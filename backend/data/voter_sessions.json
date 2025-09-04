@@ -1,0 +1,512 @@
+{
+  "fad33a48-e2c3-4107-b1e6-e7ab2a84009a": {
+    "user_id": "DEMO_USER_FAC27E11",
+    "email": "demo@example.com",
+    "name": "Demo User",
+    "created_at": "2025-08-31 18:29:38.265110",
+    "has_voted": false
+  },
+  "7e73507f-1ed0-4f34-a056-4c4e36d237e5": {
+    "user_id": "DEMO_USER_810F2728",
+    "email": "demo@example.com",
+    "name": "Demo User",
+    "created_at": "2025-08-31 18:34:38.678790",
+    "has_voted": false
+  },
+  "1071cad8-f5d8-4153-9864-9fea5dbbd25c": {
+    "user_id": "107402049874203959354",
+    "email": "en.husam@gmail.com",
+    "name": "Hussam",
+    "created_at": "2025-08-31 18:36:09.214677",
+    "has_voted": true
+  },
+  "43988607-5476-4116-92fd-a602269125ee": {
+    "user_id": "DEMO_USER_F79D0144",
+    "email": "demo@example.com",
+    "name": "Demo User",
+    "created_at": "2025-08-31 18:57:14.832033",
+    "has_voted": false
+  },
+  "cf13487a-6e6b-4bae-b9d8-90ab0460c946": {
+    "user_id": "DEMO_USER_AC7DCA81",
+    "email": "demo@example.com",
+    "name": "Demo User",
+    "created_at": "2025-08-31 18:57:44.016494",
+    "has_voted": true
+  },
+  "bd3bf710-e79e-42ae-a90d-6b92b707efef": {
+    "user_id": "DEMO_USER_48153722",
+    "email": "demo@example.com",
+    "name": "Demo User",
+    "created_at": "2025-08-31 19:02:56.240061",
+    "has_voted": true
+  },
+  "0bb96280-1804-41b4-8b0c-95b2dc55241c": {
+    "user_id": "f9ee80d3-c387-43d6-96df-a8860b7e79ef",
+    "email": "demo_user_f9ee80d3@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:06:07.958149",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "275b5713-5d74-4d31-b689-58de71f679ba": {
+    "user_id": "a0a5bc9a-2080-4321-88b2-258a6b774cf3",
+    "email": "demo_user_a0a5bc9a@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:06:43.219120",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "b35ed7de-b82c-46b6-95c5-7fe32acc7660": {
+    "user_id": "8a4224f5-3c1a-4ac2-ae43-b1c1872ce19a",
+    "email": "demo_user_8a4224f5@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:15:26.403693",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "072efea5-b7d3-4350-912a-8dde89cefd1f": {
+    "user_id": "9c6008bd-65f1-4090-acc3-6b23ec547c69",
+    "email": "demo_user_9c6008bd@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:15:55.146445",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "a3e19ae2-a007-46c1-9ea7-6ef75185436b": {
+    "user_id": "c03cb970-e7e4-4688-adb9-44da8be0f449",
+    "email": "demo_user_c03cb970@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:36:48.356157",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "a349f82e-dc01-451e-821c-6e29c0d29eac": {
+    "user_id": "af789ea3-48e7-4552-b054-c65a5323bb2c",
+    "email": "demo_user_af789ea3@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:51:53.322362",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "e48cdbdc-9ba4-4c1c-b12f-66c3428f4c4e": {
+    "user_id": "f7af1624-a50a-4104-bbbb-ad19502c023c",
+    "email": "demo_user_f7af1624@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:52:58.768420",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "df0a6676-61c9-4760-b8f4-941c94bf8832": {
+    "user_id": "cc49df6e-c0fb-4c13-a775-1f7536725a7c",
+    "email": "demo_user_cc49df6e@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T13:58:42.742400",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "b7f8a56c-014a-46b2-8335-753e010369ca": {
+    "user_id": "2364f073-2692-45d9-b333-b51ecabdec38",
+    "email": "demo_user_2364f073@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T14:16:23.550165",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "e2fdb3f4-5f7e-44aa-b73b-b6955a21fcf5": {
+    "user_id": "56f3e03b-4cca-4f10-a314-de7a74b8a0aa",
+    "email": "demo_user_56f3e03b@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:39:07.191013",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "a18e7f55-274d-47c9-9b86-066d423de36c": {
+    "user_id": "c90b03d6-baa1-4f83-a46a-8d583272203f",
+    "email": "demo_user_c90b03d6@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:47:24.814030",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "0d2a10cb-ff95-498e-8e78-1bd529763724": {
+    "user_id": "2d0acbf0-a6c8-47f1-98b4-5e0c3eadde17",
+    "email": "demo_user_2d0acbf0@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:52:25.966153",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "8d8cddcc-03f7-4fa0-ba42-3456aaf19068": {
+    "user_id": "ef9f5605-7444-45eb-8e5b-58e42f155d37",
+    "email": "demo_user_ef9f5605@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:52:45.109644",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "8187206c-4750-42f4-afc3-15f42f6d3931": {
+    "user_id": "a96e2abe-1e4d-49da-ae63-f444a10aef06",
+    "email": "demo_user_a96e2abe@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:54:09.812323",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "279a7b2e-d423-436a-8d1b-debaaab2027d": {
+    "user_id": "bef7dbbe-77df-4fb5-a6b9-8f24d0452a06",
+    "email": "demo_user_bef7dbbe@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:58:10.897794",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "dcf5dea7-c3c2-413b-9c18-aca763ad542a": {
+    "user_id": "cdfae478-6476-4d1e-886a-c2076c1b0354",
+    "email": "demo_user_cdfae478@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:59:14.072141",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "c3a9d4d5-c8ba-44f6-a8e7-4ad541692f6d": {
+    "user_id": "00d7fde2-4db1-47f9-83a6-f9130175cd1e",
+    "email": "demo_user_00d7fde2@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:59:30.281112",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "7ea93265-955c-4f91-8c20-654229b6f506": {
+    "user_id": "2bbf7b90-f74e-4f89-9e17-f50e8eb6503f",
+    "email": "demo_user_2bbf7b90@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T19:59:41.031353",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "ac219082-4b52-43fb-95d3-3eef535816fa": {
+    "user_id": "02a67c0e-d0be-457d-bdb0-9dcc5bf28bf4",
+    "email": "demo_user_02a67c0e@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:00:03.266744",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "bde8a420-754b-4a13-9a65-c2cec896f2ac": {
+    "user_id": "e3cabdd8-2714-4849-8e8c-241b99707c73",
+    "email": "demo_user_e3cabdd8@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:00:35.053319",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "049283e7-f221-4476-85b4-8664b9316676": {
+    "user_id": "42adf1af-ed6a-45ae-9834-e3d2971a15ca",
+    "email": "demo_user_42adf1af@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:01:36.657741",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "76ef92ec-1be7-493b-bd44-5d45e3433aaa": {
+    "user_id": "f98da53a-ea49-4a66-a76b-bcdd4307c3a4",
+    "email": "demo_user_f98da53a@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:10:57.001876",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "e85e349c-2ef2-40cd-98b6-f7aa6d38a669": {
+    "user_id": "6d109627-ef76-4c72-a33b-4d71ea718b62",
+    "email": "demo_user_6d109627@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:14:08.449352",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "26640d22-68d4-49c2-bcd8-7079de8a3df0": {
+    "user_id": "42b619f9-d7e8-49fd-b27b-b9f6a0ec7889",
+    "email": "demo_user_42b619f9@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T20:22:53.215677",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "d51cfafa-3c38-4719-a7de-e83e440d89b6": {
+    "user_id": "e4ee1061-fff0-4a2f-b022-6c6d5acc5ac4",
+    "email": "demo_user_e4ee1061@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T22:29:37.411240",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "be4baaf9-4f36-473d-995b-ed4d24402d55": {
+    "user_id": "f9b94f9c-82a1-4507-8274-76652ec3ed53",
+    "email": "demo_user_f9b94f9c@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T23:09:48.184908",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "cc5d6a15-905a-4fac-9ddb-fa2288b89cab": {
+    "user_id": "a99d4aca-4684-4939-b009-6af658174967",
+    "email": "demo_user_a99d4aca@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-03T23:44:14.894040",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "b2c1ca0e-eeda-4922-9c0a-06d2a1849866": {
+    "user_id": "b9140e16-6336-4c72-bd8a-e02f33d63388",
+    "email": "demo_user_b9140e16@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:11:17.510854",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "f6b3e66d-fd84-4a03-890c-584d06aabfcf": {
+    "user_id": "c7e5dc38-2a9f-466d-9545-9ca59dbef143",
+    "email": "demo_user_c7e5dc38@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:24:02.500017",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "0301cdc3-52d5-45ba-84fc-1d93b2942a49": {
+    "user_id": "1b0f6171-0097-41c1-bba5-a51a52ffd2a4",
+    "email": "demo_user_1b0f6171@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:36:46.709385",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "0e24bacb-3620-4b2e-9f75-0b71186cbc10": {
+    "user_id": "511493d5-1d49-4704-b962-35646e472015",
+    "email": "demo_user_511493d5@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:39:26.510547",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "c332e5db-60b0-4bd7-9916-6dc7f2a618de": {
+    "user_id": "8ac8700b-ce44-4fa0-bde4-4badbd70e7b9",
+    "email": "demo_user_8ac8700b@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:39:33.058677",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "237164d1-a2d0-4520-a7e0-1eb3b5ed8356": {
+    "user_id": "91f0cd77-d4fb-4100-83be-e5d36e8d989d",
+    "email": "demo_user_91f0cd77@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:47:19.434085",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "ee6dfd70-b5b4-4bac-952e-1bdedd545c5d": {
+    "user_id": "dcc7e673-481b-4470-ae8e-206ed32ea0f2",
+    "email": "demo_user_dcc7e673@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:47:57.243912",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "0af7b117-0baf-4c5a-b5bd-7e70efaa2b6b": {
+    "user_id": "9eabcff1-36bd-485f-8d8e-bee1beb15878",
+    "email": "demo_user_9eabcff1@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:53:20.683952",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "fecc9284-c499-4eaf-92b0-47a2618f2da4": {
+    "user_id": "1d77218e-2e74-4d20-bcc6-e0fee00e9452",
+    "email": "demo_user_1d77218e@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:54:32.969886",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "09e63748-8264-483b-8e2e-9f94ddc4cd22": {
+    "user_id": "e8b68a9c-d892-43ad-872e-991e3732420d",
+    "email": "demo_user_e8b68a9c@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T01:59:50.302610",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "21ac6ffe-f2d5-4ae3-9f29-f99e623201be": {
+    "user_id": "c0dd0e45-f0f9-4282-9664-e461cc155348",
+    "email": "demo_user_c0dd0e45@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:05:10.943923",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "14415d5d-5339-4532-8f2d-20257e298838": {
+    "user_id": "fd39b238-997f-4495-bcfb-70086a5e654c",
+    "email": "demo_user_fd39b238@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:06:04.502293",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "665313e9-5973-4882-91b2-171f66612c79": {
+    "user_id": "1fbc09d9-6ecb-47c5-9b55-84689cad692d",
+    "email": "demo_user_1fbc09d9@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:07:20.936228",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "5a2777e5-a02a-46be-b98c-a4f3eb5fe95c": {
+    "user_id": "3fe98cdc-ea15-4ee7-8357-1c5d59c78b2c",
+    "email": "demo_user_3fe98cdc@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:13:37.902730",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "a0bbf137-360f-4460-913f-c50d250ced99": {
+    "user_id": "139b0660-edcb-476c-8662-b434597bbe18",
+    "email": "demo_user_139b0660@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:18:19.079397",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "940dcb5a-ac9b-49d2-b4c8-117ab139e275": {
+    "user_id": "44962910-708b-4634-9c7c-12faeab54e14",
+    "email": "demo_user_44962910@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:18:37.375236",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "b2a6242a-2fd8-4884-ba13-a0ca4745fd92": {
+    "user_id": "909a3038-ce29-4807-8c82-ac55ed961380",
+    "email": "demo_user_909a3038@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:55:21.437226",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "9599ef0c-18b6-4a6f-9d9d-52cdaa5c8db3": {
+    "user_id": "6140e8dd-c62c-4087-93b3-3903a2ba1259",
+    "email": "demo_user_6140e8dd@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T02:56:30.693945",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "428b1d3f-0793-4ebf-9ccd-ca0afa914fec": {
+    "user_id": "733cf832-49eb-4739-bf0d-95d09c162bf5",
+    "email": "demo_user_733cf832@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T03:06:57.723803",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "782473e4-58e6-4458-b061-54893988adf9": {
+    "user_id": "b717b0bf-d2ee-481f-8dab-4465d845d6af",
+    "email": "demo_user_b717b0bf@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T03:19:25.119163",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "09d54b34-709c-4d81-b1a2-9ea31e0c0cce": {
+    "user_id": "3634e141-a2e4-434a-a57e-9fe6c7d7d0fe",
+    "email": "demo_user_3634e141@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T03:29:44.627726",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "bd23168b-8244-478c-9746-a9ac2ca5055c": {
+    "user_id": "1f5131c6-ca91-4fa5-8d2b-94ee02bcb5b6",
+    "email": "demo_user_1f5131c6@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T04:02:28.382613",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "7cf01802-5ebd-4908-97d5-edfbfce3f2c5": {
+    "user_id": "5314cb5a-4007-424f-a0b0-7ef99933fcfd",
+    "email": "demo_user_5314cb5a@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T04:11:52.333243",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "160365b2-200a-46c9-94bc-271045e44df3": {
+    "user_id": "311a8e1c-eea9-4c5a-b14a-f3ae5e147aff",
+    "email": "demo_user_311a8e1c@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T04:20:36.478279",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  },
+  "36aa7de0-63b3-4e1a-8f34-2281c8359cf6": {
+    "user_id": "a5162ef8-811f-4f93-a46d-5d01eda3c0c4",
+    "email": "demo_user_a5162ef8@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-04T04:49:59.092449",
+    "has_voted": false,
+    "is_admin": false,
+    "is_eligible_voter": false
+  }
+}
