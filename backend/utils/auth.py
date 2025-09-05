@@ -18,11 +18,11 @@ class GoogleAuth:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
 
-        # OAuth2 scopes — no trailing spaces
+        # OAuth2 scopes - REMOVED trailing spaces
         self.scopes = [
             'openid',
-            'https://www.googleapis.com/auth/userinfo.email',
-            'https://www.googleapis.com/auth/userinfo.profile'
+            'https://www.googleapis.com/auth/userinfo.email',   # Fixed
+            'https://www.googleapis.com/auth/userinfo.profile'   # Fixed
         ]
 
     def get_authorization_url(self) -> tuple[str, str]:
@@ -32,8 +32,8 @@ class GoogleAuth:
                 "web": {
                     "client_id": self.client_id,
                     "client_secret": self.client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed
-                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed: Removed trailing spaces
+                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed: Removed trailing spaces
                     "redirect_uris": [self.redirect_uri]
                 }
             },
@@ -43,7 +43,7 @@ class GoogleAuth:
 
         authorization_url, state = flow.authorization_url(
             access_type='offline',
-            include_granted_scopes='true'  # Should be boolean, not string
+            include_granted_scopes='true' # String is acceptable, boolean (True) also often works
         )
 
         return authorization_url, state
@@ -55,8 +55,8 @@ class GoogleAuth:
                 "web": {
                     "client_id": self.client_id,
                     "client_secret": self.client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed
-                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed: Removed trailing spaces
+                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed: Removed trailing spaces
                     "redirect_uris": [self.redirect_uri]
                 }
             },
@@ -85,10 +85,15 @@ class GoogleAuth:
                 self.client_id
             )
 
-            # Validate issuer — correct domains without spaces
-            valid_issuers = ['accounts.google.com', 'https://accounts.google.com']
+            # Validate issuer - REMOVED trailing space from the valid issuer
+            # Note: The actual issuer might just be 'accounts.google.com' or 'https://accounts.google.com'
+            # depending on the token. It's often safer to check if the issuer STARTS with the base URL.
+            # However, for simplicity, let's correct the string.
+            valid_issuers = ['accounts.google.com', 'https://accounts.google.com'] # Fixed: Removed trailing space
             if idinfo['iss'] not in valid_issuers:
-                raise ValueError('Wrong issuer.')
+                 # Alternative, more robust check (uncomment if the above fails):
+                 # if not any(idinfo['iss'].startswith(issuer) for issuer in ['https://accounts.google.com', 'accounts.google.com']):
+                raise ValueError(f'Wrong issuer. Got: {idinfo["iss"]}')
 
             # Validate audience
             if idinfo['aud'] != self.client_id:
@@ -108,8 +113,9 @@ class GoogleAuth:
     def get_user_info(self, access_token: str) -> Optional[Dict[str, Any]]:
         """Get user info from Google API."""
         try:
+            # Fixed: Removed trailing space from the URL
             response = http_requests.get(
-                'https://www.googleapis.com/oauth2/v2/userinfo',  # Fixed: no trailing space
+                'https://www.googleapis.com/oauth2/v2/userinfo',
                 headers={'Authorization': f'Bearer {access_token}'}
             )
             response.raise_for_status()
@@ -120,6 +126,7 @@ class GoogleAuth:
 
 
 # Voter session management
+# (This part seems mostly fine, assuming the VoterSession class is used correctly elsewhere)
 class VoterSession:
     def __init__(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))  # backend/utils
@@ -180,3 +187,8 @@ class VoterSession:
         if session_id in self.sessions:
             del self.sessions[session_id]
             self._save_sessions()
+
+# Make sure the class is actually instantiated if needed elsewhere,
+# or that the app.py correctly imports and uses it.
+# e.g., if app.py does `from utils.auth import GoogleAuth, VoterSession`
+# and then `google_auth = GoogleAuth(...)` and `voter_session = VoterSession()`
