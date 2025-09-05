@@ -97,11 +97,25 @@ def create_app(config_name='default'):
     @app.route('/auth/google/login')
     def google_login():
         # Redirect to Google's OAuth 2.0 authorization endpoint
-        auth_url = google_auth.get_authorization_url()
+        auth_url, state = google_auth.get_authorization_url()
+        
+        print("\n" + "="*80)        # <- for testing
+        print("🔍 FULL AUTH URL:")  # <- for testing
+        print(auth_url)             # <- for testing
+        print("="*80)               # <- for testing
+        
+        session['oauth_state'] = state
         return redirect(auth_url)
 
     @app.route('/auth/google/callback')
     def google_callback():
+        #Verify State parameter for CSRF protection
+        state = request.args.get('state')
+        if not state or state != session.get('oauth_state'):
+             app.logger.warning("CSRF warning: state mismatch or missing.")
+             return jsonify({'message': 'Invalid state parameter'}), 400
+            
+            
         # Handle the redirect back from Google
         code = request.args.get('code')
         if not code:

@@ -14,6 +14,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv()
 
+secret_key = os.getenv('SECRET_KEY')
+client_id = os.getenv('GOOGLE_CLIENT_ID')
+
 # Import the Flask app
 from app import create_app
 
