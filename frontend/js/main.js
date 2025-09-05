@@ -1,4 +1,4 @@
-// main.js - Main application logic
+// main.js - Main application logic with Language Switching, Sorting, and other features
 
 // State management
 let selectedCandidates = [];
@@ -12,10 +12,14 @@ const totalVoters = 20; // Number of eligible voters (for demo)
 let currentUser = null; // Store the authenticated user information
 let candidates = []; // Moved from const to let, initialized as empty
 
+// --- Language Switching (Using Backend API) ---
+let translations = {}; // Will hold translations fetched from backend
+let currentLanguage = 'en'; // Default language
+// --- END Language Switching ---
+
 // DOM Elements - Initialize as null to avoid errors
 let candidateList = null;
 let selectedCount = null;
-let executiveCount = null;
 let submitVoteBtn = null;
 let electionStatus = null;
 let resultsContent = null;
@@ -25,24 +29,68 @@ let winnerInfoPopup = null;
 function initDOMElements() {
     candidateList = document.getElementById('candidateList');
     selectedCount = document.getElementById('selectedCount');
-    executiveCount = document.getElementById('executiveCount');
     submitVoteBtn = document.getElementById('submitVoteBtn');
     electionStatus = document.getElementById('electionStatus');
     resultsContent = document.getElementById('resultsContent');
     winnerInfoPopup = document.getElementById('winnerInfoPopup');
 }
 
-// --- UI Functions ---
+// --- NEW: Sorting Utility Function ---
+/**
+ * Sorts an array of candidate objects based on the given criteria.
+ * @param {Array} candidatesArray - The array of candidate objects to sort.
+ * @param {string} criteria - The sorting criteria ('name-asc', 'name-desc', 'activity-asc', 'activity-desc').
+ * @returns {Array} - The sorted array.
+ */
+function sortCandidates(candidatesArray, criteria) {
+    return candidatesArray.sort((a, b) => {
+        switch (criteria) {
+            case 'name-asc':
+                return a.name.localeCompare(b.name);
+            case 'name-desc':
+                return b.name.localeCompare(a.name);
+            case 'activity-desc':
+                // Sort by activity descending, then by name ascending for ties
+                if (b.activity !== a.activity) {
+                    return b.activity - a.activity;
+                }
+                return a.name.localeCompare(b.name);
+            case 'activity-asc':
+                // Sort by activity ascending, then by name ascending for ties
+                if (a.activity !== b.activity) {
+                    return a.activity - b.activity;
+                }
+                return a.name.localeCompare(b.name);
+            default:
+                return 0; // No sorting
+        }
+    });
+}
+// --- END NEW: Sorting Utility ---
 
+
+// --- UI Functions ---
 // Initialize candidates for voting
 function initCandidates() {
     if (!candidateList) {
         console.error('candidateList element not found');
         return;
     }
-    
     candidateList.innerHTML = '';
-    candidates.forEach(candidate => {
+
+    // --- NEW: Get sorting criteria for Voting Tab ---
+    const sortSelect = document.getElementById('sortVoteBy');
+    let sortBy = 'name-asc'; // Default
+    if (sortSelect) {
+        sortBy = sortSelect.value;
+    }
+    // --- END NEW ---
+
+    // --- NEW: Sort candidates based on criteria ---
+    const sortedCandidates = sortCandidates([...candidates], sortBy); // Create a copy to sort
+    // --- END NEW ---
+
+    sortedCandidates.forEach(candidate => {
         const activityClass = candidate.activity >= 14 ? 'activity-high' :
                             candidate.activity >= 7 ? 'activity-medium' : 'activity-low';
         const activityText = candidate.activity >= 14 ? 'High Activity' :
@@ -123,13 +171,11 @@ function selectCandidate(id) {
         showMessage('Voting is currently closed', 'error');
         return;
     }
-
     // Ensure candidates data is available
     if (typeof candidates === 'undefined' || !Array.isArray(candidates)) {
         showMessage('Candidate data is not loaded correctly.', 'error');
         return;
     }
-
     const candidate = candidates.find(c => c.id === id);
     if (!candidate) {
         console.warn(`Candidate with ID ${id} not found.`);
@@ -137,7 +183,6 @@ function selectCandidate(id) {
     }
     const isSelected = selectedCandidates.includes(id);
     const isExecutive = executiveCandidates.includes(id);
-
     // --- UPDATED LOGIC ---
     if (isSelected) {
         // Clicked on a candidate that is already selected
@@ -173,7 +218,6 @@ function selectCandidate(id) {
         }
     }
     // --- END UPDATED LOGIC ---
-
     updateUI();
 }
 // --- END FIXED VOTING LOGIC ---
@@ -182,8 +226,7 @@ function selectCandidate(id) {
 function updateUI() {
     // Update counters - Check if elements exist
     if (selectedCount) selectedCount.textContent = selectedCandidates.length;
-    if (executiveCount) executiveCount.textContent = executiveCandidates.length;
-    
+
     // Update card states
     document.querySelectorAll('.candidate-item').forEach(card => {
         const id = parseInt(card.dataset.id);
@@ -228,14 +271,11 @@ async function submitVote() {
         showMessage(`Please designate exactly ${maxExecutives} executive officers`, 'error');
         return;
     }
-    
     // Check if loading element exists before using it
     const submitLoadingElement = document.getElementById('submitLoading');
-    
     // Show loading state
     if (submitVoteBtn) submitVoteBtn.disabled = true;
     if (submitLoadingElement) submitLoadingElement.classList.remove('hidden');
-
     try {
         const response = await ElectionAPI.submitVote(selectedCandidates, executiveCandidates);
         if (response.message && response.message.includes('successfully')) {
@@ -273,24 +313,19 @@ async function renderResults() {
         console.error('resultsContent element not found');
         return;
     }
-
     try {
         const resultsData = await ElectionAPI.getResults();
-        
         // FIX: Check if stats exists and provide default values
         const stats = resultsData.stats || { totalCandidates: 0, totalVotes: 0 };
-        
         // Update stats - Check if elements exist
         const totalCandidatesEl = document.getElementById('totalCandidates');
         const voterTurnoutEl = document.getElementById('voterTurnout');
-        
         if (totalCandidatesEl) totalCandidatesEl.textContent = stats.totalCandidates;
         if (voterTurnoutEl) {
             voterTurnoutEl.textContent = resultsData.isOpen ?
                 'Elections in Progress' :
                 `${Math.round((stats.totalVotes / totalVoters) * 100)}%`;
         }
-
         if (resultsData.isOpen) {
             resultsContent.innerHTML = `
                 <div class="status-info">
@@ -309,29 +344,23 @@ async function renderResults() {
             }
             return;
         }
-
         // FIX: Check if results exists and provide default
         const fullResultsArray = resultsData.results || [];
-
         // --- NEW: Get only the top 15 candidates based on Council Votes ---
         const top15ResultsArray = fullResultsArray.slice(0, 15);
         // --- END NEW ---
-
         // --- MODIFIED: Identify executive officers within the TOP 15 ---
         // Sort the TOP 15 by executive votes to find the top 7 EOs among them
         const sortedTop15ByExecutiveVotes = [...top15ResultsArray].sort((a, b) => b.executiveVotes - a.executiveVotes);
         const executiveOfficers = sortedTop15ByExecutiveVotes.slice(0, 7).map(c => c.name);
         // --- END MODIFIED ---
-
         let resultsHTML = `<div class="results-container">`;
-
         // --- MODIFIED: Loop only through the TOP 15 results ---
         top15ResultsArray.forEach(candidate => {
         // --- END MODIFIED ---
             // Find the full candidate object to get winner status and other details
             const fullCandidate = candidates.find(c => c.id === candidate.id);
             const isExecutive = executiveOfficers.includes(candidate.name);
-
             // Add data attribute for winner status and use winner-name class for styling and interaction
             const winnerClass = (fullCandidate && fullCandidate.isWinner) ? 'winner-name' : '';
             const winnerDataAttr = (fullCandidate && fullCandidate.isWinner) ? `data-is-winner="true"` : `data-is-winner="false"`;
@@ -368,14 +397,12 @@ async function renderResults() {
         });
         resultsHTML += `</div>`;
         resultsContent.innerHTML = resultsHTML;
-
         // --- MODIFIED: Show the pre-defined chart container ---
         const chartContainerElement = document.getElementById('chartContainer');
         if (chartContainerElement) {
             chartContainerElement.classList.remove('hidden');
         }
         // --- END MODIFIED ---
-
         // --- MODIFIED: Create chart using only the TOP 15 data ---
         // Use the explicitly sorted data for the chart to guarantee the order matches the backend sorting logic:
         // Primary sort: Council Votes (descending), Secondary sort: Executive Votes (descending) for ties.
@@ -388,7 +415,6 @@ async function renderResults() {
             // Secondary sort: Executive Votes (descending) for ties in council votes
             return b.executiveVotes - a.executiveVotes;
         });
-
         // Create chart - Ensuring it's destroyed and recreated correctly
         setTimeout(() => {
             const chartCanvas = document.getElementById('resultsChart');
@@ -396,13 +422,11 @@ async function renderResults() {
                 console.error('resultsChart canvas element not found');
                 return;
             }
-            
             const ctx = chartCanvas.getContext('2d');
             if (currentChart) {
                 currentChart.destroy();
                 currentChart = null; // Ensure it's nulled after destruction
             }
-
             currentChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -527,7 +551,6 @@ function showWinnerPopup(event) {
         console.error('winnerInfoPopup element not found');
         return;
     }
-    
     const target = event.currentTarget;
     const isWinner = target.getAttribute('data-is-winner') === 'true';
     if (!isWinner) {
@@ -537,18 +560,22 @@ function showWinnerPopup(event) {
     const position = target.getAttribute('data-position');
     const bio = target.getAttribute('data-bio');
     const activity = target.getAttribute('data-activity');
-    
     // Populate popup content - Check if elements exist
-    const popupNameEl = document.getElementById('popupName');
+    const popupNameEl = document.getElementById('popupName'); // These IDs don't exist in the HTML
     const popupPositionEl = document.getElementById('popupPosition');
     const popupBioEl = document.getElementById('popupBio');
     const popupActivityEl = document.getElementById('popupActivity');
-    
-    if (popupNameEl) popupNameEl.textContent = name;
-    if (popupPositionEl) popupPositionEl.textContent = position;
-    if (popupBioEl) popupBioEl.textContent = bio;
-    if (popupActivityEl) popupActivityEl.textContent = activity;
-    
+    // Use the correct IDs from the HTML
+    const winnerNameEl = document.getElementById('winnerName');
+    const winnerPositionEl = document.getElementById('winnerPosition');
+    const winnerBioEl = document.getElementById('winnerBio');
+    const winnerActivityEl = document.getElementById('winnerActivity');
+
+    if (winnerNameEl) winnerNameEl.textContent = name;
+    if (winnerPositionEl) winnerPositionEl.textContent = position;
+    if (winnerBioEl) winnerBioEl.textContent = bio;
+    if (winnerActivityEl) winnerActivityEl.textContent = activity;
+
     // Position the popup near the cursor or the element
     const rect = target.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -564,7 +591,6 @@ function showWinnerPopup(event) {
 // Hide winner info popup (can be called by clicking outside or a close button if added)
 function hideWinnerPopup() {
     if (!winnerInfoPopup) return;
-    
     winnerInfoPopup.style.display = 'none';
     // Update ARIA attributes for accessibility
     winnerInfoPopup.setAttribute('aria-hidden', 'true');
@@ -576,7 +602,6 @@ document.addEventListener('click', function(event) {
         hideWinnerPopup();
     }
 });
-
 // --- Voting Process Functions ---
 
 // Google OAuth2 Authentication for Admin Tab
@@ -586,21 +611,17 @@ async function signInWithGoogleForAdmin() {
         // Show loading state on the admin-specific button
         const googleAdminBtn = document.getElementById('googleAdminSigninBtn');
         const adminAuthLoading = document.getElementById('adminAuthLoading');
-
         if (googleAdminBtn && adminAuthLoading) {
             googleAdminBtn.disabled = true;
             adminAuthLoading.classList.remove('hidden');
         }
-
         // --- CHANGE: Redirect the browser window ---
         // This avoids CORS issues and initiates the standard OAuth2 flow.
         // The backend will check if the email is in PHOENIX_ADMIN_EMAILS.
         window.location.href = '/auth/google/login';
         // --- END CHANGE ---
-
         // Note: Because we redirect, code after window.location.href might not run
         // depending on how quickly the redirect happens.
-
     } catch (err) {
         console.error('Error initiating Google admin sign-in redirect:', err);
         showMessage('An error occurred while redirecting to Google. Please try again.', 'error');
@@ -615,6 +636,7 @@ async function signInWithGoogleForAdmin() {
         }
     }
 }
+
 // Google OAuth2 Authentication - FIXED TO AVOID CORS
 async function signInWithGoogle() {
     try {
@@ -631,7 +653,6 @@ async function signInWithGoogle() {
     // depending on how quickly the redirect happens. The loading state logic
     // below is kept for potential asynchronous pre-checks, but the redirect itself
     // will stop further JS execution on this page.
-
     // Show loading state *before* redirect attempt (optional, might be very brief)
     const googleSigninBtn = document.getElementById('googleSigninBtn');
     const authLoading = document.getElementById('authLoading');
@@ -639,7 +660,6 @@ async function signInWithGoogle() {
          googleSigninBtn.disabled = true;
          authLoading.classList.remove('hidden');
     }
-
     // The redirect happens above. The 'finally' block from fetch is not applicable here
     // in the same way, as the page unloads. If the redirect fails, the catch block handles it.
 }
@@ -650,10 +670,8 @@ async function demoAuth() {
         // Show loading state
         const demoAuthBtn = document.getElementById('demoAuthBtn');
         const authLoading = document.getElementById('authLoading');
-        
         if (demoAuthBtn) demoAuthBtn.disabled = true;
         if (authLoading) authLoading.classList.remove('hidden');
-
         // Call demo authentication endpoint
         const response = await fetch('/api/auth/demo', {
             method: 'POST',
@@ -661,24 +679,19 @@ async function demoAuth() {
                 'Content-Type': 'application/json'
             }
         });
-
         if (response.ok) {
             const data = await response.json();
             currentUser = data.user;
-
             // Show step 3 directly
             const step1 = document.getElementById('step1');
             const step2 = document.getElementById('step2');
             const step3 = document.getElementById('step3');
-            
             if (step1) step1.classList.add('hidden');
             if (step2) step2.classList.add('hidden');
             if (step3) step3.classList.remove('hidden');
-
             // Update UI with demo user info
             const confirmedUserNameEl = document.getElementById('confirmedUserName');
             if (confirmedUserNameEl) confirmedUserNameEl.textContent = currentUser.name;
-
             // Initialize candidates
             initCandidates();
             updateUI();
@@ -710,14 +723,11 @@ async function checkAuthStatus() {
                 const step1 = document.getElementById('step1');
                 const step2 = document.getElementById('step2');
                 const step3 = document.getElementById('step3');
-                
                 if (step1) step1.classList.add('hidden');
                 if (step2) step2.classList.add('hidden');
                 if (step3) step3.classList.remove('hidden');
-                
                 const confirmedUserNameEl = document.getElementById('confirmedUserName');
                 if (confirmedUserNameEl) confirmedUserNameEl.textContent = currentUser.name;
-                
                 initCandidates();
                 updateUI();
                 showMessage('Welcome back! You are authenticated.', 'success');
@@ -733,11 +743,9 @@ function proceedToVoting() {
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
     const confirmedUserNameEl = document.getElementById('confirmedUserName');
-    
     if (step2) step2.classList.add('hidden');
     if (step3) step3.classList.remove('hidden');
     if (confirmedUserNameEl) confirmedUserNameEl.textContent = currentUser.name;
-    
     initCandidates();
     updateUI();
     showMessage('Ready to vote!', 'success');
@@ -752,11 +760,9 @@ async function logout() {
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const step3 = document.getElementById('step3');
-        
         if (step1) step1.classList.remove('hidden');
         if (step2) step2.classList.add('hidden');
         if (step3) step3.classList.add('hidden');
-        
         showMessage('Logged out successfully', 'success');
     } catch (err) {
         console.error('Error logging out:', err);
@@ -768,7 +774,6 @@ async function logout() {
 function handleAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const authenticated = urlParams.get('authenticated');
-
     if (authenticated === 'true') {
         // User was redirected back from Google OAuth2
         checkAuthStatus();
@@ -776,7 +781,6 @@ function handleAuthCallback() {
 }
 
 // --- Admin Functions ---
-
 // Admin authentication
 async function authenticateAdmin() {
     const adminPasswordEl = document.getElementById('adminPassword');
@@ -784,20 +788,16 @@ async function authenticateAdmin() {
         showMessage('Admin password field not found', 'error');
         return;
     }
-    
     const password = adminPasswordEl.value;
     if (!password) {
         showMessage('Please enter admin password', 'error');
         return;
     }
-    
     // Show loading state
     const authAdminBtn = document.getElementById('authAdminBtn');
     const adminAuthLoading = document.getElementById('adminAuthLoading');
-    
     if (authAdminBtn) authAdminBtn.disabled = true;
     if (adminAuthLoading) adminAuthLoading.classList.remove('hidden');
-
     try {
         const response = await ElectionAPI.authenticateAdmin(password);
         if (response.message && response.message.includes('authenticated')) {
@@ -828,7 +828,6 @@ async function toggleElection() {
             const btn = document.getElementById('electionToggle');
             const electionClosedMessage = document.getElementById('electionClosedMessage');
             const step1 = document.getElementById('step1');
-            
             if (electionOpen) {
                 if (btn) {
                     btn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
@@ -853,13 +852,11 @@ async function toggleElection() {
                     electionStatus.classList.add('closed');
                 }
                 if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
-                
                 const step2 = document.getElementById('step2');
                 const step3 = document.getElementById('step3');
                 if (step1) step1.classList.add('disabled');
                 if (step2) step2.classList.add('disabled');
                 if (step3) step3.classList.add('disabled');
-                
                 showMessage('Election has been closed. Results are now available.', 'success');
             }
             // Update results display if on results tab
@@ -905,7 +902,6 @@ async function exportVotesToCSV() {
     // Declare variables in function scope so they are accessible in try, catch, finally
     const exportCSVBtn = document.getElementById('exportVotesToCSVBtn');
     let originalHTML = '';
-
     try {
         // Show loading state if desired (optional for this action)
         if (exportCSVBtn) {
@@ -914,7 +910,6 @@ async function exportVotesToCSV() {
             exportCSVBtn.disabled = true;
         }
         const response = await ElectionAPI.exportVotesToCSV();
-
         if (response.ok) {
             // --- Handle the successful file download ---
             // Check if the response is actually a CSV file based on headers
@@ -929,24 +924,19 @@ async function exportVotesToCSV() {
                         filename = filenameMatch[1];
                     }
                 }
-
                 // Convert the response body to a Blob
                 const blob = await response.blob();
-
                 // Create a temporary download link
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = filename; // Use the filename from the header
-
                 // Programmatically click the link to trigger the download
                 document.body.appendChild(link); // Required for Firefox
                 link.click();
-
                 // Clean up: remove the link and revoke the object URL
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(url);
-
                 showMessage(`Votes exported successfully as ${filename}`, 'success');
             } else {
                 // Response was OK, but not CSV. Might be an unexpected JSON error from backend.
@@ -958,7 +948,6 @@ async function exportVotesToCSV() {
                     console.error('Error reading response body text:', readErr);
                     throw new Error('Failed to read response body from server.');
                 }
-
                 // Try parsing the text as JSON
                 let errorMessage = 'Unexpected response format from server during CSV export.';
                 try {
@@ -1004,7 +993,6 @@ async function exportVotesToCSV() {
 }
 
 // --- Utility Functions ---
-
 // Show status message
 function showMessage(message, type) {
     const div = document.createElement('div');
@@ -1023,14 +1011,11 @@ const UIController = {
         // Remove active class from all tabs and tab contents
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
         // Add active class to the clicked tab and corresponding content
         const selectedTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
         const selectedContent = document.getElementById(tabName);
-        
         if (selectedTab) selectedTab.classList.add('active');
         if (selectedContent) selectedContent.classList.add('active');
-
         // Specific actions for certain tabs
         if (tabName === 'results') {
             renderResults();
@@ -1055,108 +1040,6 @@ const UIController = {
     }
 };
 
-// --- Event Listeners ---
-
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('Phoenix Council Elections frontend initialized');
-    
-    // Initialize DOM elements first
-    initDOMElements();
-    
-    // Load candidates and check authentication
-    loadCandidates(); // Initiates the fetch of candidate data
-    checkAuthStatus(); // Check for existing authentication
-
-    // Check for authentication callback
-    handleAuthCallback();
-
-    // Initial UI setup
-    // Fetch initial election status
-    try {
-        const statusResponse = await ElectionAPI.getElectionStatus();
-        electionOpen = statusResponse.is_open;
-        // Update election status display
-        if (!electionOpen && electionStatus) {
-            electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is closed';
-            electionStatus.classList.add('closed');
-            
-            const electionClosedMessage = document.getElementById('electionClosedMessage');
-            const step1 = document.getElementById('step1');
-            
-            if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
-            if (step1) step1.classList.add('disabled');
-        }
-    } catch (err) {
-        console.error('Error fetching initial election status:', err);
-    }
-
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            UIController.switchTab(tab.dataset.tab);
-        });
-    });
-
-    // Admin button (top right corner)
-    const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-            UIController.switchTab('admin');
-        });
-    }
-
-    // Authentication buttons
-    const googleSigninBtn = document.getElementById('googleSigninBtn');
-    const demoAuthBtn = document.getElementById('demoAuthBtn');
-    const proceedToVoteBtn = document.getElementById('proceedToVoteBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const submitVoteBtn = document.getElementById('submitVoteBtn');
-
-    if (googleSigninBtn) googleSigninBtn.addEventListener('click', signInWithGoogle);
-    if (demoAuthBtn) demoAuthBtn.addEventListener('click', demoAuth);
-    if (proceedToVoteBtn) proceedToVoteBtn.addEventListener('click', proceedToVoting);
-    if (logoutBtn) logoutBtn.addEventListener('click', logout);
-    if (submitVoteBtn) submitVoteBtn.addEventListener('click', submitVote);
-
-    // Admin buttons
-    const authAdminBtn = document.getElementById('authAdminBtn');
-    const googleAdminSigninBtn = document.getElementById('googleAdminSigninBtn');
-    const electionToggle = document.getElementById('electionToggle');
-    const refreshDataBtn = document.getElementById('refreshDataBtn');
-    const exportVotesBtn = document.getElementById('exportVotesBtn');
-    const exportVotesToCSVBtn = document.getElementById('exportVotesToCSVBtn');
-    const backupToCloudBtn = document.getElementById('backupToCloudBtn');
-
-    if (authAdminBtn) authAdminBtn.addEventListener('click', authenticateAdmin);
-    if (googleAdminSigninBtn) googleAdminSigninBtn.addEventListener('click', signInWithGoogleForAdmin);
-    if (electionToggle) electionToggle.addEventListener('click', toggleElection);
-    if (refreshDataBtn) refreshDataBtn.addEventListener('click', refreshData);
-    if (exportVotesBtn) exportVotesBtn.addEventListener('click', exportVotes);
-    if (exportVotesToCSVBtn) exportVotesToCSVBtn.addEventListener('click', exportVotesToCSV);
-    if (backupToCloudBtn) backupToCloudBtn.addEventListener('click', backupToCloud);
-
-    // Allow pressing Enter in the admin password field to trigger authentication
-    const adminPasswordInput = document.getElementById('adminPassword');
-    if (adminPasswordInput) {
-        adminPasswordInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                authenticateAdmin();
-            }
-        });
-    }
-
-    // Initialize the application for the vote tab
-    updateUI(); // Initial UI update
-
-    // Add click outside listener for candidate details
-    document.addEventListener('click', (e) => {
-        if (activeDetails && !e.target.closest('.candidate-item')) {
-            hideCandidateDetails(activeDetails);
-        }
-    });
-});
-
 // --- NEW FUNCTION: Fetch Candidates from Backend ---
 /**
  * Fetches the list of candidates from the backend API.
@@ -1168,28 +1051,21 @@ async function loadCandidates() {
         console.error("Candidate list container (#candidateList) not found in the DOM.");
         return;
     }
-
     // Show a loading indicator while fetching data
     candidateListElement.innerHTML = '<div class="loader">Loading candidates...</div>';
-
     try {
         // --- FETCH DATA FROM BACKEND ---
         const response = await fetch('/api/candidates');
-
         if (!response.ok) {
             throw new Error(`Backend returned error ${response.status}: ${response.statusText}`);
         }
-
         const candidatesData = await response.json();
-
         if (!Array.isArray(candidatesData)) {
              throw new Error("Received candidate data is not in the expected array format.");
         }
-
         // --- SUCCESSFULLY LOADED ---
         candidates = candidatesData; // Assign fetched data to the global variable
         console.log("Candidates successfully loaded from backend:", candidates);
-
         // --- INITIALIZE UI DEPENDENT ON CANDIDATES ---
         // These functions now use the populated `candidates` array
         initCandidates();
@@ -1219,7 +1095,6 @@ function displayInfoCandidates() {
         console.warn("Info candidate list container (#infoCandidateList) not found.");
         return;
     }
-
     // Clear any existing content
     infoCandidateListElement.innerHTML = '';
 
@@ -1229,18 +1104,28 @@ function displayInfoCandidates() {
         return;
     }
 
-    // Loop through the loaded candidates array and create expandable HTML elements for the Info tab
-    candidates.forEach(candidate => {
+    // --- NEW: Get sorting criteria for Info Tab ---
+    const sortSelect = document.getElementById('sortInfoBy');
+    let sortBy = 'name-asc'; // Default
+    if (sortSelect) {
+        sortBy = sortSelect.value;
+    }
+    // --- END NEW ---
+
+    // --- NEW: Sort candidates based on criteria ---
+    const sortedCandidates = sortCandidates([...candidates], sortBy); // Create a copy to sort
+    // --- END NEW ---
+
+    // Loop through the loaded (and sorted) candidates array and create expandable HTML elements for the Info tab
+    sortedCandidates.forEach(candidate => {
         const infoCard = document.createElement('div');
         infoCard.className = 'candidate-item info-candidate-item'; // Add a specific class for styling
         infoCard.dataset.id = candidate.id; // Store ID
-
         // Determine activity class and text
         const activityClass = candidate.activity >= 14 ? 'activity-high' :
                             candidate.activity >= 7 ? 'activity-medium' : 'activity-low';
         const activityText = candidate.activity >= 14 ? 'High Activity' :
                            candidate.activity >= 7 ? 'Medium Activity' : 'Low Activity';
-
         // Create the initial collapsed view HTML
         infoCard.innerHTML = `
             <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-image"
@@ -1259,7 +1144,6 @@ function displayInfoCandidates() {
                  <button class="btn collapse-info-btn" type="button">Collapse</button>
             </div>
         `;
-
         // Add click listener to the card itself for expanding
         infoCard.addEventListener('click', (e) => {
              // Prevent triggering if clicking on buttons within the card
@@ -1273,7 +1157,6 @@ function displayInfoCandidates() {
                  fullProfile.classList.remove('hidden');
              }
         });
-
         // Add specific listener for the "View Full Profile" button if it exists
         const expandBtn = infoCard.querySelector('.expand-info-btn');
         if (expandBtn) {
@@ -1287,7 +1170,6 @@ function displayInfoCandidates() {
                 }
             });
         }
-
         // Add listener for the "Collapse" button
         const collapseBtn = infoCard.querySelector('.collapse-info-btn');
         if (collapseBtn) {
@@ -1301,7 +1183,347 @@ function displayInfoCandidates() {
                  }
              });
         }
-
         infoCandidateListElement.appendChild(infoCard);
     });
 }
+// --- END NEW FUNCTION: Populate Info Tab Candidates ---
+
+
+// --- Language Switching Functions (Using Backend API) ---
+
+/**
+ * Fetches translations from the backend API.
+ */
+async function fetchTranslations() {
+    try {
+        const response = await fetch('/api/translations');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        translations = await response.json();
+        console.log("Translations fetched from backend:", translations);
+        // Apply translations after fetching
+        // applyTranslations(); // Do not apply here, let the language determination logic do it
+    } catch (error) {
+        console.error("Failed to fetch translations from backend:", error);
+        // Optionally, show a user-friendly message or fallback to hardcoded defaults
+        // For now, we'll just log the error and translations will remain empty,
+        // so applyTranslations won't do anything.
+    }
+}
+
+/**
+ * Switches the current language and updates the UI.
+ * @param {string} lang - The language code (e.g., 'en', 'ar').
+ */
+function switchLanguage(lang) {
+    // Ensure lang is a valid key in the fetched translations object
+    if (lang && translations && typeof translations === 'object' && translations[lang]) {
+        currentLanguage = lang;
+        applyTranslations();
+        // Update button text
+        const langSwitcher = document.getElementById('languageSwitcher');
+        if (langSwitcher) {
+            // Determine the text for the *other* language
+            const otherLang = currentLanguage === 'en' ? 'ar' : 'en';
+            const buttonText = translations[otherLang] && translations[otherLang]['languageSwitcherText'] ?
+                               translations[otherLang]['languageSwitcherText'] : otherLang; // Fallback to lang code
+            langSwitcher.textContent = buttonText;
+            langSwitcher.setAttribute('data-lang', currentLanguage);
+        }
+        // Apply RTL/LTR class to body
+        document.body.classList.toggle('rtl', currentLanguage === 'ar');
+        // Save preference (optional, handled in DOMContentLoaded now)
+        // try {
+        //     localStorage.setItem('preferredLanguage', currentLanguage);
+        // } catch (e) {
+        //     console.warn('Could not save language preference to localStorage:', e);
+        // }
+    } else {
+        console.warn(`Cannot switch to language '${lang}'. It's not available in the loaded translations or translations haven't loaded yet.`);
+    }
+}
+
+/**
+ * Applies translations to elements with data-i18n attributes.
+ */
+function applyTranslations() {
+    // Check if translations for currentLanguage are loaded
+    if (!translations[currentLanguage]) {
+         console.warn(`Translations for language '${currentLanguage}' are not loaded.`);
+         return;
+    }
+
+    const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+    elementsToTranslate.forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const translation = translations[currentLanguage][key];
+        if (translation !== undefined && translation !== null) { // Allow empty string translations
+            // Check for placeholder replacement if data-i18n-params exists
+            if (element.dataset.i18nParams) {
+                 try {
+                     const params = JSON.parse(element.dataset.i18nParams);
+                     let translatedText = translation;
+                     for (const [paramKey, paramValue] of Object.entries(params)) {
+                         // Use global flag 'g' to replace all instances
+                         translatedText = translatedText.replace(new RegExp(`{${paramKey}}`, 'g'), paramValue);
+                     }
+                     element.innerHTML = translatedText;
+                 } catch (e) {
+                     console.error("Error parsing i18n params for key:", key, e);
+                     element.textContent = translation; // Fallback to plain text
+                 }
+            } else {
+                // Standard translation
+                element.textContent = translation;
+            }
+        } else {
+            // Only warn if the key exists in the source data-i18n attribute
+            // This prevents warnings for elements that might not need translation in all languages
+            // but still have the data-i18n attribute for consistency or future use.
+            if (key) {
+                 console.warn(`Translation key '${key}' not found for language '${currentLanguage}'`);
+            }
+            // Do not change the element's text if translation is missing.
+            // It will retain its default text from the HTML.
+        }
+    });
+
+    // Update sorting dropdown options if they exist
+    updateSortingOptions();
+}
+
+/**
+ * Updates the text of sorting options in the dropdowns based on current translations.
+ */
+function updateSortingOptions() {
+    // Ensure translations for currentLanguage are loaded
+    if (!translations[currentLanguage]) return;
+
+    // Voting Tab Sorting
+    const sortVoteSelect = document.getElementById('sortVoteBy');
+    if (sortVoteSelect) {
+        const voteOptions = sortVoteSelect.querySelectorAll('option');
+        voteOptions.forEach(option => {
+            const value = option.value;
+            let key;
+            switch (value) {
+                case 'name-asc': key = 'sortByNameAsc'; break;
+                case 'name-desc': key = 'sortByNameDesc'; break;
+                case 'activity-desc': key = 'sortByActivityDesc'; break;
+                case 'activity-asc': key = 'sortByActivityAsc'; break;
+                default: return; // Skip if no matching key
+            }
+            if (translations[currentLanguage][key] !== undefined) {
+                option.textContent = translations[currentLanguage][key];
+            }
+        });
+    }
+
+    // Info Tab Sorting
+    const sortInfoSelect = document.getElementById('sortInfoBy');
+    if (sortInfoSelect) {
+        const infoOptions = sortInfoSelect.querySelectorAll('option');
+        infoOptions.forEach(option => {
+            const value = option.value;
+            let key;
+            switch (value) {
+                case 'name-asc': key = 'sortByNameAsc'; break;
+                case 'name-desc': key = 'sortByNameDesc'; break;
+                case 'activity-desc': key = 'sortByActivityDesc'; break;
+                case 'activity-asc': key = 'sortByActivityAsc'; break;
+                default: return; // Skip if no matching key
+            }
+            if (translations[currentLanguage][key] !== undefined) {
+                option.textContent = translations[currentLanguage][key];
+            }
+        });
+    }
+}
+
+// --- END Language Switching Functions ---
+
+
+// --- Event Listeners ---
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Phoenix Council Elections frontend initialized');
+
+    // --- NEW: Language Switching Initialization ---
+    // 1. Fetch translations from the backend
+    await fetchTranslations(); // Wait for translations to load
+
+    // 2. Determine initial language priority: localStorage -> Backend IP Detection -> Default
+    let determinedLanguage = 'en'; // Start with default
+    try {
+        // Option A: Check localStorage first (user's last manual choice or previously saved)
+        const savedLang = localStorage.getItem('preferredLanguage');
+        if (savedLang && translations[savedLang]) {
+            console.log(`Using language from localStorage: ${savedLang}`);
+            determinedLanguage = savedLang;
+        } else {
+            // Option B: Fetch language determined by backend (IP-based)
+            console.log("Fetching language from backend API (/api/language)...");
+            const langResponse = await fetch('/api/language');
+            if (langResponse.ok) {
+                const langData = await langResponse.json();
+                const backendLang = langData.language;
+                if (backendLang && translations[backendLang]) {
+                    console.log(`Using language determined by backend: ${backendLang}`);
+                    determinedLanguage = backendLang;
+                    // Optionally, save the backend-determined language to localStorage
+                    // so it persists on subsequent visits if the user hasn't manually switched.
+                    // This makes the IP detection influential only on the first visit
+                    // (unless localStorage is cleared). Remove the try/catch if not needed.
+                    try {
+                        localStorage.setItem('preferredLanguage', determinedLanguage);
+                        console.log(`Saved backend-determined language (${determinedLanguage}) to localStorage.`);
+                    } catch (e) {
+                        console.warn('Could not save backend-determined language to localStorage:', e);
+                    }
+                } else {
+                    console.log(`Backend returned invalid or unsupported language: ${backendLang}. Using default.`);
+                }
+            } else {
+                console.log(`Failed to fetch language from backend (Status: ${langResponse.status}). Using default or saved.`);
+            }
+        }
+    } catch (e) {
+        console.warn('Error determining initial language preference:', e, 'Using default.');
+        // determinedLanguage remains 'en'
+    }
+
+    // 3. Set the current language state and apply it
+    currentLanguage = determinedLanguage;
+    console.log(`Initial language set to: ${currentLanguage}`);
+
+    // 4. Apply initial translation and set up the switcher button
+    const langSwitcher = document.getElementById('languageSwitcher');
+    if (langSwitcher) {
+        // Apply the determined initial language (sets text, RTL, translates elements)
+        switchLanguage(currentLanguage);
+
+        // Add click listener for manual switching
+        langSwitcher.addEventListener('click', () => {
+            // Determine the *other* language available
+            const otherLang = currentLanguage === 'en' ? 'ar' : 'en';
+            // Switch to the other language
+            // switchLanguage handles checking if translations exist
+            switchLanguage(otherLang);
+            // Save the *manually chosen* language to localStorage
+            // This makes the user's choice persistent, overriding IP detection on future visits.
+            try {
+                localStorage.setItem('preferredLanguage', otherLang);
+                console.log(`Saved manually chosen language (${otherLang}) to localStorage.`);
+            } catch (e) {
+                console.warn('Could not save manually chosen language to localStorage:', e);
+            }
+        });
+    } else {
+        console.warn("Language switcher button (#languageSwitcher) not found in the DOM.");
+    }
+    // --- END NEW: Language Switching Initialization ---
+
+
+    // Initialize DOM elements first
+    initDOMElements();
+    // Load candidates and check authentication
+    loadCandidates(); // Initiates the fetch of candidate data
+    checkAuthStatus(); // Check for existing authentication
+    // Check for authentication callback
+    handleAuthCallback();
+    // Initial UI setup
+    // Fetch initial election status
+    try {
+        const statusResponse = await ElectionAPI.getElectionStatus();
+        electionOpen = statusResponse.is_open;
+        // Update election status display
+        if (!electionOpen && electionStatus) {
+            electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is closed';
+            electionStatus.classList.add('closed');
+            const electionClosedMessage = document.getElementById('electionClosedMessage');
+            const step1 = document.getElementById('step1');
+            if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
+            if (step1) step1.classList.add('disabled');
+        }
+    } catch (err) {
+        console.error('Error fetching initial election status:', err);
+    }
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            UIController.switchTab(tab.dataset.tab);
+        });
+    });
+    // Admin button (top right corner)
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            UIController.switchTab('admin');
+        });
+    }
+    // Authentication buttons
+    const googleSigninBtn = document.getElementById('googleSigninBtn');
+    const demoAuthBtn = document.getElementById('demoAuthBtn');
+    const proceedToVoteBtn = document.getElementById('proceedToVoteBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const submitVoteBtn = document.getElementById('submitVoteBtn');
+    if (googleSigninBtn) googleSigninBtn.addEventListener('click', signInWithGoogle);
+    if (demoAuthBtn) demoAuthBtn.addEventListener('click', demoAuth);
+    if (proceedToVoteBtn) proceedToVoteBtn.addEventListener('click', proceedToVoting);
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    if (submitVoteBtn) submitVoteBtn.addEventListener('click', submitVote);
+    // Admin buttons
+    const authAdminBtn = document.getElementById('authAdminBtn');
+    const googleAdminSigninBtn = document.getElementById('googleAdminSigninBtn');
+    const electionToggle = document.getElementById('electionToggle');
+    const refreshDataBtn = document.getElementById('refreshDataBtn');
+    const exportVotesBtn = document.getElementById('exportVotesBtn');
+    const exportVotesToCSVBtn = document.getElementById('exportVotesToCSVBtn');
+    const backupToCloudBtn = document.getElementById('backupToCloudBtn');
+    if (authAdminBtn) authAdminBtn.addEventListener('click', authenticateAdmin);
+    if (googleAdminSigninBtn) googleAdminSigninBtn.addEventListener('click', signInWithGoogleForAdmin);
+    if (electionToggle) electionToggle.addEventListener('click', toggleElection);
+    if (refreshDataBtn) refreshDataBtn.addEventListener('click', refreshData);
+    if (exportVotesBtn) exportVotesBtn.addEventListener('click', exportVotes);
+    if (exportVotesToCSVBtn) exportVotesToCSVBtn.addEventListener('click', exportVotesToCSV);
+    if (backupToCloudBtn) backupToCloudBtn.addEventListener('click', backupToCloud);
+    // Allow pressing Enter in the admin password field to trigger authentication
+    const adminPasswordInput = document.getElementById('adminPassword');
+    if (adminPasswordInput) {
+        adminPasswordInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                authenticateAdmin();
+            }
+        });
+    }
+
+    // --- NEW: Add Event Listeners for Sorting Dropdowns ---
+    const sortVoteSelect = document.getElementById('sortVoteBy');
+    if (sortVoteSelect) {
+        sortVoteSelect.addEventListener('change', function() {
+             // Re-render the voting candidates based on the new sort order
+             initCandidates(); // This will now read the new value from the select
+        });
+    }
+
+    const sortInfoSelect = document.getElementById('sortInfoBy');
+    if (sortInfoSelect) {
+        sortInfoSelect.addEventListener('change', function() {
+            // Re-render the info candidates based on the new sort order
+            displayInfoCandidates(); // This will now read the new value from the select
+        });
+    }
+    // --- END NEW: Sorting Event Listeners ---
+
+    // Initialize the application for the vote tab
+    updateUI(); // Initial UI update
+    // Add click outside listener for candidate details
+    document.addEventListener('click', (e) => {
+        if (activeDetails && !e.target.closest('.candidate-item')) {
+            hideCandidateDetails(activeDetails);
+        }
+    });
+});
+// --- END Event Listeners ---
+
