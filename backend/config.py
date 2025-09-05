@@ -11,16 +11,16 @@ class Config:
     # 1. Go to https://console.cloud.google.com/
     # 2. Create a project and enable Google+ API (or relevant Google Identity API)
     # 3. Create OAuth 2.0 credentials (Client ID for Web application)
-    # 4. Set authorized redirect URI to exactly: https://hussam.pythonanywhere.com/auth/google/callback
+    # 4. Set authorized redirect URI to exactly: https://<yourusername>.pythonanywhere.com/auth/google/callback
     # 5. (Recommended) Set these environment variables in PythonAnywhere/your environment:
     #    GOOGLE_CLIENT_ID="your-client-id-here"
     #    GOOGLE_CLIENT_SECRET="your-client-secret-here"
-    #    GOOGLE_REDIRECT_URI="https://hussam.pythonanywhere.com/auth/google/callback"
+    #    GOOGLE_REDIRECT_URI="https://<yourusername>.pythonanywhere.com/auth/google/callback"
     # --- FIX: Removed trailing spaces from GOOGLE_REDIRECT_URI ---
-    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or '1074941079810-cpt1elnhmip3k0881cl5q0vt4gan3qtv.apps.googleusercontent.com'
-    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or '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'
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or ''
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or ''
     # --- FIX: Removed trailing spaces ---
-    GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI') or 'https://hussam.pythonanywhere.com/auth/google/callback' # <-- No trailing spaces
+    GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI') or 'https://majiddaas2.pythonanywhere.com/auth/google/callback' # <-- No trailing spaces
 
     @staticmethod
     def init_app(app):
