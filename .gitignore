@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 
 backend/data/voter_sessions.json
-
+backend/.env
+backend/config.py
 # C extensions
 *.so
 
