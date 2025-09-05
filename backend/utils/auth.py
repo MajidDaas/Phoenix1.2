@@ -43,7 +43,7 @@ class GoogleAuth:
 
         authorization_url, state = flow.authorization_url(
             access_type='offline',
-            include_granted_scopes=True  # Should be boolean, not string
+            include_granted_scopes='true'  # Should be boolean, not string
         )
 
         return authorization_url, state
