@@ -3,9 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+backend/__pycache__/
 backend/data/voter_sessions.json
 backend/.env
 backend/config.py
+
 # C extensions
 *.so
 
