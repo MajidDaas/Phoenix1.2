@@ -711,7 +711,7 @@ async function demoAuth() {
     }
 }
 
-// Check authentication status on page load
+// --- MODIFIED checkAuthStatus function ---
 async function checkAuthStatus() {
     try {
         const response = await fetch('/api/auth/session');
@@ -719,26 +719,39 @@ async function checkAuthStatus() {
             const data = await response.json();
             if (data.authenticated) {
                 currentUser = data.user;
-                // Show step 3 if authenticated
+                console.log("User authenticated:", currentUser); // Debug log
+                // Show step 3 directly if authenticated
                 const step1 = document.getElementById('step1');
-                const step2 = document.getElementById('step2');
                 const step3 = document.getElementById('step3');
                 if (step1) step1.classList.add('hidden');
-                if (step2) step2.classList.add('hidden');
                 if (step3) step3.classList.remove('hidden');
                 const confirmedUserNameEl = document.getElementById('confirmedUserName');
                 if (confirmedUserNameEl) confirmedUserNameEl.textContent = currentUser.name;
-                initCandidates();
+                // Initialize candidates and UI
+                loadCandidates(); // Or initCandidates() if that's the correct initialization function
                 updateUI();
                 showMessage('Welcome back! You are authenticated.', 'success');
+
+                // --- CRUCIAL: Update Admin UI based on isAdmin status ---
+                updateAdminUIForLoggedInUser(currentUser);
+                // --- END CRUCIAL ---
+            } else {
+                console.log("User is not authenticated according to backend session.");
+                // Ensure UI reflects logged-out state if needed
+                hideAdminUIForLoggedOutUser();
             }
+        } else {
+            console.log(`Failed to fetch auth session. Status: ${response.status}`);
+            hideAdminUIForLoggedOutUser(); // Treat non-OK response as not authenticated
         }
     } catch (err) {
-        console.log('Not authenticated or error checking auth status');
+        console.log('Not authenticated or error checking auth status:', err);
+        hideAdminUIForLoggedOutUser(); // Treat errors as not authenticated
     }
 }
+// --- END MODIFIED checkAuthStatus 
 
-// Proceed to voting after authentication
+---// Proceed to voting after authentication
 function proceedToVoting() {
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
@@ -774,9 +787,17 @@ async function logout() {
 function handleAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const authenticated = urlParams.get('authenticated');
+    console.log("Handling auth callback. Authenticated param:", authenticated); // Debug log
     if (authenticated === 'true') {
         // User was redirected back from Google OAuth2
+        console.log("Redirected from Google OAuth2, checking auth status..."); // Debug log
         checkAuthStatus();
+        // Optional: Remove ?authenticated=true from the URL for cleanliness
+        // window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+         // If not authenticated via callback, still check session (e.g., page refresh)
+         // This might already be handled by the initial checkAuthStatus call on DOMContentLoaded
+         console.log("No 'authenticated=true' in URL, but checking session anyway on load."); // Debug log
     }
 }
 
@@ -1347,6 +1368,15 @@ function updateSortingOptions() {
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Phoenix Council Elections frontend initialized');
+    
+    
+        // --- ADD THIS: Hide the top-right admin button initially ---
+    const topRightAdminBtn = document.getElementById('adminBtn');
+    if (topRightAdminBtn) {
+        topRightAdminBtn.style.display = 'none';
+        console.log("Top-right admin button hidden on initial load.");
+    }
+    // --- END ADDITION ---
 
     // --- NEW: Language Switching Initialization ---
     // 1. Fetch translations from the backend
@@ -1527,3 +1557,81 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 // --- END Event Listeners ---
 
+// --- NEW HELPER FUNCTIONS ---
+
+/**
+ * Updates the Admin Tab and Top-Right Admin Button visibility based on the logged-in user's admin status.
+ * @param {Object} user - The user object returned from /api/auth/session.
+ */
+function updateAdminUIForLoggedInUser(user) {
+    console.log("Updating Admin UI for logged-in user:", user);
+    const isAdmin = user && user.isAdmin === true;
+
+    // --- Update Admin Tab UI ---
+    const adminControls = document.getElementById('adminControls');
+    const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // More robust selector
+
+    if (isAdmin) {
+        console.log("User is an admin. Revealing admin controls in tab.");
+        // User is an admin
+        if (adminControls) {
+            adminControls.classList.remove('hidden');
+        }
+        // Hide the Google/Demo login prompt within the Admin Tab
+        if (adminPasswordSection) {
+            adminPasswordSection.classList.add('hidden');
+        }
+    } else {
+        console.log("User is authenticated but NOT an admin. Hiding admin controls in tab.");
+        // User is authenticated but not an admin
+        // Keep admin controls hidden
+        if (adminControls) {
+            adminControls.classList.add('hidden');
+        }
+        // Show the login prompt within the Admin Tab (if it was hidden by mistake)
+        // Or keep it visible as default. Usually, just hiding #adminControls is sufficient.
+        // If you want a specific "Access Denied" message for non-admins in the tab,
+        // you'd need an element for it and show it here.
+    }
+    // --- End Update Admin Tab UI ---
+
+    // --- Update Top-Right Admin Button ---
+    const topRightAdminBtn = document.getElementById('adminBtn');
+    if (isAdmin) {
+        console.log("User is an admin. Revealing top-right admin button.");
+        if (topRightAdminBtn) {
+            topRightAdminBtn.style.display = 'flex'; // Or 'inline-flex' depending on your CSS
+        }
+    } else {
+        console.log("User is authenticated but NOT an admin. Hiding top-right admin button.");
+        // Hide the top-right admin button for non-admin users
+        if (topRightAdminBtn) {
+            topRightAdminBtn.style.display = 'none';
+        }
+    }
+    // --- End Update Top-Right Admin Button ---
+}
+
+/**
+ * Ensures Admin UI elements are hidden for users who are not authenticated.
+ */
+function hideAdminUIForLoggedOutUser() {
+    console.log("Hiding all admin UI for logged-out user.");
+    // Hide Admin Tab controls/login prompt
+    const adminControls = document.getElementById('adminControls');
+    const adminPasswordSection = document.querySelector('#admin .admin-password-section');
+
+    if (adminControls) adminControls.classList.add('hidden');
+    // Decide whether to show the login prompt for logged-out users.
+    // Often, it's shown by default, so hiding #adminControls is enough.
+    // If you explicitly hid it earlier, you might show it here:
+    // if (adminPasswordSection) adminPasswordSection.classList.remove('hidden');
+
+    // Hide the top-right admin button
+    const topRightAdminBtn = document.getElementById('adminBtn');
+    if (topRightAdminBtn) {
+        topRightAdminBtn.style.display = 'none';
+    }
+}
+
+// --- END NEW HELPER FUNCTIONS ---
