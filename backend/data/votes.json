@@ -1,102 +1,294 @@
 {
-  "voter_ids": [
-    "107402049874203959354",
-    "DEMO_USER_AC7DCA81",
-    "DEMO_USER_48153722"
-  ],
-  "votes": [
-    {
-      "id": "b42f507a-e256-4048-b25f-4c1760e4a76e",
-      "voter_id": "107402049874203959354",
-      "selected_candidates": [
-        1,
-        2,
-        3,
-        4,
-        8,
-        7,
-        6,
-        5,
-        9,
-        10,
-        11,
-        12,
-        16,
-        15,
-        14
-      ],
-      "executive_candidates": [
-        14,
-        15,
-        16,
-        12,
-        11,
-        10,
-        9
-      ],
-      "timestamp": "2025-08-31T15:36:39.348619Z"
-    },
-    {
-      "id": "0a15b15e-d98d-41f8-84cc-03ad7ece3327",
-      "voter_id": "DEMO_USER_AC7DCA81",
-      "selected_candidates": [
-        6,
-        7,
-        8,
-        10,
-        9,
-        11,
-        12,
-        16,
-        15,
-        14,
-        13,
-        17,
-        18,
-        5,
-        4
-      ],
-      "executive_candidates": [
-        8,
-        7,
-        11,
-        12,
-        10,
-        9,
-        13
-      ],
-      "timestamp": "2025-08-31T15:58:11.874279Z"
-    },
-    {
-      "id": "c6d6c2d4-a9de-440c-bedb-9e6e53510be2",
-      "voter_id": "DEMO_USER_48153722",
-      "selected_candidates": [
-        6,
-        3,
-        2,
-        1,
-        5,
-        7,
-        8,
-        4,
-        12,
-        11,
-        10,
-        9,
-        13,
-        14,
-        15
-      ],
-      "executive_candidates": [
-        2,
-        14,
-        15,
-        13,
-        9,
-        10,
-        11
-      ],
-      "timestamp": "2025-08-31T16:03:39.574304Z"
-    }
-  ]
+    "voter_ids": [
+        "107402049874203959354",
+        "DEMO_USER_AC7DCA81",
+        "DEMO_USER_48153722",
+        "67ee2bf7-43e5-4148-97fb-e91973e961eb",
+        "3e154466-2aac-45cf-b06e-363c4ecb117e",
+        "ea980896-7f12-4cf1-a359-12fc871b40ae",
+        "0b02a443-c69e-4c0a-947e-06a44edce4a4",
+        "49b5f99e-6dcc-4223-8277-7a5c0cc1c2fb",
+        "3cf392bd-5e61-409f-a6c0-65df040db9cd"
+    ],
+    "votes": [
+        {
+            "id": "b42f507a-e256-4048-b25f-4c1760e4a76e",
+            "voter_id": "107402049874203959354",
+            "selected_candidates": [
+                1,
+                2,
+                3,
+                4,
+                8,
+                7,
+                6,
+                5,
+                9,
+                10,
+                11,
+                12,
+                16,
+                15,
+                14
+            ],
+            "executive_candidates": [
+                14,
+                15,
+                16,
+                12,
+                11,
+                10,
+                9
+            ],
+            "timestamp": "2025-08-31T15:36:39.348619Z"
+        },
+        {
+            "id": "0a15b15e-d98d-41f8-84cc-03ad7ece3327",
+            "voter_id": "DEMO_USER_AC7DCA81",
+            "selected_candidates": [
+                6,
+                7,
+                8,
+                10,
+                9,
+                11,
+                12,
+                16,
+                15,
+                14,
+                13,
+                17,
+                18,
+                5,
+                4
+            ],
+            "executive_candidates": [
+                8,
+                7,
+                11,
+                12,
+                10,
+                9,
+                13
+            ],
+            "timestamp": "2025-08-31T15:58:11.874279Z"
+        },
+        {
+            "id": "c6d6c2d4-a9de-440c-bedb-9e6e53510be2",
+            "voter_id": "DEMO_USER_48153722",
+            "selected_candidates": [
+                6,
+                3,
+                2,
+                1,
+                5,
+                7,
+                8,
+                4,
+                12,
+                11,
+                10,
+                9,
+                13,
+                14,
+                15
+            ],
+            "executive_candidates": [
+                2,
+                14,
+                15,
+                13,
+                9,
+                10,
+                11
+            ],
+            "timestamp": "2025-08-31T16:03:39.574304Z"
+        },
+        {
+            "id": "d0a9ffd0-322c-46ec-a4a7-80f78d644ced",
+            "voter_id": "67ee2bf7-43e5-4148-97fb-e91973e961eb",
+            "selected_candidates": [
+                31,
+                42,
+                40,
+                14,
+                34,
+                25,
+                8,
+                18,
+                41,
+                26,
+                38,
+                28,
+                36,
+                19,
+                13
+            ],
+            "executive_candidates": [
+                25,
+                40,
+                34,
+                14,
+                38,
+                19,
+                13
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "da412d67-b7c6-46d4-a856-bd4e4093628d",
+            "voter_id": "3e154466-2aac-45cf-b06e-363c4ecb117e",
+            "selected_candidates": [
+                28,
+                9,
+                22,
+                41,
+                31,
+                24,
+                8,
+                34,
+                1,
+                39,
+                23,
+                13,
+                11,
+                2,
+                27
+            ],
+            "executive_candidates": [
+                28,
+                9,
+                27,
+                2,
+                11,
+                41,
+                22
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "58629178-4038-4589-bb70-f20989471d50",
+            "voter_id": "ea980896-7f12-4cf1-a359-12fc871b40ae",
+            "selected_candidates": [
+                11,
+                2,
+                19,
+                27,
+                14,
+                5,
+                17,
+                15,
+                6,
+                13,
+                23,
+                39,
+                1,
+                21,
+                34
+            ],
+            "executive_candidates": [
+                17,
+                1,
+                34,
+                39,
+                23,
+                13,
+                27
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "675c6721-d3aa-4590-8b6d-a3609b78dd22",
+            "voter_id": "0b02a443-c69e-4c0a-947e-06a44edce4a4",
+            "selected_candidates": [
+                13,
+                23,
+                15,
+                19,
+                39,
+                1,
+                21,
+                17,
+                34,
+                8,
+                24,
+                36,
+                42,
+                25,
+                40
+            ],
+            "executive_candidates": [
+                15,
+                1,
+                8,
+                24,
+                34,
+                13,
+                25
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "71bb1627-b7b3-40ab-a792-c299fa44e5f3",
+            "voter_id": "49b5f99e-6dcc-4223-8277-7a5c0cc1c2fb",
+            "selected_candidates": [
+                36,
+                42,
+                40,
+                35,
+                4,
+                38,
+                3,
+                26,
+                33,
+                7,
+                25,
+                32,
+                16,
+                37,
+                20
+            ],
+            "executive_candidates": [
+                36,
+                42,
+                40,
+                35,
+                4,
+                38,
+                25
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "c08dae56-29a9-444d-ba57-894b05312142",
+            "voter_id": "3cf392bd-5e61-409f-a6c0-65df040db9cd",
+            "selected_candidates": [
+                18,
+                29,
+                28,
+                31,
+                30,
+                10,
+                22,
+                41,
+                12,
+                26,
+                3,
+                38,
+                4,
+                9,
+                33
+            ],
+            "executive_candidates": [
+                30,
+                18,
+                29,
+                10,
+                12,
+                41,
+                22
+            ],
+            "timestamp": null
+        }
+    ]
 }

@@ -22,32 +22,37 @@ const VotingModule = {
         const isSelected = window.State.selectedCandidates.includes(id);
         const isExecutive = window.State.executiveCandidates.includes(id);
 
-        if (isSelected) {
-            if (isExecutive) {
-                // Remove from both lists
-                window.State.executiveCandidates = window.State.executiveCandidates.filter(cId => cId !== id);
-                window.State.selectedCandidates = window.State.selectedCandidates.filter(cId => cId !== id);
-                console.log(`Removed candidate ID ${id} from Executive Officers and deselected.`);
-            } else {
-                // Promote to EO if possible
-                if (window.State.executiveCandidates.length < maxExecutives) {
-                    window.State.executiveCandidates.push(id);
-                    console.log(`Promoted candidate ID ${id} to Executive Officer.`);
-                } else {
-                    // Show validation popup
-                    Utils.showValidationPopup(`Can only choose ${maxExecutives} Executive Officers`);
-                    return;
-                }
-            }
+    if (isSelected) {
+        // Clicked on a candidate that is already selected
+        if (isExecutive) {
+            // --- CHANGE: Clicking an EO removes it completely ---
+            // 1. Remove from Executive Officers list (removes orange badge)
+            executiveCandidates = executiveCandidates.filter(cId => cId !== id);
+            console.log(`Removed candidate ID ${id} from Executive Officers (orange badge removed).`);
+            // 2. Remove from Selected list (removes green border)
+            selectedCandidates = selectedCandidates.filter(cId => cId !== id);
+            console.log(`Deselected candidate ID ${id} (green border removed).`);
+            // --- END CHANGE ---
         } else {
-            // Select new candidate
-            if (window.State.selectedCandidates.length < maxSelections) {
-                window.State.selectedCandidates.push(id);
-                console.log(`Selected candidate ID ${id}.`);
+            // It's selected but NOT an Executive Officer.
+            // Check if we can promote it to Executive Officer
+            if (executiveCandidates.length < maxExecutives) {
+                executiveCandidates.push(id);
+                console.log(`Promoted candidate ID ${id} to Executive Officer (added orange badge).`);
             } else {
-                // Show validation popup
-                Utils.showValidationPopup(`Can only choose ${maxSelections} Council Members`);
-                return;
+                // EO list is full. Interpret click as deselection.
+                selectedCandidates = selectedCandidates.filter(cId => cId !== id);
+                console.log(`Deselected candidate ID ${id} (EO list full, green border removed).`);
+            }
+        }
+    } else {
+        // Clicked on a candidate that is NOT selected
+        if (selectedCandidates.length < maxSelections) {
+            selectedCandidates.push(id);
+            console.log(`Selected candidate ID ${id} (added green border).`);
+        } else {
+            showMessage(`You can only select ${maxSelections} council members`, 'error');
+            return;
             }
         }
 
@@ -137,6 +142,9 @@ Executive Officers: ${window.State.executiveCandidates.length}`, 'success');
                 window.State.selectedCandidates = [];
                 window.State.executiveCandidates = [];
                 
+               // Update user session to mark as voted
+                window.State.currentUser.hasVoted = true;
+              
                 // Reset UI
                 this.updateUI();
                 

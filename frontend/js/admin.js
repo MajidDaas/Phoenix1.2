@@ -60,58 +60,103 @@ const AdminModule = {
         }
     },
 
-    // --- Toggle Election Status ---
-    toggleElection: async function() {
-        try {
-            const response = await ElectionAPI.toggleElectionStatus();
-            if (response.message) {
-                window.State.electionOpen = response.isOpen;
-                const btn = document.getElementById('electionToggle');
-                const electionClosedMessage = document.getElementById('electionClosedMessage');
-                const step1 = document.getElementById('step1');
-                if (window.State.electionOpen) {
-                    if (btn) {
-                        btn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
-                        btn.classList.remove('btn-danger');
-                        btn.classList.add('btn-success');
-                    }
-                    if (electionStatus) {
-                        electionStatus.innerHTML = '<i class="fas fa-lock"></i> Election is currently open';
-                        electionStatus.classList.remove('closed');
-                    }
-                    if (electionClosedMessage) electionClosedMessage.classList.add('hidden');
-                    if (step1) step1.classList.remove('disabled');
-                    Utils.showMessage('Election has been opened. Voting is now allowed.', 'success');
-                } else {
-                    if (btn) {
-                        btn.innerHTML = '<i class="fas fa-toggle-off"></i> Open Election';
-                        btn.classList.remove('btn-success');
-                        btn.classList.add('btn-danger');
-                    }
-                    if (electionStatus) {
-                        electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is closed';
-                        electionStatus.classList.add('closed');
-                    }
-                    if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
-                    const step2 = document.getElementById('step2');
-                    const step3 = document.getElementById('step3');
-                    if (step1) step1.classList.add('disabled');
-                    if (step2) step2.classList.add('disabled');
-                    if (step3) step3.classList.add('disabled');
-                    Utils.showMessage('Election has been closed. Results are now available.', 'success');
-                }
-                const resultsTab = document.getElementById('results');
-                if (resultsTab && resultsTab.classList.contains('active')) {
-                    ResultsModule.renderResults();
-                }
+// --- Toggle Election Status with Animations ---
+toggleElection: async function() {
+    const toggleBtn = document.getElementById('electionToggle');
+    if (!toggleBtn) return;
+
+    // Get current state from button class
+    const isCurrentlyOpen = toggleBtn.classList.contains('btn-success');
+    
+    // Show loading state
+    toggleBtn.disabled = true;
+    toggleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isCurrentlyOpen ? 'Closing...' : 'Opening...'}`;
+
+    try {
+        const response = await ElectionAPI.toggleElectionStatus();
+        
+        // ✅ FIXED: Only check for response.isOpen — ignore response.message for success/fail logic
+        if (response.isOpen !== undefined) {
+            // Update local state
+            window.State.electionOpen = response.isOpen;
+
+            // --- ANIMATED TOGGLE ---
+            if (response.isOpen) {
+                // Animate to ON state
+                toggleBtn.classList.remove('btn-danger', 'btn-warning');
+                toggleBtn.classList.add('btn-success');
+                toggleBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
+                toggleBtn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    toggleBtn.style.transform = 'scale(1)';
+                }, 200);
             } else {
-                Utils.showMessage(response.message || 'Failed to toggle election status', 'error');
+                // Animate to OFF state
+                toggleBtn.classList.remove('btn-success', 'btn-warning');
+                toggleBtn.classList.add('btn-danger');
+                toggleBtn.innerHTML = '<i class="fas fa-toggle-off"></i> Open Election';
+                toggleBtn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    toggleBtn.style.transform = 'scale(1)';
+                }, 200);
             }
-        } catch (err) {
-            console.error('Error toggling election:', err);
-            Utils.showMessage('An error occurred while toggling the election. Please try again.', 'error');
+
+            // Update election status display
+            const electionStatusEl = document.getElementById('electionStatus');
+            if (electionStatusEl) {
+                if (response.isOpen) {
+                    electionStatusEl.innerHTML = '<i class="fas fa-lock"></i> Election is currently open';
+                    electionStatusEl.classList.remove('closed');
+                    electionStatusEl.classList.add('open');
+                } else {
+                    electionStatusEl.innerHTML = '<i class="fas fa-lock-open"></i> Election is closed';
+                    electionStatusEl.classList.remove('open');
+                    electionStatusEl.classList.add('closed');
+                }
+            }
+
+            // Update UI elements
+            const electionClosedMessage = document.getElementById('electionClosedMessage');
+            const step1 = document.getElementById('step1');
+
+            if (response.isOpen) {
+                if (electionClosedMessage) electionClosedMessage.classList.add('hidden');
+                if (step1) step1.classList.remove('disabled');
+                Utils.showMessage('Election has been opened. Voting is now allowed.', 'success');
+            } else {
+                if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
+                if (step1) step1.classList.add('disabled');
+                Utils.showMessage('Election has been closed. Results are now available.', 'warning');
+            }
+
+            // Update results display if on results tab
+            const resultsTab = document.getElementById('results');
+            if (resultsTab && resultsTab.classList.contains('active')) {
+                ResultsModule.renderResults();
+            }
+
+        } else {
+            // ✅ Only throw error if response.isOpen is undefined → real error
+            throw new Error(response.message || 'Failed to toggle election status');
         }
-    },
+    } catch (err) {
+        console.error('Error toggling election:', err);
+        Utils.showMessage('An error occurred while toggling the election. Please try again.', 'error');
+        
+        // Revert button to previous state on error
+        if (isCurrentlyOpen) {
+            toggleBtn.classList.remove('btn-danger');
+            toggleBtn.classList.add('btn-success');
+            toggleBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
+        } else {
+            toggleBtn.classList.remove('btn-success');
+            toggleBtn.classList.add('btn-danger');
+            toggleBtn.innerHTML = '<i class="fas fa-toggle-off"></i> Open Election';
+        }
+    } finally {
+        toggleBtn.disabled = false;
+    }
+},
 
     // --- Export Functions ---
     exportVotes: async function() {

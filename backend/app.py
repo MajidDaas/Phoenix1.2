@@ -194,7 +194,9 @@ def create_app(config_name='default'):
                 'email': voter_info['email'],
                 # Include isAdmin flag based on session data
                 'isAdmin': voter_info.get('is_admin', False), # <--- RETURN THIS FLAG
-                'isEligibleVoter': voter_info.get('is_eligible_voter', False) # <--- RETURN THIS FLAG
+                'isEligibleVoter': voter_info.get('is_eligible_voter', False), # <--- RETURN THIS FLAG
+                'hasVoted': voter_info.get('has_voted', False)  # ← Add this line
+
             }
         }), 200
 
@@ -216,7 +218,8 @@ def create_app(config_name='default'):
                 'name': demo_name,
                 'email': demo_email,
                 'isAdmin': True, # Demo user is not an admin
-                'isEligibleVoter': True # Demo user is not an eligible voter
+                'isEligibleVoter': True, # Demo user is not an eligible voter
+                'hasVoted': False
             }
         }), 200
 
@@ -310,7 +313,8 @@ def create_app(config_name='default'):
             app.logger.error(f"Error fetching election status: {e}")
             # It's better to return an error code if status fetch fails
             # than to default silently.
-            return jsonify({"message": "Error fetching election status."}), 500
+            return jsonify({'is_open': None,  # or False, or fetch from cache if you have one
+            'message': "Error fetching election status."}), 500
 
     # --- VOTING ROUTE (Key Change Highlighted) ---
 
