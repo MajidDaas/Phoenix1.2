@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix Council Elections</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button id="languageSwitcher" class="btn lang-switcher">عربي</button>
+            <h1><i class="fas fa-vote-yea"></i> Phoenix Council Elections</h1>
+            <p>Your voice, your choice. Participate in shaping the future.</p>
+            <div class="election-status" id="electionStatus">
+                <i class="fas fa-lock"></i> Election Status: Checking...
+            </div>
+            <button id="adminBtn" class="admin-btn">
+                <i class="fas fa-user-shield"></i> Admin
+            </button>
+        </header>
+        <div class="tabs">
+            <button class="tab active" data-tab="vote" type="button">
+                <i class="fas fa-vote-yea"></i> <span data-i18n="castVote">Cast Vote</span>
+            </button>
+            <button class="tab" data-tab="results" type="button">
+                <i class="fas fa-chart-bar"></i> <span data-i18n="viewResults">View Results</span>
+            </button>
+            <button class="tab" data-tab="info" type="button">
+                <i class="fas fa-info-circle"></i> <span data-i18n="information">Information</span>
+            </button>
+            <button class="tab" data-tab="admin" type="button" style="display: none;">
+                <i class="fas fa-cog"></i> <span data-i18n="admin">Admin</span>
+            </button>
+        </div>
+
+        <!-- Voting Tab -->
+        <div class="tab-content active" id="vote">
+            <h2><i class="fas fa-vote-yea"></i> <span data-i18n="castVote">Cast Vote</span></h2>
+            <!-- Step 1: Sign In -->
+            <div id="step1" class="auth-step">
+                <div class="card">
+                    <h3><i class="fas fa-sign-in-alt"></i> <span data-i18n="authenticationRequired">Authentication Required</span></h3>
+                    <p class="auth-info" data-i18n="pleaseSignInToVote">Please sign in to participate in the election.</p>
+                    <div class="google-auth-section">
+                        <button class="btn google-signin-btn" id="googleSigninBtn">
+                            <i class="fab fa-google"></i> <span data-i18n="signInWithGoogle">Sign in with Google</span>
+                        </button>
+                        <p class="google-signin-note" data-i18n="useInstitutionalEmail">Please use your institutional Google account.</p>
+                        <div id="authLoading" class="loader hidden"></div>
+                    </div>
+                    <div class="demo-auth">
+                        <div class="demo-highlight">
+                            <h4><i class="fas fa-user-clock"></i> <span data-i18n="demoMode">Demo Mode</span></h4>
+                            <p data-i18n="demoModeDescription">Test the voting interface without authentication.</p>
+                            <button class="btn demo-btn-primary" id="demoAuthBtn">
+                                <i class="fas fa-play-circle"></i> <span data-i18n="enterDemoMode">Enter Demo Mode</span>
+                            </button>
+                            <div id="demoAuthLoading" class="loader hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Step 2: Confirmation -->
+            <div id="step2" class="auth-step hidden">
+                <div class="card">
+                    <h3><i class="fas fa-user-check"></i> <span data-i18n="authenticationSuccessful">Authentication Successful</span></h3>
+                    <p data-i18n="welcomeUser">Welcome, <strong id="confirmedUserName"></strong>!</p>
+                    <p data-i18n="youAreNowEligibleToVote">You are now eligible to cast your vote.</p>
+                    <button class="btn btn-primary" id="proceedToVoteBtn">
+                        <i class="fas fa-arrow-right"></i> <span data-i18n="proceedToVoting">Proceed to Voting</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Step 3: Voting Interface -->
+            <div id="step3" class="auth-step hidden">
+                <div class="card">
+                    <h3><i class="fas fa-vote-yea"></i> <span data-i18n="castYourVote">Cast Your Vote</span></h3>
+                    <div class="voting-instructions">
+                        <h4><i class="fas fa-info-circle"></i> <span data-i18n="instructions">Instructions</span></h4>
+                        <ol>
+                            <li data-i18n="select15Council">Select <strong>15 Council Members</strong> by clicking on their cards.</li>
+                            <li data-i18n="designate7Executive">Designate <strong>7 Executive Officers</strong> from your selected Council Members.</li>
+                            <li data-i18n="reviewAndSubmit">Review your selections and click 'Submit Vote'.</li>
+                        </ol>
+                    </div>
+                    <!-- Sorting Controls for Voting Tab -->
+                    <div class="sorting-controls">
+                        <label for="sortVoteBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
+                        <select id="sortVoteBy">
+                            <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
+                            <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
+                            <option value="activity-desc" data-i18n="sortByActivityDesc">Activity (High-Low)</option>
+                            <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
+                        </select>
+                    </div>
+                    <div class="card">
+                        <h4><i class="fas fa-users"></i> <span data-i18n="selectCouncilMembers">Select Council Members</span> <span class="counter" id="selectedCount">0/15</span></h4>
+                        <div class="candidate-grid" id="candidateList">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-30">
+                        <button class="btn btn-success" id="submitVoteBtn" disabled>
+                            <i class="fas fa-paper-plane"></i> <span data-i18n="submitVote">Submit Vote</span>
+                        </button>
+                        <button class="btn logout-btn" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+                        </button>
+                        <div id="submitLoading" class="loader hidden"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Election Closed Message -->
+            <div id="electionClosedMessage" class="card status-info hidden">
+                <p><i class="fas fa-info-circle"></i> <span data-i18n="votingClosed">Voting is currently closed.</span></p>
+            </div>
+        </div>
+
+        <!-- Results Tab -->
+        <div class="tab-content" id="results">
+            <h2><i class="fas fa-chart-bar"></i> <span data-i18n="electionResults">Election Results</span></h2>
+            <div class="card">
+                <h3><i class="fas fa-poll"></i> <span data-i18n="currentStats">Current Statistics</span></h3>
+                <p><strong data-i18n="totalCandidates">Total Candidates:</strong> <span id="totalCandidates">-</span></p>
+                <p><strong data-i18n="voterTurnout">Voter Turnout:</strong> <span id="voterTurnout">-</span></p>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-trophy"></i> <span data-i18n="topCouncilMembers">Top 15 Council Members</span></h3>
+                <div id="resultsContent">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <div class="chart-container hidden" id="chartContainer">
+                <h3><i class="fas fa-chart-bar"></i> <span data-i18n="voteDistribution">Vote Distribution (Top 15 Council Members)</span></h3>
+                <div style="position: relative; height: 60vh; max-height: 600px;">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Tab -->
+        <div class="tab-content" id="info">
+            <h2><i class="fas fa-info-circle"></i> <span data-i18n="electionInformation">Election Information</span></h2>
+            <div class="card">
+                <h3><i class="fas fa-question-circle"></i> <span data-i18n="howItWorks">How It Works</span></h3>
+                <p data-i18n="infoDescription">This election allows you to select 15 Council Members and designate 7 of them as Executive Officers. Your vote is confidential and secure.</p>
+                <ul>
+                    <li data-i18n="infoStep1">Sign in using your Google account.</li>
+                    <li data-i18n="infoStep2">Select 15 candidates for the Council.</li>
+                    <li data-i18n="infoStep3">Choose 7 Executive Officers from your Council selections.</li>
+                    <li data-i18n="infoStep4">Submit your vote before the election closes.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-users"></i> <span data-i18n="candidateProfiles">Candidate Profiles</span></h3>
+                <!-- Sorting Controls for Info Tab -->
+                <div class="sorting-controls">
+                    <label for="sortInfoBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
+                    <select id="sortInfoBy">
+                        <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
+                        <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
+                        <option value="activity-desc" data-i18n="sortByActivityDesc">Activity (High-Low)</option>
+                        <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
+                    </select>
+                </div>
+                <div class="candidate-grid" id="infoCandidateList">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div class="tab-content" id="admin">
+            <h2><i class="fas fa-cog"></i> <span data-i18n="adminPanel">Admin Panel</span></h2>
+            <div class="admin-password-section">
+                <h3><i class="fas fa-lock"></i> <span data-i18n="adminAuthentication">Admin Authentication</span></h3>
+                <p data-i18n="pleaseAuthenticateAsAdmin">Please authenticate as an admin to access these controls.</p>
+                <div class="google-auth-section">
+                    <button class="btn google-signin-btn" id="googleAdminSigninBtn">
+                        <i class="fab fa-google"></i> <span data-i18n="signInWithGoogle">Sign in with Google (Admin)</span>
+                    </button>
+                    <p class="google-signin-note" data-i18n="adminAccountRequired">Please use your designated admin Google account.</p>
+                    <div id="adminAuthLoading" class="loader hidden"></div>
+                </div>
+            </div>
+            <div id="adminControls" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-tools"></i> <span data-i18n="electionControls">Election Controls</span></h3>
+                    <div class="admin-actions">
+                        <button class="btn btn-warning" id="electionToggle">
+                            <i class="fas fa-toggle-off"></i> <span id="toggleButtonText" data-i18n="openElection">Open Election</span>
+                        </button>
+                        <button class="btn btn-secondary" id="refreshDataBtn">
+                            <i class="fas fa-sync-alt"></i> <span data-i18n="refreshData">Refresh Data</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-file-export"></i> <span data-i18n="exportData">Export Data</span></h3>
+                    <div class="admin-actions">
+                        <button class="btn btn-outline" id="exportVotesBtn">
+                            <i class="fas fa-download"></i> <span data-i18n="exportRawVotes">Export Raw Votes</span>
+                        </button>
+                        <button class="btn btn-outline" id="exportVotesToCSVBtn">
+                            <i class="fas fa-file-csv"></i> <span data-i18n="exportVotesToCSV">Export Votes to CSV</span>
+                        </button>
+                        <button class="btn btn-outline" id="backupToCloudBtn">
+                            <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="backupToCloud">Backup to Cloud</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ WINNER INFO POPUP (RESTORED) -->
+    <div id="winnerInfoPopup" style="display: none;" aria-hidden="true">
+        <div class="winner-info-content">
+            <h3 id="winnerName"></h3>
+            <p><strong data-i18n="position">Position:</strong> <span id="winnerPosition"></span></p>
+            <p><strong data-i18n="bio">Bio:</strong> <span id="winnerBio"></span></p>
+            <p><strong data-i18n="activity">Activity:</strong> <span id="winnerActivity"></span></p>
+        </div>
+    </div>
+
+    <!-- Status Message Container -->
+    <div id="messageContainer" class="message hidden"></div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Phoenix Council. <span data-i18n="allRightsReserved">All rights reserved.</span></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/core-init.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/candidates.js"></script>
+    <script src="js/voting.js"></script>
+    <script src="js/results.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/core-main.js"></script>
+</body>
+</html>

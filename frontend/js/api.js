@@ -17,7 +17,7 @@ class ElectionAPI {
     static async exportVotesToCSV() {
         // This function will primarily be called for its side effect (file download)
         // Returning the fetch promise allows the caller to handle potential errors during the initial request.
-        return fetch(`${API_BASE_URL}/admin/export-csv`, {
+        return fetch(`${API_BASE_URL}/admin/votes/export/csv`, {
             method: 'GET',
             // credentials: 'include' // Uncomment if you need to send cookies/session
         });
@@ -69,7 +69,7 @@ class ElectionAPI {
     }
 
     static async toggleElectionStatus() {
-        const response = await fetch(`${API_BASE_URL}/admin/toggle`, {
+        const response = await fetch(`${API_BASE_URL}/admin/election/toggle`, {
             method: 'POST'
         });
         return await response.json();
@@ -78,7 +78,7 @@ class ElectionAPI {
     static async exportVotes() {
         // This would typically be a direct link or a more complex download
         // For now, we'll fetch the data and log it
-        const response = await fetch(`${API_BASE_URL}/admin/export`);
+        const response = await fetch(`${API_BASE_URL}/admin/votes/export`);
         const data = await response.json();
         console.log('Exported votes:', data);
         // In a real app, you might create a downloadable file
