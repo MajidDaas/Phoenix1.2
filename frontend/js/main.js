@@ -749,9 +749,9 @@ async function checkAuthStatus() {
         hideAdminUIForLoggedOutUser(); // Treat errors as not authenticated
     }
 }
-// --- END MODIFIED checkAuthStatus 
+// --- END MODIFIED checkAuthStatus ---
 
----// Proceed to voting after authentication
+// Proceed to voting after authentication
 function proceedToVoting() {
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
