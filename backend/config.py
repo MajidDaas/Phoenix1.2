@@ -2,6 +2,7 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    FRONTEND_URL = os.environ.get('FRONTEND_URL') or 'https://majiddaas2.pythonanywhere.com'
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'admin2024'
     # Adjust the path logic here if your data folder is located differently relative to config.py
     DATA_FOLDER = os.path.join(os.path.dirname(__file__), 'data') # e.g., /path/to/config.py/data
