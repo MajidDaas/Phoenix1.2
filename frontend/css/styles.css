@@ -23,8 +23,6 @@
 /* --- BASE & LAYOUT --- */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
@@ -34,6 +32,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   padding: var(--spacing-xs);
+  margin: 0;
 }
 
 /* --- FULL AUTH SCREEN --- */
@@ -1214,6 +1213,9 @@ body {
   display: none !important;
 }
 
+/* Safety override for Cast Vote tab/button and #vote container */
+
+
 /* Loader */
 .loader {
   border: 4px solid #f3f3f3;
@@ -1388,18 +1390,6 @@ body.rtl .priority-badge {
     flex-wrap: wrap;
 }
 
-/* --- ANIMATIONS --- */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* --- BUTTON STYLES FOR CARDS --- */
 .thank-you-card .btn,
 .election-closed-card .btn {
@@ -1437,16 +1427,7 @@ body.rtl .priority-badge {
     transform: translateY(-2px);
 }
 
-.tab-content.active {
-    display: block;
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
 .tab-content.hidden-by-status,
 .tab.hidden-by-status {
-  display: none !important; /* Use !important to ensure it overrides display:flex or similar */
+  display: none !important;
 }

@@ -1,6 +1,8 @@
-// results.js - Results fetching, rendering, and winner popup logic
+// results.js - Results fetching, rendering, and winner popup logic (modernized & mobile-friendly)
 
 const ResultsModule = {
+    currentChart: null,
+
     // --- Render Results ---
     renderResults: async function() {
         const resultsContent = document.getElementById('resultsContent');
@@ -10,27 +12,47 @@ const ResultsModule = {
         }
 
         try {
-            const resultsData = await ElectionAPI.getResults();
-            const stats = resultsData.stats || { totalCandidates: 0, totalVotes: 0 };
+            // Fetch results and public candidate info
+            const [resultsRes, candidatesRes] = await Promise.all([
+                fetch('/api/results', { credentials: 'include' }),
+                fetch('/api/candidates', { credentials: 'include' })
+            ]);
+
+            if (!resultsRes.ok) {
+                throw new Error('Failed to fetch results from server');
+            }
+            const resultsData = await resultsRes.json();
+            const candidatesList = candidatesRes.ok ? await candidatesRes.json() : [];
 
             const totalCandidatesEl = document.getElementById('totalCandidates');
             const voterTurnoutEl = document.getElementById('voterTurnout');
-            if (totalCandidatesEl) totalCandidatesEl.textContent = stats.totalCandidates;
+            const totalVotesEl = document.getElementById('totalVotes');
+
+            // totalCandidates: use candidate list length
+            const totalCandidates = candidatesList.length || (resultsData.results ? resultsData.results.length : 0);
+            const totalVotes = resultsData.totalVotes || 0;
+
+            if (totalCandidatesEl) totalCandidatesEl.textContent = totalCandidates;
+            if (totalVotesEl) totalVotesEl.textContent = totalVotes;
+
+            // Voter turnout: per spec, number of voters equals number of candidates for turnout calculation
+            const turnoutPercent = totalCandidates > 0 ? Math.round((totalVotes / totalCandidates) * 100) : 0;
             if (voterTurnoutEl) {
-                voterTurnoutEl.textContent = resultsData.isOpen ?
-                    'Elections in Progress' :
-                    `${Math.round((stats.totalVotes / totalVoters) * 100)}%`;
+                voterTurnoutEl.textContent = `${turnoutPercent}%`;
             }
 
-            if (resultsData.isOpen) {
+            // Update election open flag
+            const isOpen = !!resultsData.isOpen;
+            if (isOpen) {
+                // When election is open, show friendly message and hide chart
                 resultsContent.innerHTML = `
-                    <div class="status-info">
-                        <p><i class="fas fa-info-circle"></i> Results will be available after the election is closed.</p>
+                    <div class="status-info modern-info">
+                        <p><i class="fas fa-info-circle"></i> Voting is in progress. Partial results will be available after the election closes.</p>
                     </div>
                 `;
-                if (currentChart) {
-                    currentChart.destroy();
-                    currentChart = null;
+                if (this.currentChart) {
+                    this.currentChart.destroy();
+                    this.currentChart = null;
                 }
                 const chartContainerElement = document.getElementById('chartContainer');
                 if (chartContainerElement) {
@@ -39,42 +61,72 @@ const ResultsModule = {
                 return;
             }
 
+            // Election closed: render full leaderboard
             const fullResultsArray = resultsData.results || [];
-            const top15ResultsArray = fullResultsArray.slice(0, 15);
-            const sortedTop15ByExecutiveVotes = [...top15ResultsArray].sort((a, b) => b.executiveVotes - a.executiveVotes);
-            const executiveOfficers = sortedTop15ByExecutiveVotes.slice(0, 7).map(c => c.name);
+            // Enrich results with candidate meta if available
+            const enriched = fullResultsArray.map(r => {
+                const meta = candidatesList.find(c => c.id === r.id) || {};
+                return Object.assign({}, r, {
+                    bio: meta.bio || '',
+                    position: meta.position || '',
+                    activity: meta.activity || '',
+                    avatar: meta.avatar || '' // optional
+                });
+            });
 
-            let resultsHTML = `<div class="results-container">`;
-            top15ResultsArray.forEach(candidate => {
-                const fullCandidate = window.State.candidates.find(c => c.id === candidate.id);
-                const isExecutive = executiveOfficers.includes(candidate.name);
-                const winnerClass = (fullCandidate && fullCandidate.isWinner) ? 'winner-name' : '';
-                const winnerDataAttr = (fullCandidate && fullCandidate.isWinner) ? `data-is-winner="true"` : `data-is-winner="false"`;
+            // Sort by council votes descending then exec votes
+            enriched.sort((a, b) => {
+                if (b.councilVotes !== a.councilVotes) return b.councilVotes - a.councilVotes;
+                return b.executiveVotes - a.executiveVotes;
+            });
+
+            const top15 = enriched.slice(0, 15);
+
+            // Determine executive officers: top 7 by executiveVotes among the top15
+            const sortedByExec = [...top15].sort((a,b) => b.executiveVotes - a.executiveVotes);
+            const execNames = sortedByExec.slice(0,7).map(x => x.name);
+
+            // Build modern leaderboard HTML
+            let resultsHTML = `<div class="leaderboard">`;
+            top15.forEach((candidate, idx) => {
+                const isExecutive = execNames.includes(candidate.name);
+                const rank = idx + 1;
+                // progress widths relative to top performer
+                const maxCouncil = top15[0] ? Math.max(1, top15[0].councilVotes) : 1;
+                const maxExec = sortedByExec[0] ? Math.max(1, sortedByExec[0].executiveVotes) : 1;
+                const councilPct = Math.min(100, Math.round((candidate.councilVotes / maxCouncil) * 100));
+                const execPct = Math.min(100, Math.round((candidate.executiveVotes / maxExec) * 100));
+
                 resultsHTML += `
-                    <div class="result-card ${isExecutive ? 'executive' : ''}">
-                        <h4>
-                            <span class="${winnerClass}" ${winnerDataAttr}
-                                  data-name="${candidate.name}"
-                                  data-position="${fullCandidate ? fullCandidate.position : ''}"
-                                  data-bio="${fullCandidate ? fullCandidate.bio : ''}"
-                                  data-activity="${fullCandidate ? fullCandidate.activity : ''}"
-                                  onclick="ResultsModule.showWinnerPopup(event)">
-                                ${candidate.name}
-                            </span>
-                        </h4>
-                        <div class="progress-container">
-                            <div class="progress-label">Council Votes:</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${Math.min(100, (candidate.councilVotes / (top15ResultsArray[0]?.councilVotes || 1)) * 100)}%"></div>
-                            </div>
-                            <div class="progress-value">${candidate.councilVotes.toLocaleString()}</div>
+                    <div class="leader-item ${isExecutive ? 'executive' : ''}" data-name="${candidate.name}"
+                         data-position="${candidate.position || ''}" data-bio="${candidate.bio || ''}"
+                         data-activity="${candidate.activity || ''}" data-is-winner="${rank <= 15 ? 'true' : 'false'}"
+                         onclick="ResultsModule.showWinnerPopup(event)">
+                        <div class="leader-left">
+                          <div class="leader-rank">#${rank}</div>
+                          <div class="leader-avatar">
+                            ${candidate.avatar ? `<img src="${candidate.avatar}" alt="${candidate.name}">` : `<div class="avatar-placeholder">${candidate.name.charAt(0) || '?'}</div>`}
+                          </div>
+                          <div class="leader-meta">
+                            <div class="leader-name">${candidate.name}${isExecutive ? ' <span class="exec-badge" title="Executive Officer">★</span>' : ''}</div>
+                            <div class="leader-position">${candidate.position || 'Council Member'}</div>
+                          </div>
                         </div>
-                        <div class="progress-container">
-                            <div class="progress-label">Executive Votes:</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill executive" style="width: ${Math.min(100, (candidate.executiveVotes / (sortedTop15ByExecutiveVotes[0]?.executiveVotes || 1)) * 100)}%"></div>
+                        <div class="leader-right">
+                          <div class="stat-row">
+                            <div class="stat-label">Council</div>
+                            <div class="stat-bar">
+                              <div class="stat-fill" style="width:${councilPct}%"></div>
                             </div>
-                            <div class="progress-value">${candidate.executiveVotes.toLocaleString()}</div>
+                            <div class="stat-value">${candidate.councilVotes.toLocaleString()}</div>
+                          </div>
+                          <div class="stat-row">
+                            <div class="stat-label">Executive</div>
+                            <div class="stat-bar small">
+                              <div class="stat-fill exec" style="width:${execPct}%"></div>
+                            </div>
+                            <div class="stat-value">${candidate.executiveVotes.toLocaleString()}</div>
+                          </div>
                         </div>
                     </div>
                 `;
@@ -82,130 +134,108 @@ const ResultsModule = {
             resultsHTML += `</div>`;
             resultsContent.innerHTML = resultsHTML;
 
+            // Show chart container and render mobile-friendly chart
             const chartContainerElement = document.getElementById('chartContainer');
-            if (chartContainerElement) {
-                chartContainerElement.classList.remove('hidden');
+            if (chartContainerElement) chartContainerElement.classList.remove('hidden');
+
+            // Choose chart orientation based on viewport width
+            const mobile = window.innerWidth <= 700;
+            const indexAxis = mobile ? 'x' : 'y'; // vertical bars on phone, horizontal on bigger screens
+
+            // Prepare data for chart - show top15 names and both council & exec votes
+            const chartLabels = top15.map(c => c.name);
+            const councilData = top15.map(c => c.councilVotes);
+            const execData = top15.map(c => c.executiveVotes);
+
+            // Destroy previous chart if present
+            if (this.currentChart) {
+                this.currentChart.destroy();
+                this.currentChart = null;
             }
 
-            const sortedChartData = [...top15ResultsArray];
-            sortedChartData.sort((a, b) => {
-                if (b.councilVotes !== a.councilVotes) {
-                    return b.councilVotes - a.councilVotes;
-                }
-                return b.executiveVotes - a.executiveVotes;
-            });
+            // Create chart with responsive options
+            const chartCanvas = document.getElementById('resultsChart');
+            if (!chartCanvas) {
+                console.error('resultsChart canvas element not found');
+                return;
+            }
+            const ctx = chartCanvas.getContext('2d');
 
-            setTimeout(() => {
-                const chartCanvas = document.getElementById('resultsChart');
-                if (!chartCanvas) {
-                    console.error('resultsChart canvas element not found');
-                    return;
-                }
-                const ctx = chartCanvas.getContext('2d');
-                if (currentChart) {
-                    currentChart.destroy();
-                    currentChart = null;
-                }
-                currentChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: sortedChartData.map(c => c.name),
-                        datasets: [
-                            {
-                                label: 'Council Votes',
-                                data: sortedChartData.map(c => c.councilVotes),
-                                backgroundColor: 'rgba(0, 150, 87, 0.7)',
-                                borderColor: 'rgba(0, 150, 87, 1)',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Executive Votes',
-                                data: sortedChartData.map(c => c.executiveVotes),
-                                backgroundColor: 'rgba(243, 156, 18, 0.7)',
-                                borderColor: 'rgba(243, 156, 18, 1)',
-                                borderWidth: 1
+            // Use friendly colors
+            const councilColor = 'rgba(0, 150, 87, 0.9)';
+            const execColor = 'rgba(243, 156, 18, 0.9)';
+
+            this.currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        {
+                            label: 'Council',
+                            data: councilData,
+                            backgroundColor: councilColor,
+                            borderColor: councilColor,
+                            borderRadius: 6,
+                            barPercentage: mobile ? 0.8 : 0.9,
+                        },
+                        {
+                            label: 'Executive',
+                            data: execData,
+                            backgroundColor: execColor,
+                            borderColor: execColor,
+                            borderRadius: 6,
+                            barPercentage: mobile ? 0.6 : 0.9,
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: indexAxis,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                usePointStyle: true
                             }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: 'y',
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    font: function(context) {
-                                        const width = context.chart.width;
-                                        return {
-                                            size: width < 500 ? 10 : width < 800 ? 12 : 14
-                                        };
-                                    }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y !== undefined ? context.parsed.y : context.parsed.x} votes`;
                                 }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${context.parsed.x} votes`;
-                                    }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                maxTicksLimit: mobile ? 5 : 10,
+                                callback: function(value) {
+                                    return value.toLocaleString();
                                 }
                             }
                         },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Votes',
-                                    font: function(context) {
-                                        const width = context.chart.width;
-                                        return {
-                                            size: width < 500 ? 10 : width < 800 ? 12 : 14
-                                        };
-                                    }
-                                },
-                                ticks: {
-                                    font: function(context) {
-                                        const width = context.chart.width;
-                                        return {
-                                            size: width < 500 ? 8 : width < 800 ? 10 : 12
-                                        };
-                                    }
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Top 15 Council Members',
-                                    font: function(context) {
-                                        const width = context.chart.width;
-                                        return {
-                                            size: width < 500 ? 10 : width < 800 ? 12 : 14
-                                        };
-                                    }
-                                },
-                                ticks: {
-                                    font: function(context) {
-                                        const width = context.chart.width;
-                                        return {
-                                            size: width < 500 ? 8 : width < 800 ? 10 : 12
-                                        };
-                                    },
-                                    autoSkip: false,
-                                    maxRotation: 0,
-                                    minRotation: 0
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                callback: function(value) {
+                                    return value;
                                 }
                             }
                         }
                     }
-                });
-            }, 100);
+                }
+            });
+
         } catch (err) {
             console.error('Error fetching results:', err);
             resultsContent.innerHTML = `<div class="status-error"><p>Error loading results. Please try again later.</p></div>`;
-            if (currentChart) {
-                currentChart.destroy();
-                currentChart = null;
+            if (this.currentChart) {
+                this.currentChart.destroy();
+                this.currentChart = null;
             }
             const chartContainerElement = document.getElementById('chartContainer');
             if (chartContainerElement) {
@@ -222,16 +252,22 @@ const ResultsModule = {
             return;
         }
 
-        const target = event.currentTarget;
-        const isWinner = target.getAttribute('data-is-winner') === 'true';
-        if (!isWinner) {
-            return;
+        // normalize target (might be child element)
+        let target = event.currentTarget || event.target;
+        // climb up until leader-item
+        while (target && !target.classList.contains('leader-item')) {
+            target = target.parentElement;
         }
+        if (!target) return;
 
-        const name = target.getAttribute('data-name');
-        const position = target.getAttribute('data-position');
-        const bio = target.getAttribute('data-bio');
-        const activity = target.getAttribute('data-activity');
+        const isWinner = target.getAttribute('data-is-winner') === 'true';
+        // Only show popup for top winners (we mark top15 as winners per earlier logic)
+        if (!isWinner) return;
+
+        const name = target.getAttribute('data-name') || 'Unknown';
+        const position = target.getAttribute('data-position') || 'Council Member';
+        const bio = target.getAttribute('data-bio') || 'No bio available';
+        const activity = target.getAttribute('data-activity') || '';
 
         const winnerNameEl = document.getElementById('winnerName');
         const winnerPositionEl = document.getElementById('winnerPosition');
@@ -243,14 +279,16 @@ const ResultsModule = {
         if (winnerBioEl) winnerBioEl.textContent = bio;
         if (winnerActivityEl) winnerActivityEl.textContent = activity;
 
+        // position popup near clicked item
         const rect = target.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        winnerInfoPopup.style.left = `${rect.left + scrollLeft + rect.width / 2 - winnerInfoPopup.offsetWidth / 2}px`;
-        winnerInfoPopup.style.top = `${rect.top + scrollTop - winnerInfoPopup.offsetHeight - 10}px`;
-
-        winnerInfoPopup.style.display = 'block';
-        winnerInfoPopup.setAttribute('aria-hidden', 'false');
+        const popup = winnerInfoPopup;
+        // center horizontally
+        const left = Math.max(12, rect.left + window.pageXOffset + rect.width / 2 - popup.offsetWidth / 2);
+        const top = Math.max(12, rect.top + window.pageYOffset - popup.offsetHeight - 10);
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
+        popup.style.display = 'block';
+        popup.setAttribute('aria-hidden', 'false');
     },
 
     hideWinnerPopup: function() {

@@ -22,37 +22,37 @@ const VotingModule = {
         const isSelected = window.State.selectedCandidates.includes(id);
         const isExecutive = window.State.executiveCandidates.includes(id);
 
-    if (isSelected) {
-        // Clicked on a candidate that is already selected
-        if (isExecutive) {
-            // --- CHANGE: Clicking an EO removes it completely ---
-            // 1. Remove from Executive Officers list (removes orange badge)
-            executiveCandidates = executiveCandidates.filter(cId => cId !== id);
-            console.log(`Removed candidate ID ${id} from Executive Officers (orange badge removed).`);
-            // 2. Remove from Selected list (removes green border)
-            selectedCandidates = selectedCandidates.filter(cId => cId !== id);
-            console.log(`Deselected candidate ID ${id} (green border removed).`);
-            // --- END CHANGE ---
-        } else {
-            // It's selected but NOT an Executive Officer.
-            // Check if we can promote it to Executive Officer
-            if (executiveCandidates.length < maxExecutives) {
-                executiveCandidates.push(id);
-                console.log(`Promoted candidate ID ${id} to Executive Officer (added orange badge).`);
+        if (isSelected) {
+            // Clicked on a candidate that is already selected
+            if (isExecutive) {
+                // --- CHANGE: Clicking an EO removes it completely ---
+                // 1. Remove from Executive Officers list (removes orange badge)
+                window.State.executiveCandidates = window.State.executiveCandidates.filter(cId => cId !== id);
+                console.log(`Removed candidate ID ${id} from Executive Officers (orange badge removed).`);
+                // 2. Remove from Selected list (removes green border)
+                window.State.selectedCandidates = window.State.selectedCandidates.filter(cId => cId !== id);
+                console.log(`Deselected candidate ID ${id} (green border removed).`);
+                // --- END CHANGE ---
             } else {
-                // EO list is full. Interpret click as deselection.
-                selectedCandidates = selectedCandidates.filter(cId => cId !== id);
-                console.log(`Deselected candidate ID ${id} (EO list full, green border removed).`);
+                // It's selected but NOT an Executive Officer.
+                // Check if we can promote it to Executive Officer
+                if (window.State.executiveCandidates.length < maxExecutives) {
+                    window.State.executiveCandidates.push(id);
+                    console.log(`Promoted candidate ID ${id} to Executive Officer (added orange badge).`);
+                } else {
+                    // EO list is full. Interpret click as deselection.
+                    window.State.selectedCandidates = window.State.selectedCandidates.filter(cId => cId !== id);
+                    console.log(`Deselected candidate ID ${id} (EO list full, green border removed).`);
+                }
             }
-        }
-    } else {
-        // Clicked on a candidate that is NOT selected
-        if (selectedCandidates.length < maxSelections) {
-            selectedCandidates.push(id);
-            console.log(`Selected candidate ID ${id} (added green border).`);
         } else {
-            showMessage(`You can only select ${maxSelections} council members`, 'error');
-            return;
+            // Clicked on a candidate that is NOT selected
+            if (window.State.selectedCandidates.length < maxSelections) {
+                window.State.selectedCandidates.push(id);
+                console.log(`Selected candidate ID ${id} (added green border).`);
+            } else {
+                Utils.showMessage(`You can only select ${maxSelections} council members`, 'error');
+                return;
             }
         }
 
@@ -109,6 +109,11 @@ const VotingModule = {
 
     // --- Submit Vote ---
     submitVote: async function() {
+        if (!window.State.electionOpen) {
+            Utils.showMessage('Voting is currently closed', 'error');
+            return;
+        }
+
         if (!window.State.currentUser) {
             Utils.showMessage('You must be authenticated before submitting.', 'error');
             return;
@@ -142,23 +147,29 @@ Executive Officers: ${window.State.executiveCandidates.length}`, 'success');
                 window.State.selectedCandidates = [];
                 window.State.executiveCandidates = [];
                 
-               // Update user session to mark as voted
-                window.State.currentUser.hasVoted = true;
-              
+                // Update user session to mark as voted
+                if (window.State.currentUser) {
+                    window.State.currentUser.hasVoted = true;
+                }
+                
+                // Update global state
+                window.State.userHasVoted = true;
+                
                 // Reset UI
                 this.updateUI();
                 
-                // Reset to step 1
-                const step1 = document.getElementById('step1');
-                const step2 = document.getElementById('step2');
-                const step3 = document.getElementById('step3');
+                // Update voting tab content to show thank you message
+                if (typeof updateVotingTabContent === 'function') {
+                    updateVotingTabContent();
+                }
                 
-                if (step1) step1.classList.remove('hidden');
-                if (step2) step2.classList.add('hidden');
-                if (step3) step3.classList.add('hidden');
+                // Switch to results tab
+                if (typeof UIController !== 'undefined' && UIController.switchTab) {
+                    setTimeout(() => {
+                        UIController.switchTab('results');
+                    }, 2000);
+                }
                 
-                // Clear user session
-                window.State.currentUser = null;
             } else {
                 Utils.showMessage(response.message || 'Failed to submit vote', 'error');
             }
@@ -173,13 +184,17 @@ Executive Officers: ${window.State.executiveCandidates.length}`, 'success');
 
     // --- Candidate Details ---
     showCandidateDetails: function(id) {
-        if (activeDetails) {
+        // Make sure activeDetails is defined (from core-init.js)
+        if (typeof activeDetails !== 'undefined' && activeDetails) {
             this.hideCandidateDetails(activeDetails);
         }
         const details = document.getElementById(`details-${id}`);
         if (details) {
             details.classList.add('show');
-            activeDetails = id; // This is still a global in core-init.js
+            // Set global activeDetails variable
+            if (typeof window !== 'undefined') {
+                window.activeDetails = id;
+            }
         }
     },
 
@@ -187,7 +202,10 @@ Executive Officers: ${window.State.executiveCandidates.length}`, 'success');
         const details = document.getElementById(`details-${id}`);
         if (details) {
             details.classList.remove('show');
-            activeDetails = null; // This is still a global in core-init.js
+            // Clear global activeDetails variable
+            if (typeof window !== 'undefined') {
+                window.activeDetails = null;
+            }
         }
     }
 };

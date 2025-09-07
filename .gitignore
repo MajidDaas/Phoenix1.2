@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+backend/data/votes.json
 backend/__pycache__/
 backend/data/voter_sessions.json
 backend/.env

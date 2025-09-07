@@ -15,24 +15,28 @@ const I18nModule = {
         }
     },
 
-    // --- Switch Language ---
-    switchLanguage: function(lang) {
-        if (lang && translations && typeof translations === 'object' && translations[lang]) {
-            currentLanguage = lang; // `currentLanguage` is global in core.js
-            this.applyTranslations();
-            const langSwitcher = document.getElementById('languageSwitcher');
-            if (langSwitcher) {
-                const otherLang = currentLanguage === 'en' ? 'ar' : 'en';
-                const buttonText = translations[otherLang] && translations[otherLang]['languageSwitcherText'] ?
-                                   translations[otherLang]['languageSwitcherText'] : otherLang;
-                langSwitcher.textContent = buttonText;
-                langSwitcher.setAttribute('data-lang', currentLanguage);
-            }
-            document.body.classList.toggle('rtl', currentLanguage === 'ar');
-        } else {
-            console.warn(`Cannot switch to language '${lang}'. It's not available in the loaded translations.`);
+// --- Switch Language ---
+switchLanguage: function(lang) {
+    if (lang && translations && typeof translations === 'object' && translations[lang]) {
+        currentLanguage = lang; // `currentLanguage` is global in core.js
+        this.applyTranslations();
+
+        const langSwitcher = document.getElementById('languageSwitcher');
+        if (langSwitcher) {
+            // Set the button text to "English" if current is Arabic, and "عربي" if current is English.
+            const buttonText = currentLanguage === 'en' ? 'عربي' : 'English';
+            // OR, if you prefer to use the translation keys for consistency:
+            // const buttonText = currentLanguage === 'en' ? (translations['ar']['switchToArabic'] || 'عربي') : (translations['en']['switchToEnglish'] || 'English');
+
+            langSwitcher.textContent = buttonText;
+            langSwitcher.setAttribute('data-lang', currentLanguage);
         }
-    },
+
+        document.body.classList.toggle('rtl', currentLanguage === 'ar');
+    } else {
+        console.warn(`Cannot switch to language '${lang}'. It's not available in the loaded translations.`);
+    }
+},
 
     // --- Apply Translations ---
     applyTranslations: function() {

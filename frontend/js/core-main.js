@@ -70,17 +70,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
 
         // Update UI based on initial state
-        updateVotingTabVisibility();
+        updateVotingTabContent();
 
         // Update election status display (header)
         const electionStatus = document.getElementById('electionStatus');
         if (electionStatus) {
             if (!window.State.electionOpen) {
-                electionStatus.innerHTML = '<i class="fas fa-lock"></i> Election is closed'; // Use I18nModule.translate()
+                electionStatus.innerHTML = '<i class="fas fa-lock"></i> Election is closed';
                 electionStatus.classList.add('closed');
                 electionStatus.classList.remove('open');
             } else {
-                electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is open'; // Use I18nModule.translate()
+                electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is open';
                 electionStatus.classList.add('open');
                 electionStatus.classList.remove('closed');
             }
@@ -88,74 +88,30 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     } catch (err) {
         console.error('Error fetching initial election status:', err);
-        // On error, assume voting is closed or unavailable, hide the tab
+        // On error, assume voting is closed or unavailable
         window.State.electionOpen = false;
         window.State.userHasVoted = true;
-        updateVotingTabVisibility();
+        updateVotingTabContent();
     }
 
-    // --- Ensure a valid initial tab is active AFTER visibility check ---
-    // Use window.requestAnimationFrame for potentially better timing than setTimeout(0)
-    window.requestAnimationFrame(() => {
-        const activeTabAfterUpdate = document.querySelector('.tab.active');
-        const activeContentAfterUpdate = document.querySelector('.tab-content.active');
-        const votingTabShouldBeHidden = !window.State.electionOpen || window.State.userHasVoted;
-
-        console.log("Post-Update RAF Check - Should Hide Voting Tab:", votingTabShouldBeHidden);
-
-        // If the 'vote' tab is supposed to be hidden but is currently active, switch to another tab
-        if (activeTabAfterUpdate && activeTabAfterUpdate.dataset.tab === 'vote' && votingTabShouldBeHidden) {
-            console.log("Currently active vote tab should be hidden. Switching...");
-            const firstVisibleTabButton = document.querySelector('.tab:not(.hidden)');
-            const firstVisibleTabName = firstVisibleTabButton ? firstVisibleTabButton.dataset.tab : null;
-
-            if (firstVisibleTabName) {
-                console.log("Switching to first visible tab:", firstVisibleTabName);
-                UIController.switchTab(firstVisibleTabName); // switchTab handles display
-            } else {
-                console.warn("No suitable visible tabs found to switch to!");
-                // Explicitly hide the active content if switchTab couldn't run
-                if (activeContentAfterUpdate) {
-                   activeContentAfterUpdate.classList.remove('active');
-                   activeContentAfterUpdate.style.display = 'none'; // Force hide
-                }
-                if (activeTabAfterUpdate) activeTabAfterUpdate.classList.remove('active');
+    // --- Ensure a valid initial tab is active ---
+    setTimeout(() => {
+        const activeTab = document.querySelector('.tab.active');
+        
+        // If NO tab is active at all, activate the first available tab
+        if (!activeTab) {
+            console.log("No active tab found, activating first tab.");
+            const firstTab = document.querySelector('.tab');
+            if (firstTab) {
+                UIController.switchTab(firstTab.dataset.tab);
             }
         }
-        // If NO tab is active at all after updates (edge case)
-        else if (!document.querySelector('.tab.active')) {
-            console.log("No active tab found after visibility update.");
-            const firstVisibleTabButton = document.querySelector('.tab:not(.hidden)');
-            const firstVisibleTabName = firstVisibleTabButton ? firstVisibleTabButton.dataset.tab : null;
-
-            if (firstVisibleTabName) {
-                 console.log("Activating first available visible tab:", firstVisibleTabName);
-                 UIController.switchTab(firstVisibleTabName); // switchTab handles display and classes
-            } else {
-                console.warn("No visible tabs available to activate initially!");
-            }
-        }
-        // If a different tab is active and should remain so, just ensure display is correct
-        else {
-             const stillActiveContent = document.querySelector('.tab-content.active');
-             if (stillActiveContent) {
-                 stillActiveContent.style.display = 'block'; // Ensure active content is shown
-             }
-             // Ensure other contents are hidden (redundancy check)
-             document.querySelectorAll('.tab-content:not(.active)').forEach(content => {
-                 if (!content.classList.contains('active')) {
-                     content.style.display = 'none';
-                 }
-             });
-        }
-    });
-
+    }, 100);
 
     // --- Tab switching ---
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
-            // Let UIController handle the check and switch
             UIController.switchTab(tabName);
         });
     });
@@ -211,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Add click outside listener for candidate details
     document.addEventListener('click', (e) => {
-        if (activeDetails && !e.target.closest('.candidate-item')) {
+        if (typeof activeDetails !== 'undefined' && activeDetails && !e.target.closest('.candidate-item')) {
             VotingModule.hideCandidateDetails(activeDetails);
         }
         const winnerInfoPopup = document.getElementById('winnerInfoPopup');
@@ -231,8 +187,8 @@ function handleAuthCallback() {
     if (authenticated === 'true') {
         console.log("Redirected from Google OAuth2, checking auth status...");
         AuthModule.checkAuthStatus().then(() => {
-             // Potentially re-call updateVotingTabVisibility here if user state changes post-auth
-             // e.g., if checking if they voted is part of AuthModule.checkAuthStatus
+            // Re-check voting tab content after auth status changes
+            updateVotingTabContent();
         });
     }
 }
@@ -246,14 +202,14 @@ const UIController = {
         const selectedTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
         const selectedContent = document.getElementById(tabName);
 
-        // 2. Check if the target tab/content exists and is NOT hidden
-        if (!selectedTab || selectedTab.classList.contains('hidden')) {
-            console.warn(`Cannot switch to tab button '${tabName}': Tab button is missing or hidden.`);
+        // 2. Check if the target tab/content exists
+        if (!selectedTab) {
+            console.warn(`Cannot switch to tab button '${tabName}': Tab button is missing.`);
             return;
         }
-        if (!selectedContent || selectedContent.classList.contains('hidden')) {
-             console.warn(`Cannot switch to tab content '${tabName}': Tab content is missing or hidden.`);
-             return;
+        if (!selectedContent) {
+            console.warn(`Cannot switch to tab content '${tabName}': Tab content is missing.`);
+            return;
         }
 
         // 3. Proceed with activation: Remove active class from ALL tabs and contents
@@ -262,13 +218,13 @@ const UIController = {
         });
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
-            content.style.display = 'none'; // Explicitly hide all content first
+            content.style.display = 'none';
         });
 
         // 4. Add active class and explicitly show the SELECTED tab and content
         selectedTab.classList.add('active');
         selectedContent.classList.add('active');
-        selectedContent.style.display = 'block'; // Explicitly show selected content
+        selectedContent.style.display = 'block';
 
         console.log(`Successfully switched to tab: ${tabName}`);
 
@@ -281,62 +237,66 @@ const UIController = {
             }
         }
         if (tabName === 'admin') {
-            // Focus logic if needed
             setTimeout(() => {
-                // const adminPasswordInput = document.getElementById('adminPassword');
-                // if (adminPasswordInput) adminPasswordInput.focus();
+                // Focus logic if needed
             }, 10);
+        }
+        if (tabName === 'vote') {
+            // Update voting content based on current state when switching to vote tab
+            updateVotingTabContent();
         }
 
         // 6. Hide any open popups/details when switching tabs
-        if (typeof VotingModule !== 'undefined' && activeDetails) {
+        if (typeof VotingModule !== 'undefined' && typeof activeDetails !== 'undefined' && activeDetails) {
             VotingModule.hideCandidateDetails(activeDetails);
         }
         if (typeof ResultsModule !== 'undefined' && ResultsModule.hideWinnerPopup) {
-             ResultsModule.hideWinnerPopup();
+            ResultsModule.hideWinnerPopup();
         }
     }
 };
 
-// --- Function to Update Voting Tab Visibility Based on State ---
-function updateVotingTabVisibility() {
-    const votingTab = document.querySelector('.tab[data-tab="vote"]');
-    const votingContent = document.getElementById('vote');
-    const electionClosedMessageElement = document.getElementById('electionClosedMessage'); // Inside #vote
+// --- Function to Update Voting Tab Content Based on State ---
+function updateVotingTabContent() {
+    const votingInterface = document.getElementById('votingInterface');
+    const electionClosedMessageElement = document.getElementById('electionClosedMessage');
+    const thankYouMessageElement = document.getElementById('thankYouMessage');
+    const notRegisteredCard = document.getElementById('notRegisteredCard');
 
-    const shouldHideVoting = !window.State.electionOpen || window.State.userHasVoted;
+    console.log("updateVotingTabContent - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
 
-    console.log("updateVotingTabVisibility - Should Hide:", shouldHideVoting, "Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
+    // Always hide all messages first
+    if (electionClosedMessageElement) {
+        electionClosedMessageElement.classList.add('hidden');
+    }
+    if (thankYouMessageElement) {
+        thankYouMessageElement.classList.add('hidden');
+    }
+    if (notRegisteredCard) {
+        notRegisteredCard.classList.add('hidden');
+    }
+    if (votingInterface) {
+        votingInterface.classList.add('hidden');
+    }
 
-    if (shouldHideVoting) {
-        if (votingTab) {
-            votingTab.classList.add('hidden');
-            console.log("Hiding voting tab button.");
+    // Show appropriate content based on state
+    if (window.State.userHasVoted) {
+        // User has already voted - show thank you message
+        if (thankYouMessageElement) {
+            thankYouMessageElement.classList.remove('hidden');
+            console.log("Showing thank you message.");
         }
-        if (votingContent) {
-            votingContent.classList.add('hidden');
-            // Do not explicitly set display here, let switchTab/UI handle it if needed
-            console.log("Hiding voting content.");
-        }
+    } else if (!window.State.electionOpen) {
+        // Election is closed and user hasn't voted - show closed message
         if (electionClosedMessageElement) {
-            electionClosedMessageElement.classList.remove('hidden'); // Show message inside #vote
-            console.log("Showing election closed message element.");
+            electionClosedMessageElement.classList.remove('hidden');
+            console.log("Showing election closed message.");
         }
-
     } else {
-        if (votingTab) {
-            votingTab.classList.remove('hidden');
-            console.log("Showing voting tab button.");
-        }
-        if (votingContent) {
-            votingContent.classList.remove('hidden');
-            // Do not explicitly set display here
-            console.log("Showing voting content.");
-        }
-        if (electionClosedMessageElement) {
-            electionClosedMessageElement.classList.add('hidden'); // Hide message
-            console.log("Hiding election closed message element.");
+        // Election is open and user hasn't voted - show voting interface
+        if (votingInterface) {
+            votingInterface.classList.remove('hidden');
+            console.log("Showing voting interface.");
         }
     }
 }
-
