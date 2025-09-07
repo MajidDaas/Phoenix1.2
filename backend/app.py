@@ -206,7 +206,7 @@ def create_app(config_name='default'):
         demo_user_id = str(uuid.uuid4())
         demo_email = f"demo_user_{demo_user_id[:8]}@example.com"
         demo_name = "Demo User"
-        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=True, is_eligible_voter=True) # Demo user is not admin or eligible
+        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=False, is_eligible_voter=True) # Demo user is not admin or eligible
         session['voter_session_id'] = session_id
         session['user_info'] = {'user_id': demo_user_id, 'email': demo_email, 'name': demo_name}
         # In a real scenario, you might set a flag in the session to indicate demo mode
@@ -217,7 +217,7 @@ def create_app(config_name='default'):
             'user': {
                 'name': demo_name,
                 'email': demo_email,
-                'isAdmin': True, # Demo user is not an admin
+                'isAdmin': False, # Demo user is not an admin
                 'isEligibleVoter': True, # Demo user is not an eligible voter
                 'hasVoted': False
             }
