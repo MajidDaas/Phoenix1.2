@@ -1,6 +1,9 @@
 // voting.js - Voting logic, selection management, and UI updates
 
 const VotingModule = {
+    // Flag to ensure search listener is only initialized once
+    _searchInitialized: false,
+
     // --- Select Candidate ---
     selectCandidate: function(id) {
         if (!window.State.electionOpen) {
@@ -65,8 +68,8 @@ const VotingModule = {
         const selectedCount = document.getElementById('selectedCount');
         const executiveCount = document.getElementById('executiveCount');
         
-        if (selectedCount) selectedCount.textContent = window.State.selectedCandidates.length;
-        if (executiveCount) executiveCount.textContent = window.State.executiveCandidates.length;
+        if (selectedCount) selectedCount.textContent = `${window.State.selectedCandidates.length}/${maxSelections}`;
+        if (executiveCount) executiveCount.textContent = `${window.State.executiveCandidates.length}/${maxExecutives}`;
 
         // Update candidate cards
         document.querySelectorAll('.candidate-item').forEach(card => {
@@ -105,6 +108,15 @@ const VotingModule = {
                            window.State.executiveCandidates.length === maxExecutives;
             submitVoteBtn.disabled = !isReady;
         }
+
+        // --- Initialize Search Listener (only once) ---
+        // This ensures the search bar is hooked up after the candidate list is populated
+        if (!this._searchInitialized) {
+            this.initSearch();
+            this._searchInitialized = true;
+            console.log("Candidate search listener initialized.");
+        }
+        // --- End Search Initialization ---
     },
 
     // --- Submit Vote ---
@@ -207,5 +219,48 @@ Executive Officers: ${window.State.executiveCandidates.length}`, 'success');
                 window.activeDetails = null;
             }
         }
+    },
+
+    // --- Candidate Search Functionality ---
+    // This function is called to attach the search listener after the candidate list is populated
+    initSearch: function() {
+        const candidateSearchInput = document.getElementById('candidateSearch');
+        // Ensure the candidate grid exists (it should by the time updateUI runs)
+        const candidateGrid = document.getElementById('candidateList');
+
+        if (candidateSearchInput && candidateGrid) {
+            // Remove any existing listener to prevent duplicates (good practice)
+            candidateSearchInput.removeEventListener('input', this.handleSearch);
+            // Add the input event listener, binding 'this' to the VotingModule context
+            candidateSearchInput.addEventListener('input', this.handleSearch.bind(this));
+        } else {
+            // It's okay if not found initially, maybe candidates haven't loaded yet in some edge case,
+            // but updateUI should run again after loading.
+            console.warn("Candidate search input or candidate grid not found during initSearch. Retrying might happen on next updateUI call.");
+        }
+    },
+
+    // The actual search handler function
+    handleSearch: function(event) {
+        const searchTerm = event.target.value.toLowerCase().trim();
+        // Select candidate items within the candidate grid
+        const candidateItems = document.querySelectorAll('#candidateList .candidate-item');
+
+        candidateItems.forEach(item => {
+            const candidateNameElement = item.querySelector('.candidate-name');
+            const candidatePositionElement = item.querySelector('.candidate-position');
+            
+            // Get text content and convert to lowercase for comparison
+            const nameText = candidateNameElement ? candidateNameElement.textContent.toLowerCase() : '';
+            const positionText = candidatePositionElement ? candidatePositionElement.textContent.toLowerCase() : '';
+
+            // Check if search term is empty (show all) or if it's found within name or position
+            if (searchTerm === '' || nameText.includes(searchTerm) || positionText.includes(searchTerm)) {
+                item.style.display = ''; // Show item using default CSS display
+            } else {
+                item.style.display = 'none'; // Hide item
+            }
+        });
     }
+    // --- End Candidate Search Functionality ---
 };

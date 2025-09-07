@@ -1,48 +1,64 @@
 // results.js - Results fetching, rendering, and winner popup logic (modernized & mobile-friendly)
-
 const ResultsModule = {
     currentChart: null,
-
     // --- Render Results ---
-    renderResults: async function() {
+    renderResults: async function () {
         const resultsContent = document.getElementById('resultsContent');
         if (!resultsContent) {
             console.error('resultsContent element not found');
             return;
         }
-
         try {
             // Fetch results and public candidate info
             const [resultsRes, candidatesRes] = await Promise.all([
                 fetch('/api/results', { credentials: 'include' }),
                 fetch('/api/candidates', { credentials: 'include' })
             ]);
-
             if (!resultsRes.ok) {
                 throw new Error('Failed to fetch results from server');
             }
             const resultsData = await resultsRes.json();
             const candidatesList = candidatesRes.ok ? await candidatesRes.json() : [];
-
             const totalCandidatesEl = document.getElementById('totalCandidates');
             const voterTurnoutEl = document.getElementById('voterTurnout');
             const totalVotesEl = document.getElementById('totalVotes');
+            // const statusBadgeEl = document.getElementById('statusBadge'); // Removed reference
 
             // totalCandidates: use candidate list length
             const totalCandidates = candidatesList.length || (resultsData.results ? resultsData.results.length : 0);
             const totalVotes = resultsData.totalVotes || 0;
-
             if (totalCandidatesEl) totalCandidatesEl.textContent = totalCandidates;
-            if (totalVotesEl) totalVotesEl.textContent = totalVotes;
 
-            // Voter turnout: per spec, number of voters equals number of candidates for turnout calculation
-            const turnoutPercent = totalCandidates > 0 ? Math.round((totalVotes / totalCandidates) * 100) : 0;
+            // --- Conditional Display Logic ---
+            const isOpen = !!resultsData.isOpen;
+
             if (voterTurnoutEl) {
-                voterTurnoutEl.textContent = `${turnoutPercent}%`;
+                if (isOpen) {
+                    voterTurnoutEl.textContent = 'Elections are open';
+                    voterTurnoutEl.title = 'Turnout data is hidden while voting is active.';
+                } else {
+                    // Voter turnout: per spec, number of voters equals number of candidates for turnout calculation
+                    const turnoutPercent = totalCandidates > 0 ? Math.round((totalVotes / totalCandidates) * 100) : 0;
+                    voterTurnoutEl.textContent = `${turnoutPercent}%`;
+                    voterTurnoutEl.title = ''; // Clear title if election is closed
+                }
             }
 
-            // Update election open flag
-            const isOpen = !!resultsData.isOpen;
+            if (totalVotesEl) {
+                if (isOpen) {
+                    totalVotesEl.textContent = 'Elections are open';
+                    totalVotesEl.title = 'Vote count is hidden while voting is active.';
+                } else {
+                    totalVotesEl.textContent = totalVotes.toLocaleString();
+                    totalVotesEl.title = ''; // Clear title if election is closed
+                }
+            }
+
+            // --- End Conditional Display Logic ---
+
+            // Update election open flag (for other parts of the UI)
+            // const isOpen = !!resultsData.isOpen; // Already defined above
+
             if (isOpen) {
                 // When election is open, show friendly message and hide chart
                 resultsContent.innerHTML = `
@@ -60,99 +76,101 @@ const ResultsModule = {
                 }
                 return;
             }
-
             // Election closed: render full leaderboard
             const fullResultsArray = resultsData.results || [];
-            // Enrich results with candidate meta if available
+            // Enrich results with candidate meta if available (Use 'photo' instead of 'avatar')
             const enriched = fullResultsArray.map(r => {
                 const meta = candidatesList.find(c => c.id === r.id) || {};
                 return Object.assign({}, r, {
                     bio: meta.bio || '',
                     position: meta.position || '',
                     activity: meta.activity || '',
-                    avatar: meta.avatar || '' // optional
+                    photo: meta.photo || '' // Use 'photo'
                 });
             });
-
             // Sort by council votes descending then exec votes
             enriched.sort((a, b) => {
                 if (b.councilVotes !== a.councilVotes) return b.councilVotes - a.councilVotes;
                 return b.executiveVotes - a.executiveVotes;
             });
-
             const top15 = enriched.slice(0, 15);
-
             // Determine executive officers: top 7 by executiveVotes among the top15
-            const sortedByExec = [...top15].sort((a,b) => b.executiveVotes - a.executiveVotes);
-            const execNames = sortedByExec.slice(0,7).map(x => x.name);
-
+            const sortedByExec = [...top15].sort((a, b) => b.executiveVotes - a.executiveVotes);
+            const execNames = sortedByExec.slice(0, 7).map(x => x.name);
             // Build modern leaderboard HTML
             let resultsHTML = `<div class="leaderboard">`;
             top15.forEach((candidate, idx) => {
                 const isExecutive = execNames.includes(candidate.name);
                 const rank = idx + 1;
+
+                // Determine rank medal/label
+                let rankDisplay = `#${rank}`;
+                if (rank === 1) rankDisplay = `<i class="fas fa-medal gold-medal"></i>`;
+                else if (rank === 2) rankDisplay = `<i class="fas fa-medal silver-medal"></i>`;
+                else if (rank === 3) rankDisplay = `<i class="fas fa-medal bronze-medal"></i>`;
+
                 // progress widths relative to top performer
                 const maxCouncil = top15[0] ? Math.max(1, top15[0].councilVotes) : 1;
                 const maxExec = sortedByExec[0] ? Math.max(1, sortedByExec[0].executiveVotes) : 1;
                 const councilPct = Math.min(100, Math.round((candidate.councilVotes / maxCouncil) * 100));
                 const execPct = Math.min(100, Math.round((candidate.executiveVotes / maxExec) * 100));
 
+                // Use 'photo' in the image source
                 resultsHTML += `
                     <div class="leader-item ${isExecutive ? 'executive' : ''}" data-name="${candidate.name}"
                          data-position="${candidate.position || ''}" data-bio="${candidate.bio || ''}"
                          data-activity="${candidate.activity || ''}" data-is-winner="${rank <= 15 ? 'true' : 'false'}"
                          onclick="ResultsModule.showWinnerPopup(event)">
-                        <div class="leader-left">
-                          <div class="leader-rank">#${rank}</div>
-                          <div class="leader-avatar">
-                            ${candidate.avatar ? `<img src="${candidate.avatar}" alt="${candidate.name}">` : `<div class="avatar-placeholder">${candidate.name.charAt(0) || '?'}</div>`}
-                          </div>
-                          <div class="leader-meta">
-                            <div class="leader-name">${candidate.name}${isExecutive ? ' <span class="exec-badge" title="Executive Officer">★</span>' : ''}</div>
-                            <div class="leader-position">${candidate.position || 'Council Member'}</div>
-                          </div>
+                        <div class="leader-rank">${rankDisplay}</div>
+                        <div class="leader-avatar">
+                            ${candidate.photo ? `<img src="${candidate.photo}" alt="${candidate.name}">` : `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`}
                         </div>
-                        <div class="leader-right">
-                          <div class="stat-row">
-                            <div class="stat-label">Council</div>
-                            <div class="stat-bar">
-                              <div class="stat-fill" style="width:${councilPct}%"></div>
+                        <div class="leader-content">
+                            <div class="leader-meta">
+                                <div class="leader-name">${candidate.name}${isExecutive ? ' <span class="exec-badge" title="Executive Officer"><i class="fas fa-star"></i></span>' : ''}</div>
+                                <div class="leader-position">${candidate.position || 'Council Member'}</div>
                             </div>
-                            <div class="stat-value">${candidate.councilVotes.toLocaleString()}</div>
-                          </div>
-                          <div class="stat-row">
-                            <div class="stat-label">Executive</div>
-                            <div class="stat-bar small">
-                              <div class="stat-fill exec" style="width:${execPct}%"></div>
+                            <div class="leader-stats">
+                                <div class="stat-row">
+                                    <div class="stat-label"><i class="fas fa-users"></i> Council</div>
+                                    <div class="stat-bar-container">
+                                        <div class="stat-bar">
+                                            <div class="stat-fill" style="width:${councilPct}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">${candidate.councilVotes.toLocaleString()}</div>
+                                </div>
+                                <div class="stat-row">
+                                    <div class="stat-label"><i class="fas fa-star"></i> Executive</div>
+                                    <div class="stat-bar-container">
+                                        <div class="stat-bar small">
+                                            <div class="stat-fill exec" style="width:${execPct}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">${candidate.executiveVotes.toLocaleString()}</div>
+                                </div>
                             </div>
-                            <div class="stat-value">${candidate.executiveVotes.toLocaleString()}</div>
-                          </div>
                         </div>
                     </div>
                 `;
             });
             resultsHTML += `</div>`;
             resultsContent.innerHTML = resultsHTML;
-
             // Show chart container and render mobile-friendly chart
             const chartContainerElement = document.getElementById('chartContainer');
             if (chartContainerElement) chartContainerElement.classList.remove('hidden');
-
             // Choose chart orientation based on viewport width
             const mobile = window.innerWidth <= 700;
             const indexAxis = mobile ? 'x' : 'y'; // vertical bars on phone, horizontal on bigger screens
-
             // Prepare data for chart - show top15 names and both council & exec votes
             const chartLabels = top15.map(c => c.name);
             const councilData = top15.map(c => c.councilVotes);
             const execData = top15.map(c => c.executiveVotes);
-
             // Destroy previous chart if present
             if (this.currentChart) {
                 this.currentChart.destroy();
                 this.currentChart = null;
             }
-
             // Create chart with responsive options
             const chartCanvas = document.getElementById('resultsChart');
             if (!chartCanvas) {
@@ -160,16 +178,14 @@ const ResultsModule = {
                 return;
             }
             const ctx = chartCanvas.getContext('2d');
-
             // Use friendly colors
             const councilColor = 'rgba(0, 150, 87, 0.9)';
             const execColor = 'rgba(243, 156, 18, 0.9)';
-
             this.currentChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: chartLabels,
-                    datasets: [
+                     datasets: [
                         {
                             label: 'Council',
                             data: councilData,
@@ -202,7 +218,7 @@ const ResultsModule = {
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return `${context.dataset.label}: ${context.parsed.y !== undefined ? context.parsed.y : context.parsed.x} votes`;
                                 }
                             }
@@ -213,7 +229,7 @@ const ResultsModule = {
                             beginAtZero: true,
                             ticks: {
                                 maxTicksLimit: mobile ? 5 : 10,
-                                callback: function(value) {
+                                callback: function (value) {
                                     return value.toLocaleString();
                                 }
                             }
@@ -221,7 +237,7 @@ const ResultsModule = {
                         y: {
                             ticks: {
                                 autoSkip: false,
-                                callback: function(value) {
+                                callback: function (value) {
                                     return value;
                                 }
                             }
@@ -229,7 +245,6 @@ const ResultsModule = {
                     }
                 }
             });
-
         } catch (err) {
             console.error('Error fetching results:', err);
             resultsContent.innerHTML = `<div class="status-error"><p>Error loading results. Please try again later.</p></div>`;
@@ -243,15 +258,13 @@ const ResultsModule = {
             }
         }
     },
-
     // --- Winner Popup ---
-    showWinnerPopup: function(event) {
+    showWinnerPopup: function (event) {
         const winnerInfoPopup = document.getElementById('winnerInfoPopup');
         if (!winnerInfoPopup) {
             console.error('winnerInfoPopup element not found');
             return;
         }
-
         // normalize target (might be child element)
         let target = event.currentTarget || event.target;
         // climb up until leader-item
@@ -259,26 +272,21 @@ const ResultsModule = {
             target = target.parentElement;
         }
         if (!target) return;
-
         const isWinner = target.getAttribute('data-is-winner') === 'true';
         // Only show popup for top winners (we mark top15 as winners per earlier logic)
         if (!isWinner) return;
-
         const name = target.getAttribute('data-name') || 'Unknown';
         const position = target.getAttribute('data-position') || 'Council Member';
         const bio = target.getAttribute('data-bio') || 'No bio available';
         const activity = target.getAttribute('data-activity') || '';
-
         const winnerNameEl = document.getElementById('winnerName');
         const winnerPositionEl = document.getElementById('winnerPosition');
         const winnerBioEl = document.getElementById('winnerBio');
         const winnerActivityEl = document.getElementById('winnerActivity');
-
         if (winnerNameEl) winnerNameEl.textContent = name;
         if (winnerPositionEl) winnerPositionEl.textContent = position;
         if (winnerBioEl) winnerBioEl.textContent = bio;
         if (winnerActivityEl) winnerActivityEl.textContent = activity;
-
         // position popup near clicked item
         const rect = target.getBoundingClientRect();
         const popup = winnerInfoPopup;
@@ -290,8 +298,7 @@ const ResultsModule = {
         popup.style.display = 'block';
         popup.setAttribute('aria-hidden', 'false');
     },
-
-    hideWinnerPopup: function() {
+    hideWinnerPopup: function () {
         const winnerInfoPopup = document.getElementById('winnerInfoPopup');
         if (!winnerInfoPopup) return;
         winnerInfoPopup.style.display = 'none';

@@ -129,15 +129,24 @@
               <li data-i18n="reviewAndSubmit">Review and click 'Submit Vote'.</li>
             </ol>
           </div>
-          <div class="sorting-controls">
-            <label for="sortVoteBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
-            <select id="sortVoteBy">
-              <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
-              <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
-              <option value="activity-desc" data-i18n="sortByActivityDesc">Activity (High-Low)</option>
-              <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
-            </select>
+          <!-- Combined Sorting and Search Controls -->
+          <div class="vote-controls-container">
+            <div class="sorting-controls">
+              <label for="sortVoteBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
+              <select id="sortVoteBy">
+                <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
+                <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
+                <option value="activity-desc" data-i18n="sortByActivityDesc">Activity (High-Low)</option>
+                <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
+              </select>
+            </div>
+
+            <div class="search-container">
+              <input type="text" id="candidateSearch" placeholder="Search candidates..." />
+            </div>
           </div>
+          <!-- End Combined Sorting and Search Controls -->
+          
           <div class="selection-header">
             <div class="counter-group">
               <h3><i class="fas fa-users"></i> <span data-i18n="selectCouncilMembers">Council Members</span></h3>
@@ -170,7 +179,6 @@
             <div class="stat-item large"><label data-i18n="totalCandidates">Total Candidates</label><span id="totalCandidates">-</span></div>
             <div class="stat-item large"><label data-i18n="voterTurnout">Voter Turnout</label><span id="voterTurnout">-</span></div>
             <div class="stat-item small"><label data-i18n="totalVotes">Total Votes</label><span id="totalVotes">-</span></div>
-            <div class="stat-item small"><label data-i18n="electionStatus">Election Status</label><span id="statusBadge">-</span></div>
           </div>
         </div>
         <div class="results-card modern-results">

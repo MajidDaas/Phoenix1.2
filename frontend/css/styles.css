@@ -135,7 +135,7 @@ body {
   padding: 14px 24px;
   font-size: 1.1rem;
   font-weight: 600;
-  border-radius: 99px;
+  border-radius: var(--pill-radius);
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.25);
@@ -191,7 +191,7 @@ body {
 .demo-highlight {
   background: #fff8e1;
   border: 1px dashed var(--warning);
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   padding: 30px;
   margin-top: 0;
   transition: var(--transition);
@@ -252,7 +252,7 @@ body {
   padding: 14px 24px;
   font-size: 1.1rem;
   font-weight: 600;
-  border-radius: 99px;
+  border-radius: var(--pill-radius);
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 12px rgba(253, 184, 19, 0.25);
@@ -515,7 +515,7 @@ body {
 /* --- CONTENT SECTION --- */
 .content-section {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   padding: 30px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   margin-bottom: var(--spacing-lg);
@@ -638,7 +638,7 @@ body {
   text-align: center;
 }
 
-/* --- CANDIDATE CARDS — BIGGER & BETTER --- */
+/* --- CANDIDATE CARDS --- */
 .candidate-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -649,7 +649,7 @@ body {
 .candidate-item {
   background: white;
   border: 2px solid #e9ecef;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   padding: 24px;
   text-align: center;
   cursor: pointer;
@@ -817,7 +817,7 @@ body {
   width: 100%;
   height: 100%;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   padding: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   z-index: 10;
@@ -1071,7 +1071,7 @@ body {
 /* --- OTHER STYLES --- */
 .stats-card, .results-card, .info-card, .admin-card {
   background: white;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   padding: 24px;
   margin-bottom: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -1119,7 +1119,7 @@ body {
   position: absolute;
   background: white;
   padding: 24px;
-  border-radius: 16px;
+  border-radius: var(--border-radius);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   z-index: 2000;
   min-width: 300px;
@@ -1212,9 +1212,6 @@ body {
 .hidden {
   display: none !important;
 }
-
-/* Safety override for Cast Vote tab/button and #vote container */
-
 
 /* Loader */
 .loader {
@@ -1395,7 +1392,7 @@ body.rtl .priority-badge {
 .election-closed-card .btn {
     padding: 12px 24px;
     font-size: 1rem;
-    border-radius: 50px;
+    border-radius: var(--pill-radius);
     min-width: 180px;
     transition: all 0.3s ease;
 }
@@ -1431,3 +1428,464 @@ body.rtl .priority-badge {
 .tab.hidden-by-status {
   display: none !important;
 }
+
+/* --- LEADERBOARD (Improved Results Tab) --- */
+.leaderboard {
+  display: grid;
+  /* Responsive grid: 1 column on small screens, 2 on medium, 3 on large */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+  width: 100%;
+}
+
+.leader-item {
+  background: #ffffff;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  border: 1px solid var(--light-gray);
+  overflow: hidden; /* Contain the pseudo-element */
+}
+
+.leader-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #d1d1d1;
+}
+
+.leader-item.executive {
+  border: 1px solid var(--warning);
+  background-color: #fffaf0; /* Very light orange background */
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15);
+}
+
+.leader-item.executive:hover {
+  box-shadow: 0 8px 20px rgba(243, 156, 18, 0.25);
+}
+
+/* Rank styling with medals */
+.leader-rank {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--gray);
+  min-width: 50px;
+  text-align: center;
+  align-self: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.leader-rank .fa-medal.gold-medal { color: #FFD700; font-size: 2rem; }
+.leader-rank .fa-medal.silver-medal { color: #C0C0C0; font-size: 2rem; }
+.leader-rank .fa-medal.bronze-medal { color: #CD7F32; font-size: 2rem; }
+
+
+/* Avatar/Photo styling */
+.leader-avatar {
+  flex-shrink: 0; /* Prevent avatar from shrinking */
+}
+
+.leader-avatar img,
+.avatar-placeholder {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover; /* Ensures photo covers the area */
+  border: 2px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--gray);
+  background-color: #f8f9fa;
+}
+
+.leader-item.executive .leader-avatar img,
+.leader-item.executive .avatar-placeholder {
+    border-color: var(--warning);
+    box-shadow: 0 2px 6px rgba(243, 156, 18, 0.1);
+}
+
+/* Content area (name, position, stats) */
+.leader-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allows content to shrink if needed */
+}
+
+.leader-meta {
+  margin-bottom: var(--spacing-sm);
+}
+
+.leader-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  word-break: break-word; /* Break long names */
+}
+
+.exec-badge {
+  color: var(--warning);
+  font-size: 1rem;
+}
+
+.leader-position {
+  font-size: 0.9rem;
+  color: var(--gray);
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* Stats styling */
+.leader-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.stat-label {
+  color: var(--dark);
+  font-weight: 500;
+  min-width: 90px; /* Consistent label width */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-bar-container {
+  flex: 1;
+  min-width: 80px; /* Minimum width for the bar container */
+}
+
+.stat-bar {
+  background: #e9ecef;
+  border-radius: 10px;
+  height: 12px;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+}
+
+.stat-bar.small {
+  height: 8px;
+}
+
+.stat-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 10px;
+  transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  width: 0; /* Start at 0 for animation */
+}
+
+.stat-fill.exec {
+  background: var(--warning);
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark);
+  min-width: 45px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --- STATS CARD (Ensuring it appears below leaderboard) --- */
+/* Target the content section within the results tab */
+#results .content-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Style the results card (leaderboard container) */
+.results-card.modern-results {
+  order: 1; /* This will make it appear first */
+  flex: 1; /* Allow it to grow */
+  margin-bottom: var(--spacing-md); /* Add some space below the leaderboard */
+  padding: 0; /* Remove padding as leaderboard items have their own */
+  background: transparent; /* Make transparent so grid items show their own background */
+  border: none; /* Remove border */
+  box-shadow: none; /* Remove box-shadow */
+}
+
+/* Style the stats card */
+.stats-card.modern-stats {
+  order: 2; /* This will make it appear second (below the leaderboard) */
+  flex: 0 0 auto; /* Don't let it grow, keep its natural size */
+  width: 100%;
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--light-gray);
+}
+
+/* Ensure the chart container comes after */
+.chart-container.responsive-chart {
+  order: 3; /* This will make it appear last */
+  flex: 1; /* Allow it to grow */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .leaderboard {
+    grid-template-columns: 1fr; /* Stack items on small screens */
+  }
+
+  .leader-item {
+    flex-direction: row; /* Keep horizontal layout on small screens if space allows */
+    align-items: flex-start;
+  }
+
+  .leader-content {
+    /* Adjust content layout if needed on small screens */
+  }
+
+  .stat-row {
+    flex-wrap: wrap; /* Allow stats to wrap on very small screens */
+  }
+
+  .stat-bar-container {
+    min-width: 60px; /* Adjust minimum width for smaller screens */
+  }
+
+  .stat-label {
+    min-width: 80px; /* Adjust label width for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .leader-item {
+    flex-direction: column; /* Stack avatar/name/stats vertically on tiny screens */
+    align-items: center;
+    text-align: center;
+  }
+
+  .leader-rank {
+    position: absolute;
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+    font-size: 1.2rem;
+    min-width: auto;
+  }
+
+  .leader-avatar {
+    margin-top: 20px; /* Space for rank badge */
+  }
+
+  .leader-content {
+    width: 100%;
+    align-items: center;
+  }
+
+  .leader-meta {
+    align-items: center;
+  }
+
+  .leader-stats {
+    width: 100%;
+  }
+
+  .stat-row {
+    justify-content: space-between; /* Distribute space on tiny screens */
+  }
+
+  .stat-label {
+    min-width: auto;
+    justify-content: flex-start;
+  }
+
+  .stat-bar-container {
+    flex: 1;
+    min-width: 50px;
+  }
+}
+/* Add hover effect for the card */
+.leader-item:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 40px rgba(253,184,19,0.18);
+}
+
+/* --- VOTE COUNTERS (Enhanced) --- */
+/* Make the Executive Officer counter background gold */
+.counter-group:nth-child(2) .counter {
+  background-color: var(--warning);
+  color: #fff;
+}
+
+/* Make the Executive Officer label text gold */
+.counter-group:nth-child(2) h3 {
+  color: var(--warning);
+}
+
+/* Optional: If you also want the icon in the Executive Officer label to be gold */
+.counter-group:nth-child(2) h3 i.fas.fa-star {
+  color: var(--warning);
+}
+
+/* Keep the Council Members counter text color as primary */
+.counter-group:nth-child(1) .counter {
+  color: white;
+  background-color: var(--primary);
+}
+
+/* --- CANDIDATE SEARCH BAR --- */
+.search-container {
+    margin-bottom: var(--spacing-md);
+}
+
+#candidateSearch {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--light-gray);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+#candidateSearch:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
+}
+
+/* --- COMBINED VOTE CONTROLS (SORT & SEARCH) --- */
+.vote-controls-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Adjust existing sorting controls for the new layout */
+.vote-controls-container .sorting-controls {
+    flex: 1;
+    margin: 0;
+    min-width: 200px;
+}
+
+/* Style the search container within the combined area */
+.vote-controls-container .search-container {
+    flex: 1;
+    margin: 0;
+    min-width: 150px;
+}
+
+/* Style the search input */
+.vote-controls-container .search-container input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--light-gray);
+    background: white;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: var(--transition);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.vote-controls-container .search-container input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
+}
+
+/* --- Responsive adjustments for combined controls --- */
+@media (max-width: 768px) {
+    .vote-controls-container {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    .vote-controls-container .sorting-controls,
+    .vote-controls-container .search-container {
+        min-width: 100%;
+        width: 100%;
+    }
+}
+
+/* --- COMBINED VOTE CONTROLS (SORT & SEARCH) --- */
+.vote-controls-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+    align-items: flex-start;
+    background: #f8f9fa; /* Shared background */
+    padding: var(--spacing-sm); /* Padding around the controls */
+    border-radius: 12px; /* Rounded corners for the container */
+    width: 100%;
+}
+
+/* Adjust existing sorting controls for the new layout */
+.vote-controls-container .sorting-controls {
+    flex: 1;
+    margin: 0;
+    min-width: 200px;
+    background: transparent; /* Remove individual background */
+    padding: 0; /* Remove individual padding */
+}
+
+/* Style the search container within the combined area */
+.vote-controls-container .search-container {
+    flex: 1;
+    margin: 0;
+    min-width: 150px;
+}
+
+/* Style the search input */
+.vote-controls-container .search-container input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--light-gray);
+    background: white;
+    font-size: 0.95rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: var(--transition);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.vote-controls-container .search-container input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
+}
+
+/* --- Responsive adjustments for combined controls --- */
+@media (max-width: 768px) {
+    .vote-controls-container {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    .vote-controls-container .sorting-controls,
+    .vote-controls-container .search-container {
+        min-width: 100%;
+        width: 100%;
+    }
+}
+
