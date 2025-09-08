@@ -38,11 +38,11 @@ body {
   margin: 0;
 }
 .hidden {
-  display: none !important;
+  display: none ;
 }
 
 .hidden-by-status {
-  display: none !important;
+  display: none ;
 }
 
 /* --- FULL AUTH SCREEN --- */
