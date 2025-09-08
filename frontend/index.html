@@ -17,16 +17,13 @@
                 <div class="logo-icon">
                     <i class="fas fa-vote-yea"></i>
                 </div>
-                <!-- data-i18n for main title -->
                 <h1 data-i18n="pageTitle">Phoenix Council Elections</h1>
-                <!-- data-i18n for subtitle -->
                 <p class="auth-subtitle" data-i18n="pageSubtitle">Secure & Transparent Voting Platform</p>
             </div>
 
             <div class="auth-card">
                 <h2><i class="fas fa-sign-in-alt"></i> <span data-i18n="authenticationRequired">Sign In</span></h2>
                 <p data-i18n="pleaseSignInToVote">Welcome! Please sign in to participate in the elections.</p>
-
                 <div class="auth-section">
                     <button id="googleSigninBtn" class="google-signin-btn">
                         <i class="fab fa-google"></i> <span data-i18n="signInWithGoogle">Sign in with Google</span>
@@ -74,9 +71,6 @@
                 <button id="languageSwitcher" class="lang-switcher">
                     <i class="fas fa-language"></i> <span data-i18n="switchToArabic">AR</span>
                 </button>
-                <button id="adminBtn" class="admin-btn hidden">
-                    <i class="fas fa-user-shield"></i> <span data-i18n="admin">Admin</span>
-                </button>
             </div>
             <h1><i class="fas fa-landmark"></i> <span data-i18n="pageTitle">Phoenix Council Elections</span></h1>
             <p data-i18n="pageSubtitle">Cast your vote for Council Members and Executive Officers.</p>
@@ -101,8 +95,8 @@
                     <div class="instructions-card">
                         <h3><i class="fas fa-info-circle"></i> <span data-i18n="instructions">Voting Instructions</span></h3>
                         <ol>
-                            <li data-i18n="select15Council">Select up to <strong>15 Council Members</strong>.</li>
-                            <li data-i18n="designate7Executive">Select up to <strong>7 Executive Officers</strong>.</li>
+                            <li data-i18n="select15Council">Select up to <strong>"Council Members"</strong>.</li>
+                            <li data-i18n="designate7Executive">Select up to <strong>"7 Executive Officers"</strong>.</li>
                             <li data-i18n="reviewAndSubmit">Review your selections carefully.</li>
                             <li data-i18n="submitVote">Click <strong>"Submit Vote"</strong> to finalize.</li>
                         </ol>
@@ -112,10 +106,10 @@
                         <div class="sorting-controls">
                             <label for="sortVoteBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
                             <select id="sortVoteBy">
-                                <option value="name" data-i18n="sortByNameAsc">Name (A-Z)</option>
-                                <option value="nameDesc" data-i18n="sortByNameDesc">Name (Z-A)</option>
-                                <option value="position" data-i18n="position">Position</option>
-                                <option value="activity" data-i18n="activity">Activity Level</option>
+                                <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
+                                <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
+                                <option value="activity-desc" data-i18n="sortByActivityDesc">Acivity (High-Low)</option>
+                                <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
                             </select>
                         </div>
                         <div class="search-container">
@@ -123,22 +117,21 @@
                         </div>
                     </div>
 
-                    <div class="selection-header">
-                        <div class="counter-group">
-                            <h3><i class="fas fa-users"></i> <span data-i18n="selectCouncilMembers">Council Members</span></h3>
-                            <div class="counter" id="selectedCount">0 / 15</div>
-                        </div>
-                        <div class="counter-group">
-                            <h3><i class="fas fa-star"></i> <span data-i18n="selectExecutiveOfficers">Executive Officers</span></h3>
-                            <div class="counter" id="executiveCount">0 / 7</div>
-                        </div>
-                    </div>
-
                     <div id="candidateList" class="candidate-grid">
                         <!-- Candidates loaded by JS -->
                     </div>
                 </div>
-
+                    <div class="selection-header">
+                        <div class="counter-group">
+                            <h3><i class="fas fa-users"></i> <span data-i18n="selectCouncilMembers">Selected Council Members</span></h3>
+                            <div class="counter" id="selectedCount">0 / 15</div>
+                        </div>
+                        <div class="counter-group">
+                            <h3><i class="fas fa-star"></i> <span data-i18n="selectExecutiveOfficers">Selected Executive Officers</span></h3>
+                            <div class="counter" id="executiveCount">0 / 7</div>
+                        </div>
+                    </div>
+                    
                 <div class="action-buttons">
                     <button id="submitVoteBtn" class="btn btn-success" disabled>
                         <i class="fas fa-paper-plane"></i> <span data-i18n="submitVote">Submit Vote</span>
@@ -202,10 +195,10 @@
                 <div class="sorting-controls">
                     <label for="sortInfoBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
                     <select id="sortInfoBy">
-                        <option value="name" data-i18n="sortByNameAsc">Name (A-Z)</option>
-                        <option value="nameDesc" data-i18n="sortByNameDesc">Name (Z-A)</option>
-                        <option value="position" data-i18n="position">Position</option>
-                        <option value="activity" data-i18n="activity">Activity Level</option>
+                                <option value="name-asc" data-i18n="sortByNameAsc">Name (A-Z)</option>
+                                <option value="name-desc" data-i18n="sortByNameDesc">Name (Z-A)</option>
+                                <option value="activity-desc" data-i18n="sortByActivityDesc">Acivity (High-Low)</option>
+                                <option value="activity-asc" data-i18n="sortByActivityAsc">Activity (Low-High)</option>
                     </select>
                 </div>
                 <div id="infoCandidateList" class="candidate-grid">
@@ -250,13 +243,6 @@
         <div id="admin" class="tab-content">
             <div class="content-section">
                 <h2><i class="fas fa-user-shield"></i> <span data-i18n="adminPanel">Administrator Panel</span></h2>
-
-                <div class="admin-card">
-                    <h3><i class="fas fa-sign-in-alt"></i> <span data-i18n="adminAuthentication">Admin Authentication</span></h3>
-                    <button id="googleAdminSigninBtn" class="btn">
-                        <i class="fab fa-google"></i> <span data-i18n="signInWithGoogleAdmin">Sign in with Google (Admin)</span>
-                    </button>
-                </div>
 
                 <div class="admin-card">
                     <h3><i class="fas fa-cog"></i> <span data-i18n="electionControls">Election Controls</span></h3>

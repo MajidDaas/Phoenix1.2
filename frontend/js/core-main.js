@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (logoutBtnThankYou) logoutBtnThankYou.addEventListener('click', AuthModule.logout);
     if (logoutBtnClosed) logoutBtnClosed.addEventListener('click', AuthModule.logout);
     if (logoutBtnNotRegistered) logoutBtnNotRegistered.addEventListener('click', AuthModule.logout);
-    if (submitVoteBtn) submitVoteBtn.addEventListener('click', VotingModule.submitVote);
+    if (submitVoteBtn) submitVoteBtn.addEventListener('click', VotingModule.submitVote.bind(VotingModule));
 
     // Admin buttons
     const googleAdminSigninBtn = document.getElementById('googleAdminSigninBtn');

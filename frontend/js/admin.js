@@ -1,8 +1,7 @@
 // admin.js - Admin panel functionality and user interface management (tweaked for modern admin UI)
-
 const AdminModule = {
-    // --- Google OAuth2 for Admin (redirects to same login flow) ---
-    signInWithGoogleForAdmin: async function() {
+    // - Google OAuth2 for Admin (redirects to same login flow) -
+    signInWithGoogleForAdmin: async function () {
         try {
             const googleAdminBtn = document.getElementById('googleAdminSigninBtn');
             const adminAuthLoading = document.getElementById('adminAuthLoading');
@@ -24,182 +23,198 @@ const AdminModule = {
         }
     },
 
-    // --- Toggle Election Status with Animations (unchanged) ---
-    toggleElection: async function() {
+    // - Toggle Election Status with Animations (unchanged) -
+    toggleElection: async function () {
         const toggleBtn = document.getElementById('electionToggle');
-        if (!toggleBtn) return;
+        if (!toggleBtn) {
+            console.error("Election toggle button not found.");
+            Utils.showMessage('UI Error: Toggle button not found.', 'error');
+            return;
+        }
 
-        const isCurrentlyOpen = toggleBtn.classList.contains('btn-success');
-
+        // Disable button immediately to prevent spam
         toggleBtn.disabled = true;
-        toggleBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isCurrentlyOpen ? 'Closing...' : 'Opening...'}`;
 
         try {
-            const response = await ElectionAPI.toggleElectionStatus();
+            // 1. Fetch current status
+            const statusResponse = await ElectionAPI.getElectionStatus();
+            const isOpen = statusResponse.is_open;
 
-            if (response.isOpen !== undefined) {
-                window.State.electionOpen = response.isOpen;
+            // 2. Determine new status
+            const newStatus = !isOpen;
+            console.log(`Toggling election status from ${isOpen} to ${newStatus}`);
 
-                if (response.isOpen) {
-                    toggleBtn.classList.remove('btn-danger', 'btn-warning');
+            // 3. Call API to update status
+            const updateResponse = await fetch('/api/admin/election/status', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ is_open: newStatus })
+            });
+
+            if (!updateResponse.ok) {
+                throw new Error(`Failed to update election status: ${updateResponse.statusText}`);
+            }
+
+            const data = await updateResponse.json();
+            console.log("Election status update response:", data);
+
+            // 4. Update frontend state
+            window.State.electionOpen = data.is_open;
+            console.log("Frontend electionOpen state updated to:", window.State.electionOpen);
+
+            // 5. Update UI elements
+            const electionStatusElement = document.getElementById('electionStatus');
+            if (electionStatusElement) {
+                if (data.is_open) {
+                    electionStatusElement.innerHTML = '<i class="fas fa-lock-open"></i> Election is open';
+                    electionStatusElement.classList.remove('closed');
+                    electionStatusElement.classList.add('open');
+                } else {
+                    electionStatusElement.innerHTML = '<i class="fas fa-lock"></i> Election is closed';
+                    electionStatusElement.classList.remove('open');
+                    electionStatusElement.classList.add('closed');
+                }
+            }
+
+            // 6. Update button text and style with animation
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                // Remove any existing animation class
+                toggleBtn.classList.remove('scale-animation');
+
+                if (data.is_open) {
+                    // Election is now open
+                    toggleBtn.innerHTML = '<i class="fas fa-lock"></i> Close Election';
+                    toggleBtn.classList.remove('btn-success');
+                    toggleBtn.classList.add('btn-warning');
+                } else {
+                    // Election is now closed
+                    toggleBtn.innerHTML = '<i class="fas fa-lock-open"></i> Open Election';
+                    toggleBtn.classList.remove('btn-warning');
                     toggleBtn.classList.add('btn-success');
-                    toggleBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
-                    toggleBtn.style.transform = 'scale(1.05)';
-                    setTimeout(() => toggleBtn.style.transform = 'scale(1)', 200);
-                } else {
-                    toggleBtn.classList.remove('btn-success', 'btn-warning');
-                    toggleBtn.classList.add('btn-danger');
-                    toggleBtn.innerHTML = '<i class="fas fa-toggle-off"></i> Open Election';
-                    toggleBtn.style.transform = 'scale(1.05)';
-                    setTimeout(() => toggleBtn.style.transform = 'scale(1)', 200);
                 }
-
-                const electionStatusEl = document.getElementById('electionStatus');
-                if (electionStatusEl) {
-                    if (response.isOpen) {
-                        electionStatusEl.innerHTML = '<i class="fas fa-lock-open"></i> Election is currently open';
-                        electionStatusEl.classList.remove('closed');
-                        electionStatusEl.classList.add('open');
-                    } else {
-                        electionStatusEl.innerHTML = '<i class="fas fa-lock"></i> Election is closed';
-                        electionStatusEl.classList.remove('open');
-                        electionStatusEl.classList.add('closed');
-                    }
-                }
-
-                const electionClosedMessage = document.getElementById('electionClosedMessage');
-                const step1 = document.getElementById('step1');
-
-                if (response.isOpen) {
-                    if (electionClosedMessage) electionClosedMessage.classList.add('hidden');
-                    if (step1) step1.classList.remove('disabled');
-                    Utils.showMessage('Election has been opened. Voting is now allowed.', 'success');
-                } else {
-                    if (electionClosedMessage) electionClosedMessage.classList.remove('hidden');
-                    if (step1) step1.classList.add('disabled');
-                    Utils.showMessage('Election has been closed. Results are now available.', 'warning');
-                }
-
-                // Refresh results if open on results tab
-                const resultsTab = document.getElementById('results');
-                if (resultsTab && resultsTab.classList.contains('active')) {
-                    ResultsModule.renderResults();
-                }
-            } else {
-                throw new Error(response.message || 'Failed to toggle election status');
+                // Trigger reflow to restart animation
+                // eslint-disable-next-line no-unused-vars
+                const _ = toggleBtn.offsetWidth;
+                toggleBtn.classList.add('scale-animation');
             }
-        } catch (err) {
-            console.error('Error toggling election:', err);
-            Utils.showMessage('An error occurred while toggling the election. Please try again.', 'error');
 
-            if (isCurrentlyOpen) {
-                toggleBtn.classList.remove('btn-danger');
-                toggleBtn.classList.add('btn-success');
-                toggleBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Close Election';
-            } else {
-                toggleBtn.classList.remove('btn-success');
-                toggleBtn.classList.add('btn-danger');
-                toggleBtn.innerHTML = '<i class="fas fa-toggle-off"></i> Open Election';
-            }
+            // 7. Show success message
+            Utils.showMessage(`Election ${data.is_open ? 'opened' : 'closed'} successfully`, 'success');
+
+            // 8. Update voting tab content if needed (e.g., if it should now show "Election Closed")
+            // This might be handled by the electionStatusElement update and CSS, or might need explicit call
+            // updateVotingTabContent(); // Assuming this function exists globally or is accessible
+
+        } catch (error) {
+            console.error("Error toggling election status:", error);
+            Utils.showMessage('Failed to toggle election status. Please try again.', 'error');
         } finally {
+            // Re-enable button
             toggleBtn.disabled = false;
         }
     },
 
-    // --- Export Functions ---
-    exportVotes: async function() {
+    // - Export Votes -
+    exportVotes: async function () {
         try {
-            await ElectionAPI.exportVotes();
-            Utils.showMessage('Votes export initiated. Check console for data.', 'success');
-        } catch (err) {
-            console.error('Error exporting votes:', err);
-            Utils.showMessage('An error occurred while exporting votes. Please try again.', 'error');
+            const response = await fetch('/api/admin/export/votes', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Export failed: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'votes.json'; // Or get filename from response headers
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            Utils.showMessage('Votes exported successfully', 'success');
+        } catch (error) {
+            console.error("Error exporting votes:", error);
+            Utils.showMessage('Failed to export votes.', 'error');
         }
     },
 
-    exportVotesToCSV: async function() {
-        const exportCSVBtn = document.getElementById('exportVotesToCSVBtn');
-        let originalHTML = '';
+    // - Export Votes to CSV -
+    exportVotesToCSV: async function () {
         try {
-            if (exportCSVBtn) {
-                originalHTML = exportCSVBtn.innerHTML;
-                exportCSVBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
-                exportCSVBtn.disabled = true;
+            const response = await fetch('/api/admin/export/votes/csv', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'text/csv',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`CSV Export failed: ${response.statusText}`);
             }
 
-            const response = await ElectionAPI.exportVotesToCSV();
-            if (response.ok) {
-                const contentType = response.headers.get('Content-Type');
-                if (contentType && contentType.includes('text/csv')) {
-                    const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = 'votes_export.csv';
-                    if (contentDisposition) {
-                        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-                        if (filenameMatch && filenameMatch.length === 2) {
-                            filename = filenameMatch[1];
-                        }
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(url);
-                    Utils.showMessage(`Votes exported successfully as ${filename}`, 'success');
-                } else {
-                    let responseText = await response.text();
-                    let errorMessage = 'Unexpected response format from server during CSV export.';
-                    try {
-                        const errorData = JSON.parse(responseText);
-                        errorMessage = errorData.message || errorMessage;
-                    } catch (parseErr) {
-                        console.warn('Could not parse unexpected response from CSV export as JSON:', parseErr);
-                    }
-                    throw new Error(errorMessage);
-                }
-            } else {
-                let errorMessage = `Failed to export votes to CSV (Status: ${response.status}).`;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (parseErr) {
-                    console.warn('Could not parse error response (status ' + response.status + ') from CSV export:', parseErr);
-                }
-                throw new Error(errorMessage);
-            }
-        } catch (err) {
-            console.error('Error exporting votes to CSV:', err);
-            Utils.showMessage(`Error exporting votes to CSV: ${err.message}`, 'error');
-        } finally {
-            if (exportCSVBtn) {
-                exportCSVBtn.disabled = false;
-                exportCSVBtn.innerHTML = originalHTML;
-            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'votes.csv'; // Or get filename from response headers
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            Utils.showMessage('Votes exported to CSV successfully', 'success');
+        } catch (error) {
+            console.error("Error exporting votes to CSV:", error);
+            Utils.showMessage('Failed to export votes to CSV.', 'error');
         }
     },
 
-    // --- Placeholder Functions ---
-    refreshData: async function() {
+    // - Placeholder Functions -
+    refreshData: async function () {
         Utils.showMessage('Data refreshed successfully', 'success');
         // trigger a refresh in other modules
         if (window.ResultsModule && typeof window.ResultsModule.renderResults === 'function') {
             window.ResultsModule.renderResults();
         }
     },
-
-    backupToCloud: async function() {
+    backupToCloud: async function () {
         Utils.showMessage('Data backed up to cloud successfully', 'success');
     },
 
-    // --- Admin UI Management ---
-    updateAdminUIForLoggedInUser: function(user) {
+    // - Admin UI Management -
+    updateAdminUIForLoggedInUser: function (user) {
         console.log("Updating Admin UI for logged-in user:", user);
+        // Assumes the user object from the backend has an 'isAdmin' boolean property
+        // e.g., { ..., "isAdmin": true, ... }
         const isAdmin = user && user.isAdmin === true;
 
-        const adminControls = document.getElementById('adminControls');
+        // --- FIX: Manage visibility of the Admin Tab Button ---
+        const adminTabBtn = document.getElementById('adminTabBtn'); // The button in the main .tabs list
+        if (adminTabBtn) {
+            if (isAdmin) {
+                adminTabBtn.classList.remove('hidden-by-status');
+                console.log("User is admin, showing admin tab button (#adminTabBtn).");
+            } else {
+                adminTabBtn.classList.add('hidden-by-status');
+                console.log("User is not admin, hiding admin tab button (#adminTabBtn).");
+            }
+        } else {
+             console.warn("Admin tab button (#adminTabBtn) not found in the DOM.");
+        }
+        // --- END FIX ---
+
+        // Manage visibility of admin controls within the admin tab content
+        const adminControls = document.getElementById('adminControls'); // Content inside #admin tab
         const adminPasswordSection = document.querySelector('#admin .admin-password-section');
         if (isAdmin) {
             console.log("User is an admin. Revealing admin controls in tab.");
@@ -207,37 +222,53 @@ const AdminModule = {
                 adminControls.classList.remove('hidden');
             }
             if (adminPasswordSection) {
-                adminPasswordSection.classList.add('hidden');
+                adminPasswordSection.classList.add('hidden'); // Hide password prompt if user is admin
             }
         } else {
             console.log("User is authenticated but NOT an admin. Hiding admin controls in tab.");
             if (adminControls) {
                 adminControls.classList.add('hidden');
             }
+            // Optionally, show a "not authorized" message or the password section
+            // if (adminPasswordSection) { adminPasswordSection.classList.remove('hidden'); }
         }
 
+        // Manage visibility of the top-right admin quick-access button
         const topRightAdminBtn = document.getElementById('adminBtn');
         if (isAdmin) {
             console.log("User is an admin. Revealing top-right admin button.");
             if (topRightAdminBtn) {
-                topRightAdminBtn.style.display = 'flex';
+                topRightAdminBtn.style.display = 'flex'; // Or remove 'hidden' class if styled that way
             }
         } else {
             console.log("User is authenticated but NOT an admin. Hiding top-right admin button.");
             if (topRightAdminBtn) {
-                topRightAdminBtn.style.display = 'none';
+                topRightAdminBtn.style.display = 'none'; // Or add 'hidden' class
             }
         }
     },
 
-    hideAdminUIForLoggedOutUser: function() {
+    hideAdminUIForLoggedOutUser: function () {
         console.log("Hiding all admin UI for logged-out user.");
+        // Hide content inside the admin tab
         const adminControls = document.getElementById('adminControls');
         const adminPasswordSection = document.querySelector('#admin .admin-password-section');
         if (adminControls) adminControls.classList.add('hidden');
+        // Optionally show password section or a "logged out" message
+        // if (adminPasswordSection) adminPasswordSection.classList.remove('hidden');
+
+        // Hide the top-right admin button
         const topRightAdminBtn = document.getElementById('adminBtn');
         if (topRightAdminBtn) {
             topRightAdminBtn.style.display = 'none';
         }
+
+        // --- ADDITION: Ensure the main tab button is also hidden for logged out users ---
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        if (adminTabBtn) {
+            adminTabBtn.classList.add('hidden-by-status');
+            console.log("User logged out, ensuring admin tab button (#adminTabBtn) is hidden.");
+        }
+        // --- END ADDITION ---
     }
 };
