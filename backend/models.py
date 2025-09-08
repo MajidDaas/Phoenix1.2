@@ -1,6 +1,7 @@
 # models.py
 from dataclasses import dataclass, asdict
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 @dataclass
 class Candidate:
@@ -63,9 +64,37 @@ class VotesData:
 
 @dataclass
 class ElectionStatus:
-    is_open: bool
+    def __init__(self, is_open=False, start_time=None, end_time=None):
+        self.is_open = is_open
+        # Store as ISO format strings for easy JSON serialization
+        self.start_time = start_time.isoformat() if isinstance(start_time, datetime) else start_time
+        self.end_time = end_time.isoformat() if isinstance(end_time, datetime) else end_time
 
-    def to_dict(self) -> Dict[str, bool]:
-        """Converts the ElectionStatus object to a dictionary."""
-        return asdict(self)
+    def to_dict(self):
+        return {
+            'is_open': self.is_open,
+            'start_time': self.start_time,
+            'end_time': self.end_time
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        # Convert strings back to datetime objects if needed for internal logic
+        if isinstance(start_time, str):
+            try:
+                start_time = datetime.fromisoformat(start_time)
+            except ValueError:
+                start_time = None
+        if isinstance(end_time, str):
+            try:
+                end_time = datetime.fromisoformat(end_time)
+            except ValueError:
+                end_time = None
+        return cls(
+            is_open=data.get('is_open', False),
+            start_time=start_time,
+            end_time=end_time
+        )
 

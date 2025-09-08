@@ -255,6 +255,24 @@
                         </button>
                     </div>
                 </div>
+                
+                <!--Schedule Election Card -->
+                <div class="admin-card">
+                    <h3><i class="fas fa-calendar-alt"></i> <span data-i18n="scheduleElection">Schedule Election</span></h3>
+                    <div class="form-group">
+                        <label for="electionStart"><i class="fas fa-play"></i> <span data-i18n="electionStart">Start Time (UTC)</span></label>
+                        <input type="datetime-local" id="electionStart" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="electionEnd"><i class="fas fa-stop"></i> <span data-i18n="electionEnd">End Time (UTC)</span></label>
+                        <input type="datetime-local" id="electionEnd" class="form-control">
+                    </div>
+                    <div class="action-buttons">
+                        <button id="scheduleElectionBtn" class="btn btn-success">
+                            <i class="fas fa-calendar-check"></i> <span data-i18n="setSchedule">Set Schedule</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="admin-card">
                     <h3><i class="fas fa-file-export"></i> <span data-i18n="exportData">Export Data</span></h3>

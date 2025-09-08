@@ -20,7 +20,9 @@
         "717ba502-376b-492e-93e7-14f534020312",
         "68b030b3-9aaf-4ee0-8ff5-0c3b333ed5bb",
         "f2aa5026-0621-4ada-9d1b-a4e59b1f10ca",
-        "6152e12b-10a9-4269-9a09-337b9ebaf875"
+        "6152e12b-10a9-4269-9a09-337b9ebaf875",
+        "0b9b30df-29a0-43cb-bd58-62903a6df90c",
+        "dbfba9e6-54c1-4d2d-973d-5ed9348cab20"
     ],
     "votes": [
         {
@@ -671,6 +673,68 @@
                 42,
                 37,
                 16
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "1c62dd15-89f3-419f-9688-54f2871d3fca",
+            "voter_id": "0b9b30df-29a0-43cb-bd58-62903a6df90c",
+            "selected_candidates": [
+                29,
+                10,
+                12,
+                18,
+                30,
+                4,
+                38,
+                3,
+                26,
+                33,
+                2,
+                11,
+                15,
+                19,
+                27
+            ],
+            "executive_candidates": [
+                30,
+                4,
+                18,
+                2,
+                11,
+                19,
+                15
+            ],
+            "timestamp": null
+        },
+        {
+            "id": "f0bc4263-77db-4c30-86e1-08bc5cd2e4f2",
+            "voter_id": "dbfba9e6-54c1-4d2d-973d-5ed9348cab20",
+            "selected_candidates": [
+                33,
+                42,
+                26,
+                3,
+                25,
+                40,
+                35,
+                4,
+                30,
+                18,
+                29,
+                10,
+                12,
+                37,
+                38
+            ],
+            "executive_candidates": [
+                42,
+                26,
+                25,
+                3,
+                40,
+                4,
+                38
             ],
             "timestamp": null
         }

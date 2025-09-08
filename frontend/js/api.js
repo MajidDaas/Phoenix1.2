@@ -74,6 +74,21 @@ class ElectionAPI {
         });
         return await response.json();
     }
+    
+    // --- NEW: Admin API to Schedule Election ---
+    static async scheduleElection(startTime, endTime) {
+        const response = await fetch(`${API_BASE_URL}/admin/election/schedule`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                start_time: startTime,
+                end_time: endTime
+            })
+        });
+        return await response.json();
+    }
 
     static async exportVotes() {
         // This would typically be a direct link or a more complex download

@@ -102,8 +102,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
 const statusResponse = await ElectionAPI.getElectionStatus();
 window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : true;
-// Use the hasVoted flag from the user object obtained during authentication
+window.State.electionStartTime = statusResponse.start_time || null;
+window.State.electionEndTime = statusResponse.end_time || null;
 window.State.userHasVoted = (window.State.currentUser && window.State.currentUser.hasVoted) ? window.State.currentUser.hasVoted : false;
+electionStatusFetched = true; // ✅ ADD THIS LINE
 console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
 
         } catch (err) {
@@ -146,15 +148,49 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         // Update election status display (header)
         const electionStatus = document.getElementById('electionStatus');
         if (electionStatus && electionStatusFetched) {
-            if (!window.State.electionOpen) {
-                electionStatus.innerHTML = '<i class="fas fa-lock"></i> Election is closed';
-                electionStatus.classList.add('closed');
-                electionStatus.classList.remove('open');
+            // Get the schedule from the global state (set in the API call below)
+            const startTime = window.State.electionStartTime ? new Date(window.State.electionStartTime) : null;
+            const endTime = window.State.electionEndTime ? new Date(window.State.electionEndTime) : null;
+            const now = new Date();
+
+            let displayText = '';
+            let cssClass = '';
+
+            if (!startTime || !endTime) {
+                // No schedule set
+                displayText = '<i class="fas fa-exclamation-triangle"></i> No election scheduled';
+                cssClass = 'warning';
+            } else if (now < startTime) {
+                // Election hasn't started yet
+                const timeDiff = startTime - now;
+                displayText = `<i class="fas fa-clock"></i> Opens in ${formatCountdown(timeDiff)}`;
+                cssClass = 'warning';
+            } else if (now >= endTime) {
+                // Election has ended
+                displayText = '<i class="fas fa-lock"></i> Election Closed';
+                cssClass = 'closed';
             } else {
-                electionStatus.innerHTML = '<i class="fas fa-lock-open"></i> Election is open';
-                electionStatus.classList.add('open');
-                electionStatus.classList.remove('closed');
+                // Election is currently open
+                const timeDiff = endTime - now;
+                displayText = `<i class="fas fa-clock"></i> Closes in ${formatCountdown(timeDiff)}`;
+                cssClass = 'open';
             }
+
+            electionStatus.innerHTML = displayText;
+            // Remove all status classes
+            electionStatus.classList.remove('open', 'closed', 'warning');
+            // Add the appropriate class
+            electionStatus.classList.add(cssClass);
+
+            // --- START COUNTDOWN TIMER ---
+            // Clear any existing timer to avoid duplicates
+            if (window.electionStatusTimer) {
+                clearInterval(window.electionStatusTimer);
+            }
+            // Set a new timer to update every minute
+            window.electionStatusTimer = setInterval(() => {
+                updateElectionStatusDisplay(); // We'll define this function below
+            }, 1000); // Update every 60 seconds
         }
         // Update voting tab content based on final state
         updateVotingTabContent();
@@ -259,6 +295,52 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         });
     }
 
+    // --- NEW: Schedule Election Button ---
+    const scheduleElectionBtn = document.getElementById('scheduleElectionBtn');
+    if (scheduleElectionBtn) {
+        scheduleElectionBtn.addEventListener('click', async () => {
+            const startInput = document.getElementById('electionStart');
+            const endInput = document.getElementById('electionEnd');
+
+            if (!startInput.value || !endInput.value) {
+                Utils.showMessage('Please set both start and end times.', 'error');
+                return;
+            }
+
+            // Convert to UTC ISO string (the input is local time, so we adjust)
+            const startLocal = new Date(startInput.value);
+            const endLocal = new Date(endInput.value);
+
+            // Send as ISO string. The backend will handle UTC conversion if needed.
+            // Alternatively, you can convert to UTC here:
+            // const startUTC = new Date(startLocal.getTime() - startLocal.getTimezoneOffset() * 60000).toISOString();
+            // const endUTC = new Date(endLocal.getTime() - endLocal.getTimezoneOffset() * 60000).toISOString();
+            // For simplicity, we'll send the local ISO string and let the backend handle it as UTC.
+            const startISO = startLocal.toISOString();
+            const endISO = endLocal.toISOString();
+
+            try {
+                const response = await ElectionAPI.scheduleElection(startISO, endISO);
+
+                if (response.message) {
+                    Utils.showMessage('Election schedule updated successfully!', 'success');
+                    // Refresh the election status to reflect changes
+                    const statusResponse = await ElectionAPI.getElectionStatus();
+                    window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : false;
+                    window.State.electionStartTime = statusResponse.start_time || null;
+                    window.State.electionEndTime = statusResponse.end_time || null;
+                    // Update the UI
+                    updateElectionStatusDisplay();
+                } else {
+                    Utils.showMessage(`Failed to set schedule: ${response.message || 'Unknown error'}`, 'error');
+                }
+            } catch (err) {
+                console.error('Error setting election schedule:', err);
+                Utils.showMessage('An error occurred while setting the schedule.', 'error');
+            }
+        });
+    }
+    // --- END NEW ---
 
     // Add click outside listener for candidate details and winner popup
     document.addEventListener('click', (e) => {
@@ -402,4 +484,58 @@ function updateVotingTabContent() {
             console.log("Showing voting interface.");
         }
     }
+}
+
+// --- Helper Function: Format Milliseconds into Readable String ---
+function formatCountdown(ms) {
+    if (ms < 0) return "0s";
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+
+    let parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (parts.length === 0 || seconds > 0) parts.push(`${seconds}s`); // Always show seconds if no larger units or if seconds > 0
+
+    return parts.join(' ');
+}
+
+// --- Helper Function: Update Election Status Display (for Timer) ---
+function updateElectionStatusDisplay() {
+    const electionStatus = document.getElementById('electionStatus');
+    if (!electionStatus) return;
+
+    const startTime = window.State.electionStartTime ? new Date(window.State.electionStartTime) : null;
+    const endTime = window.State.electionEndTime ? new Date(window.State.electionEndTime) : null;
+    const now = new Date();
+
+    if (!startTime || !endTime) {
+        electionStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> No election scheduled';
+        electionStatus.classList.remove('open', 'closed', 'warning');
+        electionStatus.classList.add('warning');
+        return;
+    }
+
+    let displayText = '';
+    let cssClass = '';
+
+    if (now < startTime) {
+        const timeDiff = startTime - now;
+        displayText = `<i class="fas fa-clock"></i> Opens in ${formatCountdown(timeDiff)}`;
+        cssClass = 'warning';
+    } else if (now >= endTime) {
+        displayText = '<i class="fas fa-lock"></i> Election Closed';
+        cssClass = 'closed';
+    } else {
+        const timeDiff = endTime - now;
+        displayText = `<i class="fas fa-clock"></i> Closes in ${formatCountdown(timeDiff)}`;
+        cssClass = 'open';
+    }
+
+    electionStatus.innerHTML = displayText;
+    electionStatus.classList.remove('open', 'closed', 'warning');
+    electionStatus.classList.add(cssClass);
 }

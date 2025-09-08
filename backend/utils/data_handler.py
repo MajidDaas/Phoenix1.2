@@ -215,15 +215,12 @@ def get_election_status() -> ElectionStatus:
     data = _load_json_file(ELECTION_STATUS_FILE, {"is_open": True}) # Default to open
     if isinstance(data, dict):
         try:
-            # --- FIX 19: Ensure ElectionStatus model constructor accepts 'is_open' ---
-            # This requires the models.py ElectionStatus class to have an 'is_open' parameter in __init__
-            return ElectionStatus(**data) # <-- Pass the dict as kwargs
-        except TypeError as e: # Catch specific error for argument mismatch
-            print(f"Warning: election_status.json has invalid data structure (TypeError): {e}. Returning default status.")
+            # Use from_dict for consistent loading and parsing
+            # --- FIX: Use from_dict method ---
+            return ElectionStatus.from_dict(data) # <-- Use from_dict
+        except Exception as e: # Catch potential errors in from_dict
+            print(f"Warning: election_status.json has invalid data structure or parsing failed: {e}. Returning default status.")
             return ElectionStatus(is_open=True)
-        except Exception as e: # Catch other potential errors in ElectionStatus construction
-             print(f"Warning: election_status.json has invalid data structure (Unexpected Error): {e}. Returning default status.")
-             return ElectionStatus(is_open=True)
     else:
         print("Warning: election_status.json content is not a dict. Returning default status.")
         return ElectionStatus(is_open=True)

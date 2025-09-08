@@ -825,40 +825,44 @@ body {
   background: #007d4a;
 }
 .close-details {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #eee;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  color: var(--gray);
-  font-size: 1rem;
-  transition: var(--transition);
+    position: fixed; /* Keep close button visible when scrolling */
+    top: 12px;
+    right: 12px;
+    background: #eee;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--gray);
+    font-size: 1rem;
+    transition: var(--transition);
+    z-index: 15; /* Ensure it's above the scrolling content */
 }
 .close-details:hover {
   background: var(--danger);
   color: white;
 }
 .candidate-details {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: var(--border-radius);
-  padding: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-  display: none;
-  flex-direction: column;
-  animation: slideUp 0.25s ease forwards;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    animation: slideUp 0.25s ease forwards;
+    /* --- NEW: Constrain content and allow scrolling --- */
+    overflow-y: auto; /* Enable vertical scrollbar if content overflows */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 .candidate-details.show {
   display: flex;
@@ -1710,4 +1714,28 @@ body.rtl .message {
 .leader-item:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 12px 40px rgba(253,184,19,0.18);
+}
+
+/* --- ADMIN FORM STYLES --- */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark);
+}
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
 }
