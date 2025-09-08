@@ -97,7 +97,7 @@ def create_app(config_name='default'):
     def google_login():
         # Redirect to Google's OAuth 2.0 authorization endpoint
         auth_url, state = google_auth.get_authorization_url()
-        print("\n" + "="*80)        # <- for testing (FIXED: Added backslash for newline)
+        print("\n" + "="*80)        # <- for testing (FIXED: Added \n for newline)
         print("🔍 FULL AUTH URL:")  # <- for testing
         print(auth_url)             # <- for testing
         print("="*80)               # <- for testing
@@ -218,7 +218,7 @@ def create_app(config_name='default'):
         session.pop('demo_mode', None) # Clear demo mode flag
         return jsonify({'message': 'Logged out successfully'}), 200
 
-    # --- ELECTION DATA ROUTES (MODIFIED: get_results) ---
+    # --- ELECTION DATA ROUTES (MODIFIED: get_results to hide during open election) ---
     @app.route('/api/candidates')
     def get_candidates_api():
         # This endpoint returns public candidate data (without private fields)
@@ -345,7 +345,7 @@ def create_app(config_name='default'):
                  'end_time': None,
                 'message': "Error fetching election status."}), 500
 
-    # --- VOTING ROUTE (Key Change Highlighted: datetime.datetime -> datetime) ---
+    # --- VOTING ROUTE (Key Changes Highlighted: datetime.datetime -> datetime, indentation fix) ---
     @app.route('/api/votes/submit', methods=['POST'])
     def submit_vote():
         voter_session_id = session.get('voter_session_id')
@@ -392,6 +392,7 @@ def create_app(config_name='default'):
             except ValueError as e:
                 app.logger.error(f"Error parsing election start/end times for vote submission: {e}")
                 # If parsing fails, assume closed for safety
+                # FIXED: Correct indentation for this line
                 is_election_open = False
         else:
             # If start or end time is missing, assume closed
@@ -433,7 +434,7 @@ def create_app(config_name='default'):
         """Add a new candidate."""
         try:
             data = request.get_json()
-            if not data:
+            if not data: # FIXED: Check if data is None
                 return jsonify({"message": "Invalid JSON data"}), 400
             # Basic validation (add more as needed in data_handler.add_candidate)
             required_fields = ['name', 'bio']
@@ -565,38 +566,55 @@ def create_app(config_name='default'):
             return jsonify({}), 200 # Or return 500 if critical
     # --- END NEW: API ENDPOINT FOR TRANSLATIONS ---
 
-    # app.py - Inside create_app function, add this new route
+    # app.py - Inside create_app function, add this new route (IMPROVED)
     @app.route('/api/admin/election/schedule', methods=['POST'])
     @require_admin
     def schedule_election():
         try:
+            # --- IMPROVEMENT 1: Check if request.get_json() succeeded ---
             data = request.get_json()
+            if data is None:
+                app.logger.warning("schedule_election: Invalid or missing JSON in request body.")
+                return jsonify({'message': 'Invalid or missing JSON data in request body.'}), 400
+            # --- END IMPROVEMENT 1 ---
+
             start_time_str = data.get('start_time')
             end_time_str = data.get('end_time')
             if not start_time_str or not end_time_str:
                 return jsonify({'message': 'Both start_time and end_time are required.'}), 400
+
             # Parse the datetime strings (assuming ISO format, e.g., "2024-06-15T10:00:00Z")
             try:
+                # Ensure datetime parsing is correct (it was already correct in the provided code)
                 start_time = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
                 end_time = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
-            except ValueError:
+            except ValueError as ve: # Catch specific parsing error
+                app.logger.warning(f"schedule_election: Invalid datetime format provided: {ve}")
                 return jsonify({'message': 'Invalid datetime format. Use ISO 8601 (e.g., 2024-06-15T10:00:00Z).'}), 400
+
             if start_time >= end_time:
                 return jsonify({'message': 'Start time must be before end time.'}), 400
+
             # Create new ElectionStatus object
             new_status = ElectionStatus(is_open=False, start_time=start_time, end_time=end_time)
+
             # Save to file/database
             if save_election_status(new_status):
+                # --- IMPROVEMENT 2: Return ISO formatted strings for consistency ---
                 return jsonify({
                     'message': 'Election schedule updated successfully.',
-                    'start_time': new_status.start_time,
-                    'end_time': new_status.end_time
+                    'start_time': new_status.start_time.isoformat() if new_status.start_time else None,
+                    'end_time': new_status.end_time.isoformat() if new_status.end_time else None
                 }), 200
             else:
+                app.logger.error("schedule_election: Failed to save election status to data handler.")
                 return jsonify({'message': 'Failed to save election schedule.'}), 500
+
         except Exception as e:
-            app.logger.error(f"Error scheduling election: {e}")
-            return jsonify({'message': 'An internal server error occurred.'}), 500
+            # --- IMPROVEMENT 3: Ensure *any* unhandled error returns JSON ---
+            app.logger.error(f"Error scheduling election: {e}", exc_info=True) # exc_info logs the traceback
+            # Return JSON even on unexpected errors
+            return jsonify({'message': 'An internal server error occurred on the server.'}), 500
 
     return app
 
