@@ -42,7 +42,7 @@ body {
 }
 
 .hidden-by-status {
-  display: none ;
+  display: none !important;
 }
 
 /* --- FULL AUTH SCREEN --- */
