@@ -46,7 +46,7 @@ const AdminModule = {
 
             // 3. Call API to update status
             const updateResponse = await fetch('/api/admin/election/status', {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
