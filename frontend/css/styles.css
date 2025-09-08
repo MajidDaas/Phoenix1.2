@@ -418,7 +418,7 @@ body {
 /* --- TABS --- */
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   background: var(--light);
   border-radius: var(--pill-radius);
   margin: var(--spacing-md) auto var(--spacing-md);
