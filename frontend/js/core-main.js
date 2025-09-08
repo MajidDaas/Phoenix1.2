@@ -158,6 +158,13 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         }
         // Update voting tab content based on final state
         updateVotingTabContent();
+        
+        const adminTabBtn = document.getElementById('adminTabBtn');
+        if (adminTabBtn && window.State.currentUser && window.State.currentUser.isAdmin) {
+            adminTabBtn.classList.remove('hidden-by-status');
+            console.log("Admin tab button revealed for admin user.");
+        }
+        
         // Initialize UI elements that depend on candidates/auth being checked
         VotingModule.updateUI(); // This might need to wait for candidates, but usually handles it
 
