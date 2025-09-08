@@ -46,7 +46,7 @@ const AdminModule = {
 
             // 3. Call API to update status
             const updateResponse = await fetch('/api/admin/election/toggle', {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },

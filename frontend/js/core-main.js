@@ -100,11 +100,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     let electionStatusFetched = false;
     if (isAuthenticated) {
         try {
-            const statusResponse = await ElectionAPI.getElectionStatus();
-            window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : true;
-            window.State.userHasVoted = statusResponse.has_voted !== undefined ? statusResponse.has_voted : false;
-            console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
-            electionStatusFetched = true;
+const statusResponse = await ElectionAPI.getElectionStatus();
+window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : true;
+// Use the hasVoted flag from the user object obtained during authentication
+window.State.userHasVoted = (window.State.currentUser && window.State.currentUser.hasVoted) ? window.State.currentUser.hasVoted : false;
+console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
+
         } catch (err) {
             console.error('Error fetching initial election status:', err);
             // On error, assume defaults (set above) or specific safe defaults
