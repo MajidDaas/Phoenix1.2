@@ -108,9 +108,17 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
 
         } catch (err) {
             console.error('Error fetching initial election status:', err);
-            // On error, assume defaults (set above) or specific safe defaults
-            window.State.electionOpen = false; // Safer default on error if authenticated
-            window.State.userHasVoted = true; // Assume voted to prevent voting if status unknown
+            // On error, assume election is closed for safety.
+            window.State.electionOpen = false;
+            // Do NOT assume userHasVoted. Keep it as false or use the value from the user session.
+            // The UI will show the "Election Closed" message, which is accurate if the status is unknown.
+
+            // Show a system error message to the user for better UX.
+            if (typeof Utils !== 'undefined' && typeof Utils.showMessage === 'function') {
+                Utils.showMessage('Unable to verify election status. Please refresh the page or try again later.', 'error');
+            } else {
+                alert('System Error: Unable to verify election status.');
+            }
         }
     } else {
         // If not authenticated, ensure state reflects that
@@ -197,13 +205,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         });
     });
 
-    // Admin button (top right corner)
-    const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', () => {
-            UIController.switchTab('admin');
-        });
-    }
 
     // --- ✅ RESTORED: Button Event Listeners ---
     const googleSigninBtn = document.getElementById('googleSigninBtn');
@@ -342,13 +343,15 @@ const UIController = {
         }
     }
 };
-// --- Function to Update Voting Tab Content Based on State (No changes needed here) ---
+// --- Function to Update Voting Tab Content Based on State ---
 function updateVotingTabContent() {
     const votingInterface = document.getElementById('votingInterface');
     const electionClosedMessageElement = document.getElementById('electionClosedMessage');
     const thankYouMessageElement = document.getElementById('thankYouMessage');
     const notRegisteredCard = document.getElementById('notRegisteredCard');
+
     console.log("updateVotingTabContent - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
+
     // Always hide all messages first
     if (electionClosedMessageElement) {
         electionClosedMessageElement.classList.add('hidden');
@@ -362,8 +365,18 @@ function updateVotingTabContent() {
     if (votingInterface) {
         votingInterface.classList.add('hidden');
     }
+
+    // --- NEW: Check if user is eligible to vote ---
+    const isEligible = window.State.currentUser && window.State.currentUser.isEligibleVoter;
+
     // Show appropriate content based on state
-    if (window.State.userHasVoted) {
+    if (!isEligible) {
+        // User is not eligible - show not registered message
+        if (notRegisteredCard) {
+            notRegisteredCard.classList.remove('hidden');
+            console.log("Showing 'not registered' message.");
+        }
+    } else if (window.State.userHasVoted) {
         // User has already voted - show thank you message
         if (thankYouMessageElement) {
             thankYouMessageElement.classList.remove('hidden');
@@ -376,7 +389,7 @@ function updateVotingTabContent() {
             console.log("Showing election closed message.");
         }
     } else {
-        // Election is open and user hasn't voted - show voting interface
+        // Election is open, user is eligible, and hasn't voted - show voting interface
         if (votingInterface) {
             votingInterface.classList.remove('hidden');
             console.log("Showing voting interface.");

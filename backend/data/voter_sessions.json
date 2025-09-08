@@ -796,14 +796,5 @@
     "has_voted": false,
     "is_admin": false,
     "is_eligible_voter": true
-  },
-  "744e5752-a400-492e-9394-3dc1beec5c0a": {
-    "user_id": "f2aa5026-0621-4ada-9d1b-a4e59b1f10ca",
-    "email": "demo_user_f2aa5026@example.com",
-    "name": "Demo User",
-    "created_at": "2025-09-08T05:36:14.717075",
-    "has_voted": true,
-    "is_admin": false,
-    "is_eligible_voter": true
   }
 }
