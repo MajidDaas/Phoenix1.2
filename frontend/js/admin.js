@@ -45,7 +45,7 @@ const AdminModule = {
             console.log(`Toggling election status from ${isOpen} to ${newStatus}`);
 
             // 3. Call API to update status
-            const updateResponse = await fetch('/api/admin/election/status', {
+            const updateResponse = await fetch('/api/admin/election/toggle', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const AdminModule = {
     // - Export Votes -
     exportVotes: async function () {
         try {
-            const response = await fetch('/api/admin/export/votes', {
+            const response = await fetch('/api/admin/votes/export', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ const AdminModule = {
     // - Export Votes to CSV -
     exportVotesToCSV: async function () {
         try {
-            const response = await fetch('/api/admin/export/votes/csv', {
+            const response = await fetch('/api/admin/votes/export/csv', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'text/csv',
