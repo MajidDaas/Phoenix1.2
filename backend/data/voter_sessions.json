@@ -797,13 +797,13 @@
     "is_admin": false,
     "is_eligible_voter": true
   },
-  "89915bdf-f6af-452d-b034-fd9536d7cd85": {
-    "user_id": "0493c1a4-2564-414b-8950-417a5976848e",
-    "email": "demo_user_0493c1a4@example.com",
+  "8d4e4d67-61a5-4b27-aee6-206f8f76a162": {
+    "user_id": "25a5b899-cc9c-4f80-a705-8a6a41243c29",
+    "email": "demo_user_25a5b899@example.com",
     "name": "Demo User",
-    "created_at": "2025-09-08T18:46:31.628874",
+    "created_at": "2025-09-08T20:13:48.595989",
     "has_voted": false,
-    "is_admin": true,
+    "is_admin": false,
     "is_eligible_voter": true
   }
 }

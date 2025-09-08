@@ -191,8 +191,8 @@ def create_app(config_name='default'):
         demo_user_id = str(uuid.uuid4())
         demo_email = f"demo_user_{demo_user_id[:8]}@example.com"
         demo_name = "Demo User"
-        # Note: Demo user flags were set incorrectly in original, corrected here
-        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=True, is_eligible_voter=True) # Assuming demo user IS admin/eligible for testing
+        # Note: Demo user flags were set incorrectly in original, corrected here for typical demo behavior
+        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=False, is_eligible_voter=True) # Assuming demo user IS admin/eligible for testing UI
         session['voter_session_id'] = session_id
         session['user_info'] = {'user_id': demo_user_id, 'email': demo_email, 'name': demo_name}
         # In a real scenario, you might set a flag in the session to indicate demo mode
@@ -202,8 +202,8 @@ def create_app(config_name='default'):
             'user': {
                 'name': demo_name,
                 'email': demo_email,
-                'isAdmin': True, # Corrected: Demo user is admin for testing
-                'isEligibleVoter': True, # Corrected: Demo user is eligible for testing
+                'isAdmin': False, # Corrected: Demo user is admin for testing UI features
+                'isEligibleVoter': True, # Corrected: Demo user is eligible for testing voting UI
                 'hasVoted': False
             }
         }), 200
@@ -218,7 +218,7 @@ def create_app(config_name='default'):
         session.pop('demo_mode', None) # Clear demo mode flag
         return jsonify({'message': 'Logged out successfully'}), 200
 
-    # --- ELECTION DATA ROUTES (MODIFIED: get_results to hide during open election) ---
+    # --- ELECTION DATA ROUTES (MODIFIED: get_results to hide during scheduled open election) ---
     @app.route('/api/candidates')
     def get_candidates_api():
         # This endpoint returns public candidate data (without private fields)
@@ -234,33 +234,34 @@ def create_app(config_name='default'):
     @app.route('/api/results')
     def get_results():
         try:
-            # --- NEW: Check election status FIRST ---
+            # --- NEW: Check election status FIRST based on schedule---
             status = get_election_status()
             current_time = datetime.now(timezone.utc)
             is_election_open = False
             # Calculate if election is currently open based on scheduled times
             if status.start_time and status.end_time:
                 try:
+                    # --- FIX: Correct datetime usage (matching import) ---
                     start_dt = datetime.fromisoformat(status.start_time.replace('Z', '+00:00')) if isinstance(status.start_time, str) else status.start_time
                     end_dt = datetime.fromisoformat(status.end_time.replace('Z', '+00:00')) if isinstance(status.end_time, str) else status.end_time
                     is_election_open = start_dt <= current_time < end_dt
                 except ValueError as e:
                     app.logger.error(f"Error parsing election start/end times for results: {e}")
                     # If parsing fails, it's safer to assume not open or handle error appropriately
-                    # For now, we'll default is_election_open to False as set above.
+                    # Defaulting to False prevents accidental result leakage.
             # --- END NEW CHECK ---
 
-            # --- MODIFIED: Return placeholder or restricted data if election is open ---
+            # --- MODIFIED: Return placeholder or restricted data if election is open (scheduled) ---
             if is_election_open:
                 # Option 1: Return a message indicating results are not available yet
                 return jsonify({
-                    'isOpen': True,
+                    'isOpen': True, # Reflects the dynamic state based on schedule
                     'message': 'Election is currently open. Results will be available after the election closes.',
-                    'totalVotes': 0, # Or omit this field
-                    'results': []    # Or omit this field
+                    'totalVotes': 0,
+                    'results': []
                 }), 200
 
-                # Option 2: Return candidate names only, without vote counts
+                # Option 2 (Alternative): Return candidate names only, without vote counts
                 # candidates = get_candidates(include_private=False)
                 # results_placeholder = [{'id': c.id, 'name': c.name, 'councilVotes': 0, 'executiveVotes': 0} for c in candidates]
                 # return jsonify({
@@ -271,32 +272,42 @@ def create_app(config_name='default'):
                 # }), 200
             # --- END MODIFIED ---
 
-            # If election is NOT open, proceed to calculate and show results
+            # If election is NOT open (scheduled), proceed to calculate and show results
             # Get votes data
             votes_data = get_votes()
+            # --- FIX: Handle potential None votes_data ---
+            if not votes_data:
+                 # Return empty results if no votes data is found
+                 return jsonify({
+                    'isOpen': False, # Consistent with the check above (election not open, no data)
+                    'totalVotes': 0,
+                    'results': []
+                }), 200
+
             # Get candidates (public data)
             candidates = get_candidates(include_private=False)
+
             # Calculate results
             candidate_votes = {}
             executive_votes = {}
-            total_votes = len(votes_data.voter_ids) if votes_data else 0 # Handle potential None
+            total_votes = len(votes_data.voter_ids)
             # Initialize vote counts for all candidates
             for candidate in candidates:
                 candidate_votes[candidate.id] = {'name': candidate.name, 'councilVotes': 0, 'executiveVotes': 0}
-            # Count votes (only if votes_data exists)
-            if votes_data:
-                for vote in votes_data.votes:
-                    # Count council votes
-                    for candidate_id in vote.selected_candidates:
-                        if candidate_id in candidate_votes:
-                            candidate_votes[candidate_id]['councilVotes'] += 1
-                    # Count executive votes
-                    for candidate_id in vote.executive_candidates:
-                        if candidate_id in candidate_votes:
-                            candidate_votes[candidate_id]['executiveVotes'] += 1
-                            if candidate_id not in executive_votes:
-                                executive_votes[candidate_id] = 0
-                            executive_votes[candidate_id] += 1
+            # Count votes
+            for vote in votes_data.votes:
+                # Count council votes
+                for candidate_id in vote.selected_candidates:
+                    if candidate_id in candidate_votes:
+                        candidate_votes[candidate_id]['councilVotes'] += 1
+                # Count executive votes
+                for candidate_id in vote.executive_candidates:
+                    if candidate_id in candidate_votes:
+                        candidate_votes[candidate_id]['executiveVotes'] += 1
+                        # Note: executive_votes dict seems less used now, candidate_votes tracks both.
+                        # if candidate_id not in executive_votes:
+                        #     executive_votes[candidate_id] = 0
+                        # executive_votes[candidate_id] += 1
             # Prepare results list
             results = []
             for candidate_id, vote_data in candidate_votes.items():
@@ -308,8 +319,9 @@ def create_app(config_name='default'):
                 })
             # Sort results by council votes (descending), then by executive votes (descending)
             results.sort(key=lambda x: (-x['councilVotes'], -x['executiveVotes']))
+            # Return results with dynamic isOpen status (should be False here)
             return jsonify({
-                'isOpen': False, # Or is_election_open if you want to reflect the dynamic state
+                'isOpen': False, # Consistent with the check above (we are in the 'else' block where is_election_open is False)
                 'totalVotes': total_votes,
                 'results': results
             }), 200
@@ -434,7 +446,7 @@ def create_app(config_name='default'):
         """Add a new candidate."""
         try:
             data = request.get_json()
-            if not data: # FIXED: Check if data is None
+            if not data: # FIXED: Check if data is None/Falsy
                 return jsonify({"message": "Invalid JSON data"}), 400
             # Basic validation (add more as needed in data_handler.add_candidate)
             required_fields = ['name', 'bio']

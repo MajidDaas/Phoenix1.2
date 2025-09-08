@@ -1739,3 +1739,68 @@ body.rtl .message {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
 }
+
+/* --- Candidate Info Popup Styles --- */
+.candidate-popup-overlay {
+    /* These styles are mostly handled inline in JS for dynamic creation,
+       but you can define base styles here if preferred */
+    /* display: none; (Handled by JS) */
+    /* position: fixed; (Handled by JS) */
+    /* ... other positioning ... */
+    /* background-color: rgba(0, 0, 0, 0.7); (Handled by JS) */
+    /* z-index: 10000; (Handled by JS) */
+    /* justify-content: center; (Handled by JS) */
+    /* align-items: center; (Handled by JS) */
+}
+
+.candidate-popup-content {
+    /* Base styles are inline, but you can add overrides or animations here */
+    /* background-color: white; (Handled by JS) */
+    /* padding: 25px; (Handled by JS) */
+    /* border-radius: 15px; (Handled by JS) */
+    /* max-width: 90%; (Handled by JS) */
+    /* width: 500px; (Handled by JS) */
+    /* max-height: 90vh; (Handled by JS) */
+    /* overflow-y: auto; (Handled by JS) */
+    /* box-shadow: 0 5px 15px rgba(0,0,0,0.3); (Handled by JS) */
+    /* position: relative; (Handled by JS) */
+    animation: fadeInScale 0.3s ease-out; /* Example animation */
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+
+.candidate-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #888;
+    padding: 5px;
+    line-height: 1;
+}
+.candidate-popup-close:hover {
+    color: #333;
+}
+
+/* Ensure popup content elements inherit styles or define specific ones */
+.candidate-popup-header h2,
+.candidate-popup-header p {
+    /* Inherit or set specific fonts/colors if needed */
+}
+.candidate-popup-details h3 {
+    /* Inherit or set specific fonts/colors if needed */
+    /* border-bottom: 1px solid #eee; (Handled by JS) */
+    /* padding-bottom: 5px; (Handled by JS) */
+}
+.candidate-popup-details p {
+    /* Inherit or set specific fonts/colors/margins if needed */
+    /* white-space: pre-wrap; (Handled by JS for bio) */
+}
+/* --- End Candidate Info Popup Styles --- */

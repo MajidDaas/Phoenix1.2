@@ -19,9 +19,9 @@ const ResultsModule = {
             }
             const resultsData = await resultsRes.json();
             const candidatesList = candidatesRes.ok ? await candidatesRes.json() : [];
-            const totalCandidatesEl = document.getElementById('totalCandidates');
-            const voterTurnoutEl = document.getElementById('voterTurnout');
-            const totalVotesEl = document.getElementById('totalVotes');
+            const totalCandidatesEl = document.getElementById('totalVotersStat');
+            const voterTurnoutEl = document.getElementById('turnoutRateStat');
+            const totalVotesEl = document.getElementById('votesCastStat');
             // const statusBadgeEl = document.getElementById('statusBadge'); // Removed reference
 
             // totalCandidates: use candidate list length
