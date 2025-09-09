@@ -1804,3 +1804,186 @@ body.rtl .message {
     /* white-space: pre-wrap; (Handled by JS for bio) */
 }
 /* --- End Candidate Info Popup Styles --- */
+/* In your index.html <style> tag or styles.css */
+.candidate-popup-overlay {
+    display: none; /* Or use a class like .hidden { display: none; } */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    /* aria-hidden should be managed by JS, not CSS */
+}
+
+.candidate-popup-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 90%;
+    width: 600px; /* Adjust as needed */
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.candidate-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #333;
+}
+
+.popup-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.candidate-popup-image {
+    width: 100px; /* Or use rem/em */
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px; /* Or use rem/em */
+}
+
+.popup-details {
+    display: grid;
+    grid-template-columns: 1fr; /* Default to one column */
+    gap: 15px; /* Space between sections */
+}
+
+@media (min-width: 768px) {
+    .popup-details {
+        /* On larger screens, potentially use two columns for the main grid */
+        /* grid-template-columns: 1fr 1fr; */
+         /* Or keep 1fr and let inner grids handle 2 columns */
+    }
+}
+
+.detail-section {
+    /* Basic styling for each section */
+}
+
+.detail-section h3 {
+    color: var(--primary); /* Use your defined CSS variables */
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+
+.detail-section h4 {
+     color: var(--dark);
+     margin-top: 0;
+     margin-bottom: 0.25em; /* Smaller margin below heading */
+}
+
+.detail-section p {
+    margin-top: 0.25em; /* Smaller margin above paragraph */
+    margin-bottom: 0.5em; /* Standard margin below */
+    /* white-space: pre-wrap; might be needed for biography if preserving line breaks */
+}
+
+/* Grid for Personal Info and Contact/Work sections */
+.two-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px; /* Space between grid items */
+}
+
+.activity-indicator {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    /* Styles for activity-high, activity-medium, activity-low would be defined here too */
+}
+
+.activity-high {
+    background-color: #d4edda; /* Example color */
+    color: #155724;
+}
+
+.activity-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.activity-low {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.executive-badge {
+     /* Specific styles for the executive badge if different */
+}
+/* Basic Modal Styles (Add to your CSS) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+}
+
+.modal.hidden {
+    display: none !important; /* Ensure it's hidden when class is present */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.modal-footer {
+    text-align: right;
+}

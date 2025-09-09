@@ -243,43 +243,213 @@
         <div id="admin" class="tab-content">
             <div class="content-section">
                 <h2><i class="fas fa-user-shield"></i> <span data-i18n="adminPanel">Administrator Panel</span></h2>
-
-                <!--Schedule Election Card -->
+                <p data-i18n="adminPanelDescription">Manage candidates, schedule elections, and export data.</p>
+                
+                
                 <div class="admin-card">
-                    <h3><i class="fas fa-calendar-alt"></i> <span data-i18n="scheduleElection">Schedule Election</span></h3>
+                    <h3><i class="fas fa-calendar-alt"></i> <span data-i18n="scheduleElection">Schedule Election</span>
+                    </h3>
                     <div class="form-group">
-                        <label for="electionStart"><i class="fas fa-play"></i> <span data-i18n="electionStart">Start Time (UTC)</span></label>
+                        <label for="electionStart"><i class="fas fa-hourglass-start"></i> <span
+                                data-i18n="startTime">Start Time</span></label>
                         <input type="datetime-local" id="electionStart" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="electionEnd"><i class="fas fa-stop"></i> <span data-i18n="electionEnd">End Time (UTC)</span></label>
+                        <label for="electionEnd"><i class="fas fa-hourglass-end"></i> <span
+                                data-i18n="endTime">End Time</span></label>
                         <input type="datetime-local" id="electionEnd" class="form-control">
                     </div>
-                    <div class="action-buttons">
-                        <button id="scheduleElectionBtn" class="btn btn-success">
-                            <i class="fas fa-calendar-check"></i> <span data-i18n="setSchedule">Set Schedule</span>
-                        </button>
-                    </div>
+                    <button id="scheduleElectionBtn" class="btn btn-primary">
+                        <i class="fas fa-calendar-check"></i> <span data-i18n="setSchedule">Set Schedule</span>
+                    </button>
                 </div>
 
                 <div class="admin-card">
                     <h3><i class="fas fa-file-export"></i> <span data-i18n="exportData">Export Data</span></h3>
                     <div class="action-buttons">
                         <button id="exportVotesBtn" class="btn btn-secondary">
-                            <i class="fas fa-file-download"></i> <span data-i18n="exportRawVotes">Export Votes (JSON)</span>
+                            <i class="fas fa-file-code"></i> <span data-i18n="exportAsJSON">Export Votes (JSON)</span>
                         </button>
                         <button id="exportVotesToCSVBtn" class="btn btn-secondary">
-                            <i class="fas fa-file-csv"></i> <span data-i18n="exportVotesToCSV">Export Votes (CSV)</span>
+                            <i class="fas fa-file-csv"></i> <span data-i18n="exportAsCSV">Export Votes (CSV)</span>
                         </button>
                         <button id="backupToCloudBtn" class="btn btn-secondary">
-                            <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="backupToCloud">Backup to Cloud</span>
+                            <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="backupToCloud">Backup to
+                                Cloud</span>
                         </button>
                     </div>
                 </div>
+
+                <!-- Manage Candidates Card -->
+                <div class="admin-card">
+                    <h3><i class="fas fa-user-plus"></i> <span data-i18n="manageCandidates">Manage Candidates</span></h3>
+
+                    <!-- Add Candidate Form -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-user-plus"></i> <span data-i18n="addNewCandidate">Add New Candidate</span>
+                        </h4>
+                        <form id="addCandidateForm">
+                        
+                            <!-- Name (Required) -->
+                            <div class="form-group">
+                                <label for="candidateName"><i class="fas fa-signature"></i> <span
+                                        data-i18n="name">Name *</span></label>
+                                <input type="text" id="candidateName" name="candidateName" class="form-control" required
+                                    placeholder="e.g., Majid Da'as">
+                                <small class="form-text text-muted">The candidate's display name.</small>
+                            </div>
+
+                            <!-- Photo URL (Required) -->
+                            <div class="form-group">
+                                <label for="candidatePhoto"><i class="fas fa-image"></i> <span
+                                        data-i18n="photoURL">Photo URL *</span></label>
+                                <input type="url" id="candidatePhoto" name="candidatePhoto" class="form-control"
+                                    required placeholder="https://example.com/photo.jpg">
+                                <small class="form-text text-muted">Direct link to the candidate's photo.</small>
+                            </div>
+
+                            <!-- Brief Biography (Required) -->
+                            <div class="form-group">
+                                <label for="candidateBriefBio"><i class="fas fa-file-alt"></i> <span
+                                        data-i18n="briefBiography">Brief Biography *</span></label>
+                                <textarea id="candidateBriefBio" name="candidateBriefBio" class="form-control" rows="3"
+                                    required
+                                    placeholder="A short summary of the candidate's background..."></textarea>
+                                <small class="form-text text-muted">A concise overview of the candidate (max 200 chars
+                                    recommended).</small>
+                            </div>
+
+                            <!-- Field of Activity (Required) -->
+                            <div class="form-group">
+                                <label for="candidateFieldOfActivity"><i class="fas fa-briefcase"></i> <span
+                                        data-i18n="fieldOfActivity">Field of Activity *</span></label>
+                                <input type="text" id="candidateFieldOfActivity" name="candidateFieldOfActivity"
+                                    class="form-control" required placeholder="e.g., Arts - Law">
+                                <small class="form-text text-muted">Primary professional field (e.g., 'Med - Scientific Research').</small>
+                            </div>
+
+                            <!-- Weekly Activity (Required) -->
+                            <div class="form-group">
+                                <label for="candidateActivity"><i class="fas fa-clock"></i> <span
+                                        data-i18n="activity">Weekly Activity (Hours) *</span></label>
+                                <input type="number" id="candidateActivity" name="candidateActivity"
+                                    class="form-control" min="0" max="168" value="0" required>
+                                <small class="form-text text-muted">Estimated hours of activity per week.</small>
+                            </div>
+
+                            <!-- --- Optional Fields --- -->
+                            <hr>
+                            <h5><i class="fas fa-plus-circle"></i> <span data-i18n="optionalDetails">Optional
+                                    Details</span></h5>
+
+                            <!-- Full Name -->
+                            <div class="form-group">
+                                <label for="candidateFullName"><i class="fas fa-user"></i> <span
+                                        data-i18n="fullName">Full Legal Name</span></label>
+                                <input type="text" id="candidateFullName" name="candidateFullName" class="form-control"
+                                    placeholder="e.g., Full Legal Name">
+                            </div>
+
+                            <!-- Full Biography -->
+                            <div class="form-group">
+                                <label for="candidateBio"><i class="fas fa-book"></i> <span
+                                        data-i18n="biography">Full Biography</span></label>
+                                <textarea id="candidateBio" name="candidateBio" class="form-control" rows="4"
+                                    placeholder="Detailed biography of the candidate..."></textarea>
+                                <small class="form-text text-muted">A more detailed biography.</small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="candidateEmail"><i class="fas fa-envelope"></i> <span
+                                        data-i18n="email">Email</span></label>
+                                <input type="email" id="candidateEmail" name="candidateEmail" class="form-control"
+                                    placeholder="candidate@example.com">
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="form-group">
+                                <label for="candidatePhone"><i class="fas fa-phone"></i> <span
+                                        data-i18n="phone">Phone</span></label>
+                                <input type="tel" id="candidatePhone" name="candidatePhone" class="form-control"
+                                    placeholder="+966...">
+                            </div>
+
+                            <!-- Place of Birth -->
+                            <div class="form-group">
+                                <label for="candidatePoB"><i class="fas fa-map-marker-alt"></i> <span
+                                        data-i18n="placeOfBirth">Place of Birth</span></label>
+                                <input type="text" id="candidatePoB" name="candidatePoB" class="form-control"
+                                    placeholder="e.g., Damascus, Syria">
+                            </div>
+
+                            <!-- Place of Residence -->
+                            <div class="form-group">
+                                <label for="candidatePoResidence"><i class="fas fa-home"></i> <span
+                                        data-i18n="placeOfResidence">Place of Residence</span></label>
+                                <input type="text" id="candidatePoResidence" name="candidatePoResidence"
+                                    class="form-control" placeholder="e.g., Bayren, Germany">
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="form-group">
+                                <label for="candidateDoB"><i class="fas fa-birthday-cake"></i> <span
+                                        data-i18n="dateOfBirth">Date of Birth</span></label>
+                                <input type="date" id="candidateDoB" name="candidateDoB" class="form-control">
+                            </div>
+                            
+                            <!-- Facebook URL -->
+                            <div class="form-group">
+                                <label for="candidateFacebook"><i class="fab fa-facebook"></i> <span data-i18n="facebook">Facebook Profile</span></label>
+                                <input type="url" id="candidateFacebook" name="candidateFacebook" class="form-control"
+                                       placeholder="https://www.facebook.com/username">
+                                <small class="form-text text-muted">Link to the candidate's Facebook profile.</small>
+                            </div>
+
+                            <!-- Work -->
+                            <div class="form-group">
+                                <label for="candidateWork"><i class="fas fa-building"></i> <span
+                                        data-i18n="work">Work / Title</span></label>
+                                <input type="text" id="candidateWork" name="candidateWork" class="form-control"
+                                    placeholder="e.g., Teacher">
+                            </div>
+
+                            <!-- Level of Education -->
+                            <div class="form-group">
+                                <label for="candidateEducation"><i class="fas fa-graduation-cap"></i> <span
+                                        data-i18n="Education">Level of Education</span></label>
+                                <input type="text" id="candidateEducation" name="candidateEducation"
+                                    class="form-control"
+                                    placeholder="e.g., High School - PhD in Psycology">
+                            </div>
+                            <!-- --- End Optional Fields --- -->
+
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus-circle"></i> <span data-i18n="addCandidate">Add
+                                        Candidate</span>
+                                </button>
+                                <button type="reset" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> <span data-i18n="reset">Reset</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Existing Candidates List -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-users"></i> <span data-i18n="existingCandidates">Existing Candidates</span>
+                        </h4>
+                        <div id="existingCandidatesList">
+                            <!-- Candidates will be loaded here by JS -->
+                            <p data-i18n="loadingCandidates">Loading candidates...</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Manage Candidates Card -->
+
             </div>
         </div>
-    </div>
-
+        <!-- End Admin Tab -->
     <!-- Winner Info Popup -->
     <div id="winnerInfoPopup" style="display: none;">
         <div class="winner-header">
@@ -295,6 +465,28 @@
     <div id="validationPopup" class="validation-popup hidden">
         <div class="popup-content">
             <p><i class="fas fa-exclamation-triangle"></i> <span id="validationMessage"></span></p>
+        </div>
+    </div>
+    
+    <!-- INSTRUCTIONS POPUP MODAL -->
+    <div id="instructionsPopup" class="modal hidden" role="dialog" aria-labelledby="instructionsTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="instructionsTitle"><i class="fas fa-info-circle"></i> <span data-i18n="instructions">Voting Instructions</span></h2>
+                <button id="closeInstructionsPopup" class="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li data-i18n="select15Council">Select up to <strong>15 "Council Members"</strong>.</li>
+                    <li data-i18n="designate7Executive">Designate up to <strong>7 of your selected Council Members</strong> as "Executive Officers".</li>
+                    <li data-i18n="reviewAndSubmit">Review your selections carefully.</li>
+                    <li data-i18n="submitVote">Click <strong>"Submit Vote"</strong> to finalize.</li>
+                </ol>
+                <p><strong data-i18n="note">Note:</strong> <span data-i18n="instructionsPopupNote">These instructions will only be shown once per session.</span></p>
+            </div>
+            <div class="modal-footer">
+                <button id="acknowledgeInstructions" class="btn btn-primary" data-i18n="iUnderstand">I Understand</button>
+            </div>
         </div>
     </div>
 

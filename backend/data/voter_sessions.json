@@ -797,13 +797,58 @@
     "is_admin": false,
     "is_eligible_voter": true
   },
-  "8d4e4d67-61a5-4b27-aee6-206f8f76a162": {
-    "user_id": "25a5b899-cc9c-4f80-a705-8a6a41243c29",
-    "email": "demo_user_25a5b899@example.com",
+  "62ffbcd1-7700-4566-a53e-33d85597015b": {
+    "user_id": "51b3ff37-f989-4c3c-9047-25c30fa1d710",
+    "email": "demo_user_51b3ff37@example.com",
     "name": "Demo User",
-    "created_at": "2025-09-08T20:13:48.595989",
+    "created_at": "2025-09-08T23:41:49.296922",
     "has_voted": false,
-    "is_admin": false,
+    "is_admin": true,
+    "is_eligible_voter": true
+  },
+  "2edada9a-37b4-458c-9b04-6f86c903a292": {
+    "user_id": "3516dfb2-3f75-4e9e-b3eb-d96c0aa57d9d",
+    "email": "demo_user_3516dfb2@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-09T00:53:05.380366",
+    "has_voted": false,
+    "is_admin": true,
+    "is_eligible_voter": true
+  },
+  "2ecd85e9-4933-456a-8e7e-8c1aed17bf69": {
+    "user_id": "3ae497fc-5139-41cf-b2e0-596d55838283",
+    "email": "demo_user_3ae497fc@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-09T13:45:06.488338",
+    "has_voted": false,
+    "is_admin": true,
+    "is_eligible_voter": true
+  },
+  "3c1c98f2-f135-4bb9-aea5-675df4a4ce16": {
+    "user_id": "bd8a94e2-1712-4b2b-bd1c-c93956b87f94",
+    "email": "demo_user_bd8a94e2@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-09T15:40:15.149326",
+    "has_voted": false,
+    "is_admin": true,
+    "is_eligible_voter": true
+  },
+  "b36aa635-4aed-4ecf-8330-5dfa36139b4a": {
+    "user_id": "dd81d78a-5994-44a1-8f78-0c68b23afd69",
+    "email": "demo_user_dd81d78a@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-09T17:13:09.938725",
+    "has_voted": false,
+    "is_admin": true,
+    "is_eligible_voter": true
+  },
+  "7f388b0e-9c4c-4387-8f1f-aba79e9f290c": {
+    "user_id": "660fe2e1-5857-4774-81fc-dc44a01a7cd5",
+    "email": "demo_user_660fe2e1@example.com",
+    "name": "Demo User",
+    "created_at": "2025-09-09T17:21:12.540543",
+    "has_voted": false,
+    "is_admin": true,
     "is_eligible_voter": true
   }
 }

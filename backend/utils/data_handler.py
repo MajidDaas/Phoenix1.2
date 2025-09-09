@@ -96,18 +96,21 @@ def add_candidate(new_candidate_data: Dict) -> Tuple[bool, str]:
         # --- FIX 9: Corrected key access using .get() ---
         candidate_obj_data = {
             "id": new_id,
-            "name": new_candidate_data.get("name", "").strip(),
-            "photo": new_candidate_data.get("photo", "/images/default.jpg").strip(),
-            "bio": new_candidate_data.get("bio", "").strip(),
-            "activity": int(new_candidate_data.get("activity", 0)),
-            # Private fields (Ensure your Candidate model in models.py accepts these)
-            "email": new_candidate_data.get("email", "").strip(),
-            "phone": new_candidate_data.get("phone", "").strip(),
-            "field_of_expertise": new_candidate_data.get("field_of_expertise", "").strip(),
-            "place_of_birth": new_candidate_data.get("place_of_birth", "").strip(),
-            "residence": new_candidate_data.get("residence", "").strip(),
-            # Ensure isWinner is False for new candidates (Ensure your Candidate model has this)
-            "isWinner": False
+            "name": new_candidate_data.get("name", "").strip(), # Form: candidateName -> internal: name
+            "photo": new_candidate_data.get("photo", "/images/default.jpg").strip(), # Form: candidatePhoto -> internal: photo
+            "bio": new_candidate_data.get("bio", "").strip(), # Form: candidateBriefBio -> internal: bio (was 'bio' in form data)
+            "biography": new_candidate_data.get("biography", "").strip(), # Form: candidateBio -> internal: biography
+            "field_of_activity": new_candidate_data.get("field_of_activity", "").strip(), # Form: candidateFieldOfActivity -> internal: field_of_activity
+            "activity": int(new_candidate_data.get("activity", 0)), # Form: candidateActivity -> internal: activity
+            "full_name": new_candidate_data.get("full_name", "").strip(), # Form: candidateFullName -> internal: full_name
+            "email": new_candidate_data.get("email", "").strip(), # Form: candidateEmail -> internal: email
+            "phone": new_candidate_data.get("phone", "").strip(), # Form: candidatePhone -> internal: phone
+            "place_of_birth": new_candidate_data.get("place_of_birth", "").strip(), # Form: candidatePoB -> internal: place_of_birth
+            "residence": new_candidate_data.get("residence", "").strip(), # Form: candidatePoResidence -> internal: residence
+            "date_of_birth": new_candidate_data.get("date_of_birth", "").strip(), # Form: candidateDoB -> internal: date_of_birth
+            "work": new_candidate_data.get("work", "").strip(), # Form: candidateWork -> internal: work
+            "education": new_candidate_data.get("education", "").strip(), # Form: candidateLvlOfEducation -> internal: education_level
+            "facebook_url": new_candidate_data.get("facebook_url", "").strip(),
         }
 
         # Basic validation (can be expanded)
@@ -131,7 +134,7 @@ def add_candidate(new_candidate_data: Dict) -> Tuple[bool, str]:
         # --- FIX 11: Convert Candidate objects to dicts for saving ---
         # We need to save the data, not the objects. Use to_dict().
         # Need to decide if we save private data or not. Let's save all data including private.
-        candidates_dicts = [c.to_dict() for c in candidates_list] # <-- Convert to dicts
+        candidates_dicts = [c.to_dict(include_private=True) for c in candidates_list] # <-- Convert to dicts
         if _save_json_file(CANDIDATES_FILE, candidates_dicts): # <-- Save the list of dicts
             return True, f"Candidate '{candidate_obj_data['name']}' added successfully with ID {new_id}."
         else:

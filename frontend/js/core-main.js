@@ -355,6 +355,75 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         }
     });
 });
+
+// --- ✅ ADD THIS NEW FUNCTION: Show the Instructions Popup ---
+// Place this function just before the final }); of the DOMContentLoaded listener
+function showInstructionsPopup() {
+    const popup = document.getElementById('instructionsPopup');
+    if (!popup) {
+        console.error("Instructions popup element (#instructionsPopup) not found.");
+        // Fallback: Show an alert or console message if popup HTML is missing
+        if (typeof Utils !== 'undefined' && typeof Utils.showMessage === 'function') {
+             Utils.showMessage('Voting instructions are temporarily unavailable.', 'info');
+        } else {
+             alert('Voting Instructions: Select 15 Council Members, designate 7 as Executive Officers, review, and submit.');
+        }
+        return;
+    }
+
+    // Define the function to hide the popup
+    function hidePopup() {
+        popup.classList.add('hidden');
+        popup.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = ''; // Re-enable background scrolling
+        console.log("Instructions popup hidden.");
+    }
+
+    // Get buttons
+    const closeBtn = document.getElementById('closeInstructionsPopup');
+    const ackBtn = document.getElementById('acknowledgeInstructions');
+
+    // --- Add event listeners to close the popup ---
+    if (closeBtn) {
+        // Remove potential old listener first to prevent duplicates
+        closeBtn.removeEventListener('click', hidePopup);
+        closeBtn.addEventListener('click', hidePopup);
+    }
+
+    if (ackBtn) {
+        // Remove potential old listener first to prevent duplicates
+        ackBtn.removeEventListener('click', hidePopup);
+        ackBtn.addEventListener('click', hidePopup);
+    }
+
+    // Optional: Close popup if user clicks outside the content (on the backdrop)
+    function closeOnBackdropClick(e) {
+        if (e.target === popup) {
+            hidePopup();
+        }
+    }
+    // Remove potential old listener first
+    popup.removeEventListener('click', closeOnBackdropClick);
+    popup.addEventListener('click', closeOnBackdropClick);
+
+    // Optional: Close with Escape key
+    function handleEscapeKey(e) {
+        if (e.key === 'Escape' && popup && !popup.classList.contains('hidden')) {
+            hidePopup();
+        }
+    }
+    // Remove potential old listener first
+    document.removeEventListener('keydown', handleEscapeKey);
+    document.addEventListener('keydown', handleEscapeKey);
+
+    // --- Show the Popup ---
+    popup.classList.remove('hidden');
+    popup.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    console.log("Instructions popup shown.");
+}
+// --- END NEW FUNCTION ---
+
 // --- Authentication Callback Handler ---
 function handleAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -539,3 +608,4 @@ function updateElectionStatusDisplay() {
     electionStatus.classList.remove('open', 'closed', 'warning');
     electionStatus.classList.add(cssClass);
 }
+
