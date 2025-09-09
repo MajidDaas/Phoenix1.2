@@ -192,7 +192,7 @@ def create_app(config_name='default'):
         demo_email = f"demo_user_{demo_user_id[:8]}@example.com"
         demo_name = "Demo User"
         # Note: Demo user flags were set incorrectly in original, corrected here for typical demo behavior
-        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=True, is_eligible_voter=True) # Assuming demo user IS admin/eligible for testing UI
+        session_id = voter_session.create_session(demo_user_id, demo_email, demo_name, has_voted=False, is_admin=False, is_eligible_voter=True) # Assuming demo user IS admin/eligible for testing UI
         session['voter_session_id'] = session_id
         session['user_info'] = {'user_id': demo_user_id, 'email': demo_email, 'name': demo_name}
         # In a real scenario, you might set a flag in the session to indicate demo mode
@@ -202,7 +202,7 @@ def create_app(config_name='default'):
             'user': {
                 'name': demo_name,
                 'email': demo_email,
-                'isAdmin': True, # Corrected: Demo user is admin for testing UI features
+                'isAdmin': False, # Corrected: Demo user is admin for testing UI features
                 'isEligibleVoter': True, # Corrected: Demo user is eligible for testing voting UI
                 'hasVoted': False
             }
