@@ -104,6 +104,8 @@ def create_app(config_name='default'):
         session['oauth_state'] = state
         return redirect(auth_url)
 
+
+
     @app.route('/auth/google/callback')
     def google_callback():
         #Verify State parameter for CSRF protection
@@ -152,13 +154,21 @@ def create_app(config_name='default'):
             has_voted = True
         # Create voter session (PASS THE is_admin AND is_eligible_voter FLAGS)
         session_id = voter_session.create_session(
-            user_info['user_id'],
+            user_info['user_id'],  # This is the Google User ID (sub)
             user_info['email'],
             user_info['name'],
             has_voted=has_voted,
             is_admin=is_admin, # <--- PASS THIS FLAG
             is_eligible_voter=is_eligible_voter # <--- PASS THIS FLAG
         )
+        # --- NEW: Log the successful login statically ---
+        # Call the new log_login method on the voter_session instance
+        voter_session.log_login(
+            google_user_id=user_info['user_id'], # Pass Google User ID (sub)
+            email=user_info['email'],           # Pass Email
+            name=user_info.get('name', '')      # Pass Name (optional)
+        )
+        # --- END NEW ---
         session['voter_session_id'] = session_id
         session['user_info'] = user_info
         # Redirect back to the frontend with success parameter
