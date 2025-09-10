@@ -1,7 +1,7 @@
 # utils/auth.py
 import os
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List  # Added List import
 import datetime
 import uuid
 
@@ -21,8 +21,8 @@ class GoogleAuth:
         # OAuth2 scopes - REMOVED trailing spaces
         self.scopes = [
             'openid',
-            'https://www.googleapis.com/auth/userinfo.email',   # Fixed
-            'https://www.googleapis.com/auth/userinfo.profile'   # Fixed
+            'https://www.googleapis.com/auth/userinfo.email',   # CORRECTED: Removed trailing spaces
+            'https://www.googleapis.com/auth/userinfo.profile'   # CORRECTED: Removed trailing spaces
         ]
 
     def get_authorization_url(self) -> tuple[str, str]:
@@ -32,8 +32,8 @@ class GoogleAuth:
                 "web": {
                     "client_id": self.client_id,
                     "client_secret": self.client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed: Removed trailing spaces
-                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed: Removed trailing spaces
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # CORRECTED: Removed trailing spaces
+                    "token_uri": "https://oauth2.googleapis.com/token",           # CORRECTED: Removed trailing spaces
                     "redirect_uris": [self.redirect_uri]
                 }
             },
@@ -55,8 +55,8 @@ class GoogleAuth:
                 "web": {
                     "client_id": self.client_id,
                     "client_secret": self.client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # Fixed: Removed trailing spaces
-                    "token_uri": "https://oauth2.googleapis.com/token",           # Fixed: Removed trailing spaces
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",      # CORRECTED: Removed trailing spaces
+                    "token_uri": "https://oauth2.googleapis.com/token",           # CORRECTED: Removed trailing spaces
                     "redirect_uris": [self.redirect_uri]
                 }
             },
@@ -85,14 +85,12 @@ class GoogleAuth:
                 self.client_id
             )
 
-            # Validate issuer - REMOVED trailing space from the valid issuer
-            # Note: The actual issuer might just be 'accounts.google.com' or 'https://accounts.google.com'
-            # depending on the token. It's often safer to check if the issuer STARTS with the base URL.
-            # However, for simplicity, let's correct the string.
-            valid_issuers = ['accounts.google.com', 'https://accounts.google.com'] # Fixed: Removed trailing space
-            if idinfo['iss'] not in valid_issuers:
-                 # Alternative, more robust check (uncomment if the above fails):
-                 # if not any(idinfo['iss'].startswith(issuer) for issuer in ['https://accounts.google.com', 'accounts.google.com']):
+            # Validate issuer - Use a robust check against known good issuers (trimmed)
+            # Note: The actual issuer might be 'accounts.google.com' or 'https://accounts.google.com'
+            # depending on the token. Checking if it starts with the base URL is safer.
+            # CORRECTED: Use trimmed issuer strings in the base list
+            valid_issuers_base = ['accounts.google.com', 'https://accounts.google.com'] # CORRECTED: Removed trailing spaces
+            if not any(idinfo['iss'].startswith(issuer) for issuer in valid_issuers_base):
                 raise ValueError(f'Wrong issuer. Got: {idinfo["iss"]}')
 
             # Validate audience
@@ -100,7 +98,7 @@ class GoogleAuth:
                 raise ValueError('Wrong audience.')
 
             return {
-                'user_id': idinfo['sub'],
+                'user_id': idinfo['sub'], # Google User ID
                 'email': idinfo['email'],
                 'name': idinfo.get('name', ''),
                 'picture': idinfo.get('picture', ''),
@@ -113,9 +111,9 @@ class GoogleAuth:
     def get_user_info(self, access_token: str) -> Optional[Dict[str, Any]]:
         """Get user info from Google API."""
         try:
-            # Fixed: Removed trailing space from the URL
+            # CORRECTED: Removed trailing space from the URL
             response = http_requests.get(
-                'https://www.googleapis.com/oauth2/v2/userinfo',
+                'https://www.googleapis.com/oauth2/v2/userinfo', # CORRECTED: Removed trailing space
                 headers={'Authorization': f'Bearer {access_token}'}
             )
             response.raise_for_status()
@@ -124,15 +122,15 @@ class GoogleAuth:
             print(f"Error getting user info: {e}")
             return None
 
-
 # Voter session management
-# (This part seems mostly fine, assuming the VoterSession class is used correctly elsewhere)
 class VoterSession:
     def __init__(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))  # backend/utils
         backend_dir = os.path.dirname(current_dir)               # backend
-        data_dir = os.path.join(backend_dir, 'data')            # backend/data
-        self.sessions_file = os.path.join(data_dir, 'voter_sessions.json')
+        self.data_dir = os.path.join(backend_dir, 'data')       # backend/data # Store self.data_dir correctly
+        self.sessions_file = os.path.join(self.data_dir, 'voter_sessions.json')
+        # --- NEW: Define the login log file path ---
+        self.login_log_file = os.path.join(self.data_dir, 'voter_login_log.json')
         self._load_sessions()
 
     def _load_sessions(self):
@@ -164,13 +162,80 @@ class VoterSession:
             'user_id': user_id,
             'email': email,
             'name': name,
-            'created_at': datetime.datetime.now().isoformat(),
+            # Use UTC for consistency
+            'created_at': datetime.datetime.utcnow().isoformat() + 'Z',
             'has_voted': has_voted,
             'is_admin': is_admin,
             'is_eligible_voter': is_eligible_voter
         }
         self._save_sessions()
         return session_id
+
+    # --- NEW: Helper functions for login log ---
+
+    def _load_login_log(self) -> List[Dict[str, Any]]:
+        """Load existing login log data from file."""
+        try:
+            with open(self.login_log_file, 'r') as f:
+                data = json.load(f)
+                # Ensure it's a list
+                if isinstance(data, list):
+                    return data
+                else:
+                    print(f"Warning: {self.login_log_file} does not contain a list. Initializing empty log.")
+                    return []
+        except FileNotFoundError:
+            # It's okay if the file doesn't exist yet
+            return []
+        except json.JSONDecodeError as e:
+            print(f"Error decoding {self.login_log_file}: {e}. Initializing empty log.")
+            return []
+
+    def _save_login_log(self, log_data: List[Dict[str, Any]]) -> bool:
+        """Save login log data to file."""
+        try:
+            os.makedirs(os.path.dirname(self.login_log_file), exist_ok=True)
+            # Use indent for readability, default=str handles datetime if needed directly in dict
+            with open(self.login_log_file, 'w') as f:
+                json.dump(log_data, f, indent=2, default=str) # default=str handles datetime objects if passed directly
+            return True
+        except Exception as e:
+            print(f"Error saving login log to {self.login_log_file}: {e}")
+            return False
+
+    # --- NEW: Main function to log a login event ---
+    def log_login(self, google_user_id: str, email: str, name: str = ""):
+        """
+        Logs a voter login event with Google ID, email, and timestamp.
+        This creates a static record of each login attempt.
+        """
+        try:
+            # 1. Load existing log data
+            log_entries = self._load_login_log()
+
+            # 2. Create new log entry
+            # Using UTC time and 'Z' suffix for clarity
+            new_entry = {
+                "google_id": google_user_id,
+                "email": email,
+                "name": name, # Optional, but good to log
+                "login_timestamp": datetime.datetime.utcnow().isoformat() + 'Z' # Explicit UTC
+                # Add other relevant static data if needed (e.g., IP address - be mindful of privacy)
+            }
+
+            # 3. Append new entry
+            log_entries.append(new_entry)
+
+            # 4. Save updated log data
+            success = self._save_login_log(log_entries)
+            if success:
+                print(f"Logged login for Google ID: {google_user_id}, Email: {email}")
+            else:
+                print(f"Failed to log login for Google ID: {google_user_id}")
+
+        except Exception as e:
+            print(f"Error in log_login: {e}")
+
 
     def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Get session by ID."""
@@ -192,3 +257,4 @@ class VoterSession:
 # or that the app.py correctly imports and uses it.
 # e.g., if app.py does `from utils.auth import GoogleAuth, VoterSession`
 # and then `google_auth = GoogleAuth(...)` and `voter_session = VoterSession()`
+

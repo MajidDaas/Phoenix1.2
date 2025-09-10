@@ -63,10 +63,10 @@ const CandidatesModule = {
         }
 
         sortedCandidates.forEach(candidate => {
-            const activityClass = candidate.activity >= 14 ? 'activity-high' :
-                candidate.activity >= 7 ? 'activity-medium' : 'activity-low';
-            const activityText = candidate.activity >= 14 ? 'High Activity' :
-                candidate.activity >= 7 ? 'Medium Activity' : 'Low Activity';
+            const activityClass = candidate.activity >= 5 ? 'activity-high' :
+                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+            const activityText = candidate.activity >= 5 ? 'High Activity' :
+                candidate.activity >= 2 ? 'Medium Activity' : 'Low Activity';
             const card = document.createElement('div');
             card.className = 'candidate-item';
             card.dataset.id = candidate.id;
@@ -176,10 +176,10 @@ const CandidatesModule = {
             infoCard.className = 'candidate-item info-candidate-item'; // Keep existing classes
             infoCard.dataset.id = candidate.id; // Store candidate ID on the card
 
-            const activityClass = candidate.activity >= 14 ? 'activity-high' :
-                candidate.activity >= 7 ? 'activity-medium' : 'activity-low';
-            const activityText = candidate.activity >= 14 ? 'High Activity' :
-                candidate.activity >= 7 ? 'Medium Activity' : 'Low Activity';
+            const activityClass = candidate.activity >= 5 ? 'activity-high' :
+                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+            const activityText = candidate.activity >= 5 ? 'High Activity' :
+                candidate.activity >= 2 ? 'Medium Activity' : 'Low Activity';
 
             // --- Updated Card Content ---
             // 1. Removed the 'View Full Profile' button.
@@ -289,10 +289,10 @@ const CandidatesModule = {
         const popupBody = popup.querySelector('.candidate-popup-body');
         if (popupBody) {
             // --- Determine Activity Class ---
-            const activityClass = candidate.activity >= 14 ? 'activity-high' :
-                candidate.activity >= 7 ? 'activity-medium' : 'activity-low';
-            const activityText = candidate.activity >= 14 ? 'Highly Active' :
-                candidate.activity >= 7 ? 'Moderately Active' : 'Less Active';
+            const activityClass = candidate.activity >= 5 ? 'activity-high' :
+                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+            const activityText = candidate.activity >= 5 ? 'Highly Active' :
+                candidate.activity >= 2 ? 'Moderately Active' : 'Less Active';
 
             // --- Construct Popup Content with All Details ---
             popupBody.innerHTML = `
