@@ -311,28 +311,26 @@ body {
   z-index: 10;
 }
 .lang-switcher {
-  padding: 8px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--primary);
-  border: 2px solid var(--primary);
-  border-radius: var(--pill-radius);
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: inherit;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: var(--transition);
-  outline: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    background-color: transparent; /* Make background transparent like other tabs */
+    color: var(--text-primary); /* Use primary text color */
+    border: none; /* Remove default button border */
+    padding: 12px 15px; /* Adjust padding to match other tabs */
+    text-align: left; /* Align text to the left */
+    width: 100%; /* Make it full width within the li */
+    cursor: pointer;
+    font-size: 1rem; /* Match font size */
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    border-radius: 0; /* Remove border radius if tabs don't have it */
+    transition: background-color 0.2s ease; /* Add hover effect if desired */
 }
+
 .lang-switcher:hover {
-  background: var(--secondary);
-  color: #fff;
-  border-color: var(--secondary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+background-color: var(--hover-bg);
+}
+.lang-switcher .lang-text {
+     color: inherit;
 }
 .admin-btn {
   padding: 8px 20px;
@@ -1987,3 +1985,248 @@ body.rtl .message {
 .modal-footer {
     text-align: right;
 }
+
+/* --- Modern Header Styles --- */
+
+:root {
+    --header-bg: #ffffff; /* Background color for the header */
+    --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --brand-primary: #2c3e50; /* Dark blue for text/icons */
+    --accent-color: #3498db; /* Blue for highlights */
+    --text-light: #7f8c8d; /* Lighter text color */
+    --border-color: #ecf0f1; /* Subtle border color */
+    --mobile-menu-bg: #f8f9fa; /* Background for mobile menu */
+}
+
+.modern-header {
+    background-color: var(--header-bg);
+    box-shadow: var(--header-shadow);
+    padding: 15px 5%;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between elements */
+}
+
+/* --- Top Row: Branding, Language, Menu Toggle --- */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+    gap: 10px;
+}
+
+.header-branding {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Space between logo and text */
+    min-width: 0; /* Allows title to truncate if needed */
+}
+
+.logo-icon {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+}
+
+.header-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--brand-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncate long titles */
+}
+
+.header-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin: 0;
+    display: none; /* Hidden by default, shown on larger screens */
+}
+
+/* Language Switcher Button */
+.lang-switcher {
+    background-color: var(--mobile-menu-bg);
+    border: 1px solid var(--border-color);
+    color: var(--brand-primary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+.lang-switcher:hover {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+}
+.hamburger-icon {
+    width: 100%;
+    height: 3px;
+    background-color: var(--brand-primary);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+/* --- Election Status --- */
+.election-status {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    margin: 0; /* Remove default margin */
+}
+.election-status.open {
+    background-color: #e8f5e9; /* Light green */
+    color: #2e7d32; /* Dark green */
+}
+.election-status.closed {
+    background-color: #ffebee; /* Light red */
+    color: #c62828; /* Dark red */
+}
+
+/* --- Navigation Menu --- */
+.header-nav {
+    display: block; /* Shown by default */
+}
+.nav-tabs {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto; /* Horizontal scroll if tabs overflow */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.nav-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+}
+.nav-tabs li {
+    margin-right: 5px; /* Space between tabs */
+}
+.tab {
+    background-color: transparent;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--brand-primary);
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.tab:hover {
+    background-color: var(--mobile-menu-bg);
+}
+.tab.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+.tab.hidden-by-status {
+    display: none; /* Controlled by JS based on user role/status */
+}
+
+
+/* --- Responsive Styles --- */
+
+@media (max-width: 768px) {
+    .modern-header {
+        padding: 12px 4%;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    /* Show the mobile menu toggle */
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    /* Hide the subtitle on small screens */
+    .header-subtitle {
+        display: none;
+    }
+
+    /* Style the collapsible navigation */
+    .header-nav {
+        display: none; /* Hidden by default on mobile */
+        background-color: var(--mobile-menu-bg);
+        border-top: 1px solid var(--border-color);
+        padding: 10px 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+    .header-nav.active {
+        display: block; /* Shown when toggled */
+    }
+
+    .nav-tabs {
+        flex-direction: column; /* Stack tabs vertically */
+        overflow-x: visible; /* Remove horizontal scroll */
+    }
+    .nav-tabs li {
+        margin-right: 0; /* Remove horizontal margin */
+        margin-bottom: 5px; /* Add vertical space between tabs */
+    }
+    .tab {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 20px;
+        border-radius: 0;
+    }
+    .tab:last-child {
+        margin-bottom: 0; /* Remove margin on last item */
+    }
+
+    /* Hamburger animation (Optional) */
+    .mobile-menu-toggle.active .hamburger-icon:nth-child(1) {
+         transform: translateY(9px) rotate(45deg);
+     }
+     .mobile-menu-toggle.active .hamburger-icon:nth-child(2) {
+         opacity: 0;
+     }
+     .mobile-menu-toggle.active .hamburger-icon:nth-child(3) {
+         transform: translateY(-9px) rotate(-45deg);
+     }
+}
+
+@media (min-width: 769px) {
+    .header-subtitle {
+        display: block; /* Show subtitle on larger screens */
+    }
+    .header-nav {
+        display: block !important; /* Ensure nav is always visible on desktop */
+    }
+}
+
+/* --- End Modern Header Styles --- */

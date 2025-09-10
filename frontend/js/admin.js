@@ -23,7 +23,7 @@ const AdminModule = {
         }
     },
 
-    // --- NEW: Add Candidate Functionality ---
+    // --- NEW: Add Candidate Functionality (Updated for Enter Navigation & Confirmation) ---
     addCandidate: async function (event) {
         event.preventDefault(); // Prevent default form submission
         const addCandidateForm = event.target; // Get the form element from the event
@@ -32,14 +32,14 @@ const AdminModule = {
             Utils.showMessage('UI Error: Form not found.', 'error');
             return;
         }
-        
-        // --- CORRECTED: Collect form data using the actual IDs from index.html ---
+
+        // --- Collect form data using the actual IDs from index.html ---
         // Map HTML form field IDs to temporary JS variable names
         const formDataTemp = {
             name: document.getElementById('candidateName')?.value.trim() || '',
             photo: document.getElementById('candidatePhoto')?.value.trim() || '',
             bio: document.getElementById('candidateBriefBio')?.value.trim() || '',
-            biography: document.getElementById('candidateBio')?.value.trim() || '', // ✅ Added
+            biography: document.getElementById('candidateBio')?.value.trim() || '',
             full_name: document.getElementById('candidateFullName')?.value.trim() || '',
             email: document.getElementById('candidateEmail')?.value.trim() || '',
             phone: document.getElementById('candidatePhone')?.value.trim() || '',
@@ -47,15 +47,15 @@ const AdminModule = {
             place_of_birth: document.getElementById('candidatePoB')?.value.trim() || '',
             residence: document.getElementById('candidatePoResidence')?.value.trim() || '',
             activity: parseInt(document.getElementById('candidateActivity')?.value.trim(), 10) || 0,
-            date_of_birth: document.getElementById('candidateDoB')?.value.trim() || '', // ✅ Added
-            work: document.getElementById('candidateWork')?.value.trim() || '', // ✅ Added
-            education: document.getElementById('candidateEducation')?.value.trim() || '', // ✅ Added
-            facebook_url: document.getElementById('candidateFacebook')?.value.trim() || '', 
+            date_of_birth: document.getElementById('candidateDoB')?.value.trim() || '',
+            work: document.getElementById('candidateWork')?.value.trim() || '',
+            education: document.getElementById('candidateEducation')?.value.trim() || '', // Corrected ID
+            facebook_url: document.getElementById('candidateFacebook')?.value.trim() || '',
         };
-        
+
         console.log("Collected Candidate Data (raw):", formDataTemp); // For debugging
-        
-        // --- Transform keys to match backend expectations (data_handler) ---
+
+        // --- Transform keys to match backend expectations (data_handler.py add_candidate) ---
         const formDataObject = {
             name: formDataTemp.name,
             photo: formDataTemp.photo,
@@ -64,7 +64,7 @@ const AdminModule = {
             full_name: formDataTemp.full_name,
             email: formDataTemp.email,
             phone: formDataTemp.phone,
-            field_of_activity: formDataTemp.field_of_activity, // Transform key name
+            field_of_activity: formDataTemp.field_of_activity,
             place_of_birth: formDataTemp.place_of_birth,
             residence: formDataTemp.residence,
             activity: formDataTemp.activity,
@@ -73,16 +73,25 @@ const AdminModule = {
             education: formDataTemp.education,
             facebook_url: formDataTemp.facebook_url,
         };
-        
+
         console.log("Candidate Data (to be sent):", formDataObject); // For debugging
-        
-        // --- CORRECTED: Validate required fields based on actual form and backend needs ---
+
+        // --- Validate required fields based on actual form and backend needs ---
         // Backend requires 'name' and 'bio'. 'bio' comes from candidateBriefBio.
         if (!formDataObject.name || !formDataObject.bio) {
             Utils.showMessage('Please fill in the required fields: Name and Brief Biography.', 'error');
             return; // Stop submission if validation fails
         }
-        
+
+        // --- NEW: Confirmation Dialog ---
+        const confirmationMessage = `Are you sure you want to add the candidate "${formDataObject.name}"?\n\nPlease verify the details before proceeding.`;
+        const isConfirmed = window.confirm(confirmationMessage);
+        if (!isConfirmed) {
+            console.log("Candidate addition cancelled by user.");
+            return;
+        }
+        // --- END NEW ---
+
         // Disable submit button and show loading indicator
         const submitBtn = addCandidateForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
@@ -94,30 +103,25 @@ const AdminModule = {
         if (resetBtn) {
             resetBtn.disabled = true;
         }
-        
+
         try {
-            // --- ASSUMED: ElectionAPI.addCandidate exists in api.js and handles the fetch correctly ---
-            // Call the API function from api.js
+            // --- Call the API function from api.js ---
             const result = await ElectionAPI.addCandidate(formDataObject);
             console.log("API Response:", result); // For debugging
             if (result && result.message) {
                 // Check if the message indicates success
-                // A more robust way is for the backend to return { success: true, message: "..." }
-                // or rely on HTTP status codes (201 Created vs 400 Bad Request)
                 if (result.message.toLowerCase().includes('success') || result.message.includes('added') || result.message.includes('created')) {
                     Utils.showMessage(`Success: ${result.message}`, 'success');
                     addCandidateForm.reset(); // Clear the form on success
-                    // TODO: Optionally, refresh the candidate list displayed in the admin panel
-                    // This might involve re-fetching candidates and re-rendering the list.
-                    // Example (you need to implement loadAdminCandidates or similar):
-                    // if (typeof loadAdminCandidates === 'function') {
-                    //     await loadAdminCandidates(); // Assuming it's async
-                    // } else {
-                    //     console.warn("loadAdminCandidates function not found or implemented.");
-                    // }
+                    // Refresh candidate lists if needed
+                    if (typeof CandidatesModule !== 'undefined' && typeof CandidatesModule.loadCandidates === 'function') {
+                         CandidatesModule.loadCandidates();
+                    } else {
+                         console.warn("CandidatesModule.loadCandidates not found. Candidate list might not update automatically.");
+                    }
                 } else {
                     // Assume it's an error message from the backend
-                    Utils.showMessage(`Error: ${result.message}`, 'error');
+                    Utils.showMessage(`Notice: ${result.message}`, 'warning'); // Use warning/info for backend messages that aren't strictly errors
                 }
             } else {
                 Utils.showMessage('Unexpected response from server.', 'error');
@@ -169,14 +173,16 @@ const AdminModule = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                     // Include credentials if your auth mechanism requires it (e.g., session cookies)
-                     'credentials': 'include', // Ensure session cookie is sent
+                    // Include credentials if your auth mechanism requires it (e.g., session cookies)
+                    'credentials': 'include', // Ensure session cookie is sent
                 },
                 body: JSON.stringify({ is_open: newStatus })
             });
 
             if (!updateResponse.ok) {
-                throw new Error(`Failed to update election status: ${updateResponse.statusText}`);
+                const errorData = await updateResponse.json().catch(() => ({}));
+                const errorMessage = errorData.message || updateResponse.statusText;
+                throw new Error(`Failed to update election status: ${errorMessage}`);
             }
 
             const data = await updateResponse.json();
@@ -226,13 +232,14 @@ const AdminModule = {
             // 7. Show success message
             Utils.showMessage(`Election ${data.is_open ? 'opened' : 'closed'} successfully`, 'success');
 
-            // 8. Update voting tab content if needed (e.g., if it should now show "Election Closed")
-            // This might be handled by the electionStatusElement update and CSS, or might need explicit call
-            // updateVotingTabContent(); // Assuming this function exists globally or is accessible
+            // 8. Update voting tab content if needed
+            if (typeof updateVotingTabContent === 'function') {
+                 updateVotingTabContent();
+            }
 
         } catch (error) {
             console.error("Error toggling election status:", error);
-            Utils.showMessage('Failed to toggle election status. Please try again.', 'error');
+            Utils.showMessage(`Failed to toggle election status: ${error.message}`, 'error');
         } finally {
             // Re-enable button
             toggleBtn.disabled = false;
@@ -242,24 +249,35 @@ const AdminModule = {
     // - Export Votes -
     exportVotes: async function () {
         try {
+            // Use the API method if available in api.js
+            if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotes === 'function') {
+                 // Assuming ElectionAPI.exportVotes handles the fetch and blob download
+                 await ElectionAPI.exportVotes();
+                 Utils.showMessage('Votes export initiated. Check your downloads.', 'success');
+                 return;
+            }
+
+            // Fallback direct fetch if API method is missing
+            console.warn("ElectionAPI.exportVotes not found, using direct fetch.");
             const response = await fetch('/api/admin/votes/export', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                     // Include credentials if your auth mechanism requires it (e.g., session cookies)
-                     'credentials': 'include', // Ensure session cookie is sent
+                    'credentials': 'include',
                 }
             });
 
             if (!response.ok) {
-                throw new Error(`Export failed: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || response.statusText;
+                throw new Error(`Export failed: ${errorMessage}`);
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'votes.json'; // Or get filename from response headers
+            a.download = 'votes.json';
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -268,31 +286,51 @@ const AdminModule = {
             Utils.showMessage('Votes exported successfully', 'success');
         } catch (error) {
             console.error("Error exporting votes:", error);
-            Utils.showMessage('Failed to export votes.', 'error');
+            Utils.showMessage(`Failed to export votes: ${error.message}`, 'error');
         }
     },
 
     // - Export Votes to CSV -
     exportVotesToCSV: async function () {
         try {
+             // Use the API method if available in api.js
+            if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotesToCSV === 'function') {
+                 // Assuming ElectionAPI.exportVotesToCSV handles the fetch and blob download
+                 await ElectionAPI.exportVotesToCSV();
+                 Utils.showMessage('Votes CSV export initiated. Check your downloads.', 'success');
+                 return;
+            }
+
+            // Fallback direct fetch if API method is missing
+            console.warn("ElectionAPI.exportVotesToCSV not found, using direct fetch.");
             const response = await fetch('/api/admin/votes/export/csv', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'text/csv',
-                     // Include credentials if your auth mechanism requires it (e.g., session cookies)
-                     'credentials': 'include', // Ensure session cookie is sent
+                    'credentials': 'include',
                 }
             });
 
             if (!response.ok) {
-                throw new Error(`CSV Export failed: ${response.statusText}`);
+                 const errorData = await response.json().catch(() => ({}));
+                 const errorMessage = errorData.message || response.statusText;
+                 throw new Error(`CSV Export failed: ${errorMessage}`);
             }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'votes.csv'; // Or get filename from response headers
+            // Try to get filename from Content-Disposition header
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = 'votes.csv';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+            }
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -301,7 +339,7 @@ const AdminModule = {
             Utils.showMessage('Votes exported to CSV successfully', 'success');
         } catch (error) {
             console.error("Error exporting votes to CSV:", error);
-            Utils.showMessage('Failed to export votes to CSV.', 'error');
+            Utils.showMessage(`Failed to export votes to CSV: ${error.message}`, 'error');
         }
     },
 
@@ -324,7 +362,7 @@ const AdminModule = {
         // e.g., { ..., "isAdmin": true, ... }
         const isAdmin = user && user.isAdmin === true;
 
-        // --- FIX: Manage visibility of the Admin Tab Button ---
+        // --- Manage visibility of the Admin Tab Button ---
         const adminTabBtn = document.getElementById('adminTabBtn'); // The button in the main .tabs list
         if (adminTabBtn) {
             if (isAdmin) {
@@ -337,11 +375,11 @@ const AdminModule = {
         } else {
              console.warn("Admin tab button (#adminTabBtn) not found in the DOM.");
         }
-        // --- END FIX ---
+        // --- END ---
 
         // Manage visibility of admin controls within the admin tab content
-        const adminControls = document.getElementById('adminControls'); // Content inside #admin tab - Check if this ID exists in your HTML
-        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check if this class/structure exists
+        const adminControls = document.getElementById('adminControls'); // Content inside #admin tab
+        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check structure
         if (isAdmin) {
             console.log("User is an admin. Revealing admin controls in tab.");
             if (adminControls) {
@@ -378,7 +416,7 @@ const AdminModule = {
         console.log("Hiding all admin UI for logged-out user.");
         // Hide content inside the admin tab
         const adminControls = document.getElementById('adminControls'); // Check if this ID exists in your HTML
-        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check if this class/structure exists
+        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check structure
         if (adminControls) adminControls.classList.add('hidden');
         // Optionally show password section or a "logged out" message
         // if (adminPasswordSection) adminPasswordSection.classList.remove('hidden');
@@ -389,13 +427,13 @@ const AdminModule = {
             topRightAdminBtn.style.display = 'none';
         }
 
-        // --- ADDITION: Ensure the main tab button is also hidden for logged out users ---
+        // --- Ensure the main tab button is also hidden for logged out users ---
         const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn) {
             adminTabBtn.classList.add('hidden-by-status');
             console.log("User logged out, ensuring admin tab button (#adminTabBtn) is hidden.");
         }
-        // --- END ADDITION ---
+        // --- END ---
     }
 };
 
@@ -405,28 +443,65 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Attach the Add Candidate Form Handler ---
     const addCandidateForm = document.getElementById('addCandidateForm');
     if (addCandidateForm) {
+        // --- NEW: Add Enter Key Navigation ---
+        addCandidateForm.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent form submission on Enter in an input
+
+                const formElements = Array.from(addCandidateForm.elements);
+                const currentIndex = formElements.indexOf(document.activeElement);
+
+                // Find the next focusable element (input, select, textarea, button)
+                let nextIndex = currentIndex + 1;
+                let nextElement = null;
+                while (nextIndex < formElements.length) {
+                    const element = formElements[nextIndex];
+                    // Check if the element is focusable
+                    if (
+                        element &&
+                        !element.disabled &&
+                        element.tabIndex !== -1 && // Not explicitly removed from tab order
+                        ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(element.tagName)
+                    ) {
+                        nextElement = element;
+                        break;
+                    }
+                    nextIndex++;
+                }
+
+                if (nextElement) {
+                    nextElement.focus();
+                } else {
+                    // If no next element, optionally submit the form
+                    addCandidateForm.dispatchEvent(new Event('submit'));
+                    console.log("Reached the end of focusable elements in the form.");
+                }
+            }
+        });
+        // --- END NEW ---
+
         // Bind the 'addCandidate' method of AdminModule to the form's submit event
-        addCandidateForm.addEventListener('submit', AdminModule.addCandidate);
-        console.log("Add Candidate form submit listener attached.");
+        addCandidateForm.addEventListener('submit', AdminModule.addCandidate.bind(AdminModule));
+        console.log("Add Candidate form listeners attached (Enter navigation, Submit).");
     } else {
         console.warn("Add Candidate form (#addCandidateForm) not found on this page when attaching listener.");
     }
 
     // --- You can attach other admin-related event listeners here if needed ---
-    // Example for toggle button (if not handled elsewhere):
-    // const toggleBtn = document.getElementById('electionToggle');
-    // if (toggleBtn) {
-    //     toggleBtn.addEventListener('click', AdminModule.toggleElection);
-    // }
+    // Example for toggle button:
+    const toggleBtn = document.getElementById('electionToggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', AdminModule.toggleElection);
+    }
 
-    // Example for export buttons (if not handled elsewhere):
-    // const exportVotesBtn = document.getElementById('exportVotesBtn');
-    // if (exportVotesBtn) {
-    //     exportVotesBtn.addEventListener('click', AdminModule.exportVotes);
-    // }
-    // const exportVotesToCSVBtn = document.getElementById('exportVotesToCSVBtn');
-    // if (exportVotesToCSVBtn) {
-    //     exportVotesToCSVBtn.addEventListener('click', AdminModule.exportVotesToCSV);
-    // }
+    // Example for export buttons:
+    const exportVotesBtn = document.getElementById('exportVotesBtn');
+    if (exportVotesBtn) {
+        exportVotesBtn.addEventListener('click', AdminModule.exportVotes);
+    }
+    const exportVotesToCSVBtn = document.getElementById('exportVotesToCSVBtn');
+    if (exportVotesToCSVBtn) {
+        exportVotesToCSVBtn.addEventListener('click', AdminModule.exportVotesToCSV);
+    }
     // --- End other listeners ---
 });

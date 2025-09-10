@@ -71,14 +71,20 @@ const CandidatesModule = {
             card.className = 'candidate-item';
             card.dataset.id = candidate.id;
             card.innerHTML = `
-                <div class="candidate-info" data-id="${candidate.id}">
-                    <i class="fas fa-info"></i>
+                <div class="candidate-main-content">
+                    <div class="candidate-info" data-id="${candidate.id}">
+                        <i class="fas fa-info"></i>
+                    </div>
+                    <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-image"
+                         onerror="this.src='https://via.placeholder.com/80x80/cccccc/666666?text=${candidate.name.charAt(0)}'">
+                    <div class="candidate-text-info">
+                        <div class="candidate-name">${candidate.name}</div>
+                        <div class="candidate-position">${candidate.field_of_activity || 'N/A'}</div>
+                    </div>
                 </div>
-                <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-image"
-                     onerror="this.src='https://via.placeholder.com/80x80/cccccc/666666?text=${encodeURIComponent(candidate.name.charAt(0))}'">
-                <div class="candidate-name">${candidate.name}</div>
-                <div class="candidate-position">${candidate.field_of_activity || 'N/A'}</div>
-                <div class="activity-indicator ${activityClass}">${activityText}</div>
+                <div class="candidate-activity-and-badge">
+                    <div class="activity-indicator ${activityClass}">${activityText}</div>
+                </div>
                 <div class="candidate-details" id="details-${candidate.id}">
                     <div class="close-details" data-id="${candidate.id}">×</div>
                     <h4>${candidate.name}</h4>

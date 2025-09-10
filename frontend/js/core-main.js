@@ -5,7 +5,6 @@ window.State.electionOpen = true; // Default assumption
 window.State.userHasVoted = false; // Default assumption
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('Phoenix Council Elections frontend initialized');
-
     // --- Show Skeleton Screen on Auth Screen Initially ---
     const authScreen = document.getElementById('authScreen');
     const authSkeletonScreen = document.getElementById('authSkeletonScreen');
@@ -16,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         authSkeletonShown = true;
         console.log("Initial auth skeleton screen shown.");
     }
-
     // --- Language Initialization ---
     try {
         await I18nModule.fetchTranslations();
@@ -24,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.error("Failed to fetch translations:", error);
         // Decide how to handle translation loading failure
     }
-
     let determinedLanguage = 'en';
     try {
         const savedLang = localStorage.getItem('preferredLanguage');
@@ -57,7 +54,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     currentLanguage = determinedLanguage;
     console.log(`Initial language set to: ${currentLanguage}`);
     I18nModule.switchLanguage(currentLanguage);
-
     const langSwitcher = document.getElementById('languageSwitcher');
     if (langSwitcher) {
         langSwitcher.addEventListener('click', () => {
@@ -71,16 +67,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
     }
-
     // --- Initialize App DOM Elements ---
     initDOMElements();
-
     // --- Start Loading Candidates (Independent of Auth) ---
     const candidatesLoadPromise = CandidatesModule.loadCandidates().catch(err => {
          console.error("Error loading candidates (initial):", err);
          // Handle candidate loading error if critical for initial display
     });
-
     // --- Start Checking Auth Status ---
     // This is the key check. We wait for it to complete.
     let isAuthenticated = false;
@@ -91,22 +84,37 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.error("Error during initial auth check:", authErr);
         isAuthenticated = false; // Default to not authenticated on error
     }
-
     // --- Handle Auth Callback (if this was a redirect from login) ---
     // This might trigger another auth check, but it's quick.
     handleAuthCallback();
-
     // --- Fetch Initial Election Status and User Vote Status (if authenticated) ---
     let electionStatusFetched = false;
     if (isAuthenticated) {
         try {
-const statusResponse = await ElectionAPI.getElectionStatus();
-window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : true;
-window.State.electionStartTime = statusResponse.start_time || null;
-window.State.electionEndTime = statusResponse.end_time || null;
-window.State.userHasVoted = (window.State.currentUser && window.State.currentUser.hasVoted) ? window.State.currentUser.hasVoted : false;
-electionStatusFetched = true; // ✅ ADD THIS LINE
-console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
+            const statusResponse = await ElectionAPI.getElectionStatus();
+            window.State.electionOpen = statusResponse.is_open !== undefined ? statusResponse.is_open : true;
+            window.State.electionStartTime = statusResponse.start_time || null;
+            window.State.electionEndTime = statusResponse.end_time || null;
+            window.State.userHasVoted = (window.State.currentUser && window.State.currentUser.hasVoted) ? window.State.currentUser.hasVoted : false;
+            electionStatusFetched = true; // ✅ ADD THIS LINE
+            console.log("Initial State - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
+
+            // --- START OF NEW LOGIC ---
+            // Check if the election is closed on initial load and redirect to 'info' tab
+            // This check happens right after we determine the election status for an authenticated user.
+            if (isAuthenticated && !window.State.electionOpen) {
+                 console.log("Election is closed on initial load for authenticated user. Preparing to redirect to Info tab.");
+                 // Use setTimeout to ensure UIController is ready and DOM is processed
+                 setTimeout(() => {
+                     if (typeof UIController !== 'undefined' && UIController.switchTab) {
+                         UIController.switchTab('info');
+                         console.log("Switched to 'info' tab due to closed election.");
+                     } else {
+                         console.warn("UIController not ready or switchTab method missing when trying to redirect to 'info' tab.");
+                     }
+                 }, 150); // Slightly longer delay to be sure main app UI is initialized
+            }
+            // --- END OF NEW LOGIC ---
 
         } catch (err) {
             console.error('Error fetching initial election status:', err);
@@ -114,7 +122,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
             window.State.electionOpen = false;
             // Do NOT assume userHasVoted. Keep it as false or use the value from the user session.
             // The UI will show the "Election Closed" message, which is accurate if the status is unknown.
-
             // Show a system error message to the user for better UX.
             if (typeof Utils !== 'undefined' && typeof Utils.showMessage === 'function') {
                 Utils.showMessage('Unable to verify election status. Please refresh the page or try again later.', 'error');
@@ -127,14 +134,12 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         window.State.electionOpen = true; // Default, will be checked on login
         window.State.userHasVoted = false;
     }
-
     // --- Hide Auth Skeleton Screen ---
     // Do this as soon as we know auth status, regardless of other loads.
     if (authSkeletonShown && authSkeletonScreen) {
         authSkeletonScreen.style.display = 'none';
         console.log("Auth skeleton screen hidden.");
     }
-
     // --- Update UI Visibility Based on Authentication Result ---
     const mainApp = document.getElementById('mainApp');
     if (isAuthenticated) {
@@ -152,10 +157,8 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
             const startTime = window.State.electionStartTime ? new Date(window.State.electionStartTime) : null;
             const endTime = window.State.electionEndTime ? new Date(window.State.electionEndTime) : null;
             const now = new Date();
-
             let displayText = '';
             let cssClass = '';
-
             if (!startTime || !endTime) {
                 // No schedule set
                 displayText = '<i class="fas fa-exclamation-triangle"></i> No election scheduled';
@@ -175,13 +178,11 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
                 displayText = `<i class="fas fa-clock"></i> Closes in ${formatCountdown(timeDiff)}`;
                 cssClass = 'open';
             }
-
             electionStatus.innerHTML = displayText;
             // Remove all status classes
             electionStatus.classList.remove('open', 'closed', 'warning');
             // Add the appropriate class
             electionStatus.classList.add(cssClass);
-
             // --- START COUNTDOWN TIMER ---
             // Clear any existing timer to avoid duplicates
             if (window.electionStatusTimer) {
@@ -194,23 +195,19 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         }
         // Update voting tab content based on final state
         updateVotingTabContent();
-        
         const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn && window.State.currentUser && window.State.currentUser.isAdmin) {
             adminTabBtn.classList.remove('hidden-by-status');
             console.log("Admin tab button revealed for admin user.");
         }
-        
         // Initialize UI elements that depend on candidates/auth being checked
         VotingModule.updateUI(); // This might need to wait for candidates, but usually handles it
-
     } else {
         // User is NOT authenticated, ensure auth screen is visible and main app is hidden
         if (authScreen) authScreen.style.display = 'flex'; // Explicitly show
         if (mainApp) mainApp.classList.add('hidden'); // Explicitly hide
         console.log("Auth screen shown, main app hidden (not authenticated).");
     }
-
     // --- Wait for other non-critical initial loads if needed ---
     // Although candidates are loaded, other stats etc. might need final data
     // We can wait for them here if updateVotingTabContent or other parts need them
@@ -222,8 +219,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
          console.error("One or more non-critical initial loads failed:", error);
          // UI should still be functional
     }
-
-
     // --- Ensure a valid initial tab is active (only if main app is shown) ---
     if (isAuthenticated && mainApp && !mainApp.classList.contains('hidden')) {
         setTimeout(() => {
@@ -237,9 +232,18 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
                     UIController.switchTab(firstTab.dataset.tab);
                 }
             }
-        }, 100); // Slight delay to ensure DOM is ready
+            // --- ADDITIONAL CHECK: If election is closed, ensure 'info' tab is active ---
+            // This is a secondary safeguard in case the setTimeout above ran before the redirect logic.
+            else if (!window.State.electionOpen) {
+                 const currentActiveTab = document.querySelector('.tab.active');
+                 if (currentActiveTab && currentActiveTab.dataset.tab !== 'info') {
+                     console.log("Secondary check: Election closed, switching to 'info' tab.");
+                     UIController.switchTab('info');
+                 }
+            }
+            // --- END ADDITIONAL CHECK ---
+        }, 200); // Slight delay to ensure DOM is ready and previous logic has run
     }
-
     // --- Tab switching (attach listeners) ---
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -247,8 +251,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
             UIController.switchTab(tabName);
         });
     });
-
-
     // --- ✅ RESTORED: Button Event Listeners ---
     const googleSigninBtn = document.getElementById('googleSigninBtn');
     const demoAuthBtn = document.getElementById('demoAuthBtn');
@@ -258,7 +260,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
     const logoutBtnThankYou = document.getElementById('logoutBtnThankYou');
     const logoutBtnClosed = document.getElementById('logoutBtnClosed');
     const logoutBtnNotRegistered = document.getElementById('logoutBtnNotRegistered');
-
     if (googleSigninBtn) googleSigninBtn.addEventListener('click', AuthModule.signInWithGoogle);
     if (demoAuthBtn) demoAuthBtn.addEventListener('click', AuthModule.demoAuth);
     if (logoutBtn) logoutBtn.addEventListener('click', AuthModule.logout);
@@ -266,7 +267,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
     if (logoutBtnClosed) logoutBtnClosed.addEventListener('click', AuthModule.logout);
     if (logoutBtnNotRegistered) logoutBtnNotRegistered.addEventListener('click', AuthModule.logout);
     if (submitVoteBtn) submitVoteBtn.addEventListener('click', VotingModule.submitVote.bind(VotingModule));
-
     // Admin buttons
     const googleAdminSigninBtn = document.getElementById('googleAdminSigninBtn');
     const electionToggle = document.getElementById('electionToggle');
@@ -280,7 +280,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
     if (exportVotesBtn) exportVotesBtn.addEventListener('click', AdminModule.exportVotes);
     if (exportVotesToCSVBtn) exportVotesToCSVBtn.addEventListener('click', AdminModule.exportVotesToCSV);
     if (backupToCloudBtn) backupToCloudBtn.addEventListener('click', AdminModule.backupToCloud);
-
     // --- Sorting Event Listeners ---
     const sortVoteSelect = document.getElementById('sortVoteBy');
     if (sortVoteSelect) {
@@ -294,23 +293,19 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
             CandidatesModule.displayInfoCandidates();
         });
     }
-
     // --- NEW: Schedule Election Button ---
     const scheduleElectionBtn = document.getElementById('scheduleElectionBtn');
     if (scheduleElectionBtn) {
         scheduleElectionBtn.addEventListener('click', async () => {
             const startInput = document.getElementById('electionStart');
             const endInput = document.getElementById('electionEnd');
-
             if (!startInput.value || !endInput.value) {
                 Utils.showMessage('Please set both start and end times.', 'error');
                 return;
             }
-
             // Convert to UTC ISO string (the input is local time, so we adjust)
             const startLocal = new Date(startInput.value);
             const endLocal = new Date(endInput.value);
-
             // Send as ISO string. The backend will handle UTC conversion if needed.
             // Alternatively, you can convert to UTC here:
             // const startUTC = new Date(startLocal.getTime() - startLocal.getTimezoneOffset() * 60000).toISOString();
@@ -318,10 +313,8 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
             // For simplicity, we'll send the local ISO string and let the backend handle it as UTC.
             const startISO = startLocal.toISOString();
             const endISO = endLocal.toISOString();
-
             try {
                 const response = await ElectionAPI.scheduleElection(startISO, endISO);
-
                 if (response.message) {
                     Utils.showMessage('Election schedule updated successfully!', 'success');
                     // Refresh the election status to reflect changes
@@ -341,8 +334,38 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         });
     }
     // --- END NEW ---
-
-    // Add click outside listener for candidate details and winner popup
+    // --- Modern Header Mobile Menu Toggle ---
+    // This code is added here within the DOMContentLoaded listener as requested.
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const headerNav = document.getElementById('headerNav');
+    if (mobileMenuToggle && headerNav) {
+        // Function to handle the toggle
+        const toggleMenu = function() {
+            const isExpanded = headerNav.classList.contains('active');
+            headerNav.classList.toggle('active');
+            mobileMenuToggle.classList.toggle('active');
+            mobileMenuToggle.setAttribute('aria-expanded', !isExpanded);
+        };
+        // Add click event listener to the toggle button
+        mobileMenuToggle.addEventListener('click', toggleMenu);
+        // Optional: Close menu if clicking outside (on mobile)
+        document.addEventListener('click', function(event) {
+            // Check if we are on a mobile screen size (e.g., 768px or less)
+            // Adjust this breakpoint if it differs from your CSS
+            if (window.innerWidth <= 768) {
+                const isClickInsideNav = headerNav.contains(event.target);
+                const isClickOnToggle = mobileMenuToggle.contains(event.target);
+                // If the click is outside the nav and the toggle button, and the menu is open
+                if (!isClickInsideNav && !isClickOnToggle && headerNav.classList.contains('active')) {
+                    toggleMenu(); // Reuse the toggle function to close
+                }
+            }
+        });
+    } else {
+        console.warn("Mobile menu toggle or header navigation not found. Ensure the HTML structure is correct.");
+    }
+    // --- End Modern Header Mobile Menu Toggle ---
+    // --- Add click outside listener for candidate details and winner popup ---
     document.addEventListener('click', (e) => {
         if (typeof activeDetails !== 'undefined' && activeDetails && !e.target.closest('.candidate-item')) {
             VotingModule.hideCandidateDetails(activeDetails);
@@ -355,7 +378,6 @@ console.log("Initial State - Election Open:", window.State.electionOpen, "User V
         }
     });
 });
-
 // --- ✅ ADD THIS NEW FUNCTION: Show the Instructions Popup ---
 // Place this function just before the final }); of the DOMContentLoaded listener
 function showInstructionsPopup() {
@@ -370,7 +392,6 @@ function showInstructionsPopup() {
         }
         return;
     }
-
     // Define the function to hide the popup
     function hidePopup() {
         popup.classList.add('hidden');
@@ -378,24 +399,20 @@ function showInstructionsPopup() {
         document.body.style.overflow = ''; // Re-enable background scrolling
         console.log("Instructions popup hidden.");
     }
-
     // Get buttons
     const closeBtn = document.getElementById('closeInstructionsPopup');
     const ackBtn = document.getElementById('acknowledgeInstructions');
-
     // --- Add event listeners to close the popup ---
     if (closeBtn) {
         // Remove potential old listener first to prevent duplicates
         closeBtn.removeEventListener('click', hidePopup);
         closeBtn.addEventListener('click', hidePopup);
     }
-
     if (ackBtn) {
         // Remove potential old listener first to prevent duplicates
         ackBtn.removeEventListener('click', hidePopup);
         ackBtn.addEventListener('click', hidePopup);
     }
-
     // Optional: Close popup if user clicks outside the content (on the backdrop)
     function closeOnBackdropClick(e) {
         if (e.target === popup) {
@@ -405,7 +422,6 @@ function showInstructionsPopup() {
     // Remove potential old listener first
     popup.removeEventListener('click', closeOnBackdropClick);
     popup.addEventListener('click', closeOnBackdropClick);
-
     // Optional: Close with Escape key
     function handleEscapeKey(e) {
         if (e.key === 'Escape' && popup && !popup.classList.contains('hidden')) {
@@ -415,7 +431,6 @@ function showInstructionsPopup() {
     // Remove potential old listener first
     document.removeEventListener('keydown', handleEscapeKey);
     document.addEventListener('keydown', handleEscapeKey);
-
     // --- Show the Popup ---
     popup.classList.remove('hidden');
     popup.setAttribute('aria-hidden', 'false');
@@ -423,7 +438,6 @@ function showInstructionsPopup() {
     console.log("Instructions popup shown.");
 }
 // --- END NEW FUNCTION ---
-
 // --- Authentication Callback Handler ---
 function handleAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -499,6 +513,23 @@ const UIController = {
         if (typeof ResultsModule !== 'undefined' && ResultsModule.hideWinnerPopup) {
             ResultsModule.hideWinnerPopup();
         }
+        // --- ADD NEW LOGIC HERE ---
+        // Close the mobile menu dropdown if it's open
+        const headerNav = document.getElementById('headerNav');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        if (headerNav && mobileMenuToggle) {
+            // Check if the menu is currently active/open
+            if (headerNav.classList.contains('active')) {
+                // Remove the 'active' class to close the menu
+                headerNav.classList.remove('active');
+                // Also remove the 'active' class from the toggle button for visual consistency
+                mobileMenuToggle.classList.remove('active');
+                // Update the aria-expanded attribute
+                mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                console.log("Mobile menu closed after tab switch.");
+            }
+        }
+        // --- END NEW LOGIC ---
     }
 };
 // --- Function to Update Voting Tab Content Based on State ---
@@ -507,9 +538,7 @@ function updateVotingTabContent() {
     const electionClosedMessageElement = document.getElementById('electionClosedMessage');
     const thankYouMessageElement = document.getElementById('thankYouMessage');
     const notRegisteredCard = document.getElementById('notRegisteredCard');
-
     console.log("updateVotingTabContent - Election Open:", window.State.electionOpen, "User Voted:", window.State.userHasVoted);
-
     // Always hide all messages first
     if (electionClosedMessageElement) {
         electionClosedMessageElement.classList.add('hidden');
@@ -523,10 +552,8 @@ function updateVotingTabContent() {
     if (votingInterface) {
         votingInterface.classList.add('hidden');
     }
-
     // --- NEW: Check if user is eligible to vote ---
     const isEligible = window.State.currentUser && window.State.currentUser.isEligibleVoter;
-
     // Show appropriate content based on state
     if (!isEligible) {
         // User is not eligible - show not registered message
@@ -554,7 +581,6 @@ function updateVotingTabContent() {
         }
     }
 }
-
 // --- Helper Function: Format Milliseconds into Readable String ---
 function formatCountdown(ms) {
     if (ms < 0) return "0s";
@@ -562,35 +588,28 @@ function formatCountdown(ms) {
     const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-
     let parts = [];
     if (days > 0) parts.push(`${days}d`);
     if (hours > 0) parts.push(`${hours}h`);
     if (minutes > 0) parts.push(`${minutes}m`);
     if (parts.length === 0 || seconds > 0) parts.push(`${seconds}s`); // Always show seconds if no larger units or if seconds > 0
-
     return parts.join(' ');
 }
-
 // --- Helper Function: Update Election Status Display (for Timer) ---
 function updateElectionStatusDisplay() {
     const electionStatus = document.getElementById('electionStatus');
     if (!electionStatus) return;
-
     const startTime = window.State.electionStartTime ? new Date(window.State.electionStartTime) : null;
     const endTime = window.State.electionEndTime ? new Date(window.State.electionEndTime) : null;
     const now = new Date();
-
     if (!startTime || !endTime) {
         electionStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> No election scheduled';
         electionStatus.classList.remove('open', 'closed', 'warning');
         electionStatus.classList.add('warning');
         return;
     }
-
     let displayText = '';
     let cssClass = '';
-
     if (now < startTime) {
         const timeDiff = startTime - now;
         displayText = `<i class="fas fa-clock"></i> Opens in ${formatCountdown(timeDiff)}`;
@@ -603,7 +622,6 @@ function updateElectionStatusDisplay() {
         displayText = `<i class="fas fa-clock"></i> Closes in ${formatCountdown(timeDiff)}`;
         cssClass = 'open';
     }
-
     electionStatus.innerHTML = displayText;
     electionStatus.classList.remove('open', 'closed', 'warning');
     electionStatus.classList.add(cssClass);

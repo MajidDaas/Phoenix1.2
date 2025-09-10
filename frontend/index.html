@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- data-i18n applied to title -->
-    <title data-i18n="pageTitle">Phoenix Council Elections</title>
+    <title data-i18n="pageTitle">CDU Council Elections</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <!-- The styles for the modern header are assumed to be in your css/styles.css or added elsewhere -->
+    <!-- <style> ... </style> (CSS Snippet removed as per your request) -->
 </head>
 <body>
     <!-- Authentication Screen -->
@@ -17,10 +19,9 @@
                 <div class="logo-icon">
                     <i class="fas fa-vote-yea"></i>
                 </div>
-                <h1 data-i18n="pageTitle">Phoenix Council Elections</h1>
+                <h1 data-i18n="pageTitle">CDU Council Elections</h1>
                 <p class="auth-subtitle" data-i18n="pageSubtitle">Secure & Transparent Voting Platform</p>
             </div>
-
             <div class="auth-card">
                 <h2><i class="fas fa-sign-in-alt"></i> <span data-i18n="authenticationRequired">Sign In</span></h2>
                 <p data-i18n="pleaseSignInToVote">Welcome! Please sign in to participate in the elections.</p>
@@ -30,9 +31,7 @@
                     </button>
                     <p class="auth-note" data-i18n="useInstitutionalEmail">Use your organizational Google account.</p>
                 </div>
-
                 <div class="auth-divider"><span data-i18n="or">OR</span></div>
-
                 <div class="auth-section">
                     <div class="demo-highlight">
                         <div class="demo-icon">
@@ -47,61 +46,79 @@
                     </div>
                 </div>
             </div>
-
             <div class="footer">
-                <span data-i18n="copyright">&copy; 2024 Phoenix Council. All rights reserved.</span>
+                <span data-i18n="copyright">&copy; 2025.</span>
             </div>
         </div>
-
         <!-- Skeleton Screen for Auth Check - Initially Hidden -->
         <div id="authSkeletonScreen" class="skeleton-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 10001; align-items: center; justify-content: center;">
             <div style="background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 90%; width: 400px;">
                 <div class="loader" style="margin: 20px auto;"></div>
-                <p style="font-size: 1.2rem; color: var(--dark);" data-i18n="loadingCandidates">Checking your session...</p>
+                <p style="font-size: 1.2rem; color: var(--dark);" data-i18n="loadingSession">Checking your session...</p>
                 <p style="font-size: 1rem; color: var(--gray);" data-i18n="loadingResults">Please wait a moment.</p>
             </div>
         </div>
         <!-- End Auth Skeleton Screen -->
     </div>
-
     <!-- Main Application -->
     <div class="main-app hidden" id="mainApp">
-        <div class="header">
-            <div class="header-controls">
-                <button id="languageSwitcher" class="lang-switcher">
-                    <i class="fas fa-language"></i> <span data-i18n="switchToArabic">AR</span>
+        <!-- Modern Header with Collapsible Nav -->
+        <header class="modern-header">
+            <div class="header-top">
+                <!-- Logo/Title Section -->
+                <div class="header-branding">
+                    <div class="logo-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div>
+                        <h1 class="header-title" data-i18n="pageTitle">CDU Council Elections</h1>
+                        <p class="header-subtitle" data-i18n="pageSubtitle">The third CDU council election</p>
+                    </div>
+                </div>
+
+
+                <!-- Mobile Menu Toggle Button -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span class="hamburger-icon"></span>
+                    <span class="hamburger-icon"></span>
+                    <span class="hamburger-icon"></span>
                 </button>
             </div>
-            <h1><i class="fas fa-landmark"></i> <span data-i18n="pageTitle">Phoenix Council Elections</span></h1>
-            <p data-i18n="pageSubtitle">Cast your vote for Council Members and Executive Officers.</p>
+
+            <!-- Election Status -->
             <div id="electionStatus" class="election-status open">
                 <i class="fas fa-lock-open"></i> <span data-i18n="electionStatus">Election is open</span>
             </div>
-        </div>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="vote"><i class="fas fa-vote-yea"></i> <span data-i18n="castVote">Vote</span></button>
-            <button class="tab" data-tab="info"><i class="fas fa-users"></i> <span data-i18n="information">Candidates</span></button>
-            <button class="tab" data-tab="results"><i class="fas fa-poll"></i> <span data-i18n="viewResults">Results</span></button>
-            <button id="adminTabBtn" class="tab hidden-by-status" data-tab="admin"><i class="fas fa-user-shield"></i> <span data-i18n="admin">Admin</span></button>
-        </div>
+            <!-- Navigation Menu (Collapsible) -->
+            <nav class="header-nav" id="headerNav">
+                <ul class="nav-tabs">
+                    <li><button class="tab active" data-tab="vote"><i class="fas fa-vote-yea"></i> <span data-i18n="castVote">Vote</span></button></li>
+                    <li><button class="tab" data-tab="info"><i class="fas fa-users"></i> <span data-i18n="information">Candidates</span></button></li>
+                    <li><button class="tab" data-tab="results"><i class="fas fa-poll"></i> <span data-i18n="viewResults">Results</span></button></li>
+                    <li><button id="adminTabBtn" class="tab hidden-by-status" data-tab="admin"><i class="fas fa-user-shield"></i> <span data-i18n="admin">Admin</span></button></li>
+                    <li><button id="languageSwitcher" class="tab lang-switcher" aria-label="Switch Language">
+                               <i class="fas fa-language"></i> <span class="lang-text" data-i18n="switchToArabic">AR</span>
+                    </button></li>
+                </ul>
+            </nav>
+        </header>
+        <!-- End Modern Header -->
 
         <!-- Voting Tab -->
         <div id="vote" class="tab-content active">
             <div id="votingInterface">
                 <div class="content-section">
                     <h2><i class="fas fa-vote-yea"></i> <span data-i18n="castYourVote">Cast Your Vote</span></h2>
-
                     <div class="instructions-card">
                         <h3><i class="fas fa-info-circle"></i> <span data-i18n="instructions">Voting Instructions</span></h3>
                         <ol>
-                            <li data-i18n="select15Council">Select up to <strong>"Council Members"</strong>.</li>
-                            <li data-i18n="designate7Executive">Select up to <strong>"7 Executive Officers"</strong>.</li>
+                            <li data-i18n="select15Council">Select up to <strong>"Council Members"</strong> by clicking on their card.</li>
+                            <li data-i18n="designate7Executive">Select up to <strong>"7 Executive Officers"</strong> by clicking twice.</li>
                             <li data-i18n="reviewAndSubmit">Review your selections carefully.</li>
                             <li data-i18n="submitVote">Click <strong>"Submit Vote"</strong> to finalize.</li>
                         </ol>
                     </div>
-
                     <div class="vote-controls-container">
                         <div class="sorting-controls">
                             <label for="sortVoteBy"><i class="fas fa-sort"></i> <span data-i18n="sortBy">Sort By:</span></label>
@@ -116,22 +133,20 @@
                             <input type="text" id="candidateSearch" placeholder="Search candidates..." data-i18n="candidateProfiles|placeholder">
                         </div>
                     </div>
-
                     <div id="candidateList" class="candidate-grid">
                         <!-- Candidates loaded by JS -->
                     </div>
                 </div>
                     <div class="selection-header">
                         <div class="counter-group">
-                            <h3><i class="fas fa-users"></i> <span data-i18n="selectCouncilMembers">Selected Council Members</span></h3>
+                            <h3><i class="fas fa-users"></i> <span data-i18n="selectedCouncilMembers">Selected Council Members</span></h3>
                             <div class="counter" id="selectedCount">0 / 15</div>
                         </div>
                         <div class="counter-group">
-                            <h3><i class="fas fa-star"></i> <span data-i18n="selectExecutiveOfficers">Selected Executive Officers</span></h3>
+                            <h3><i class="fas fa-star"></i> <span data-i18n="selectedExecutiveOfficers">Selected Executive Officers</span></h3>
                             <div class="counter" id="executiveCount">0 / 7</div>
                         </div>
                     </div>
-                    
                 <div class="action-buttons">
                     <button id="submitVoteBtn" class="btn btn-success" disabled>
                         <i class="fas fa-paper-plane"></i> <span data-i18n="submitVote">Submit Vote</span>
@@ -141,12 +156,10 @@
                     </button>
                 </div>
             </div>
-
             <div id="thankYouMessage" class="thank-you-card hidden">
                 <div class="thank-you-content">
                     <h2><i class="fas fa-check-circle"></i> <span data-i18n="thankYouForVoting">Thank You for Voting!</span></h2>
                     <p data-i18n="voteSubmittedMessage">Your vote has been successfully recorded.</p>
-                    <p data-i18n="electionClosedViewResults">You can now view the live election results.</p>
                     <div class="thank-you-actions">
                         <button class="btn btn-secondary" onclick="UIController.switchTab('results')">
                             <i class="fas fa-poll"></i> <span data-i18n="viewResults">View Results</span>
@@ -157,7 +170,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="electionClosedMessage" class="election-closed-card hidden">
                 <div class="closed-content">
                     <h2><i class="fas fa-lock"></i> <span data-i18n="electionIsClosed">Election Closed</span></h2>
@@ -173,7 +185,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="notRegisteredCard" class="election-closed-card hidden">
                 <div class="closed-content">
                     <h2><i class="fas fa-user-slash"></i> <span data-i18n="notAuthorizedToVote">Not Registered</span></h2>
@@ -187,7 +198,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Info Tab -->
         <div id="info" class="tab-content">
             <div class="content-section">
@@ -206,11 +216,10 @@
                 </div>
             </div>
         </div>
-
         <!-- Results Tab -->
         <div id="results" class="tab-content">
             <div class="content-section">
-                <h2><i class="fas fa-trophy"></i> <span data-i18n="electionResults">Live Election Results</span></h2>
+                <h2><i class="fas fa-trophy"></i> <span data-i18n="electionResults">Election Results</span></h2>
                 <div class="results-card modern-results">
                     <div id="resultsContent" class="leaderboard">
                         <!-- Results populated by JS -->
@@ -220,7 +229,7 @@
                     <h3><i class="fas fa-chart-pie"></i> <span data-i18n="electionInformation">Election Statistics</span></h3>
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <label data-i18n="totalVotes">Total Voters</label>
+                            <label data-i18n="totalVoters">Total Voters</label>
                             <span id="totalVotersStat">-</span>
                         </div>
                         <div class="stat-item">
@@ -238,14 +247,11 @@
                 </div>
             </div>
         </div>
-        
         <!-- Admin Tab -->
         <div id="admin" class="tab-content">
             <div class="content-section">
                 <h2><i class="fas fa-user-shield"></i> <span data-i18n="adminPanel">Administrator Panel</span></h2>
                 <p data-i18n="adminPanelDescription">Manage candidates, schedule elections, and export data.</p>
-                
-                
                 <div class="admin-card">
                     <h3><i class="fas fa-calendar-alt"></i> <span data-i18n="scheduleElection">Schedule Election</span>
                     </h3>
@@ -263,7 +269,6 @@
                         <i class="fas fa-calendar-check"></i> <span data-i18n="setSchedule">Set Schedule</span>
                     </button>
                 </div>
-
                 <div class="admin-card">
                     <h3><i class="fas fa-file-export"></i> <span data-i18n="exportData">Export Data</span></h3>
                     <div class="action-buttons">
@@ -279,17 +284,14 @@
                         </button>
                     </div>
                 </div>
-
                 <!-- Manage Candidates Card -->
                 <div class="admin-card">
                     <h3><i class="fas fa-user-plus"></i> <span data-i18n="manageCandidates">Manage Candidates</span></h3>
-
                     <!-- Add Candidate Form -->
                     <div class="form-section">
                         <h4><i class="fas fa-user-plus"></i> <span data-i18n="addNewCandidate">Add New Candidate</span>
                         </h4>
                         <form id="addCandidateForm">
-                        
                             <!-- Name (Required) -->
                             <div class="form-group">
                                 <label for="candidateName"><i class="fas fa-signature"></i> <span
@@ -298,7 +300,6 @@
                                     placeholder="e.g., Majid Da'as">
                                 <small class="form-text text-muted">The candidate's display name.</small>
                             </div>
-
                             <!-- Photo URL (Required) -->
                             <div class="form-group">
                                 <label for="candidatePhoto"><i class="fas fa-image"></i> <span
@@ -307,7 +308,6 @@
                                     required placeholder="https://example.com/photo.jpg">
                                 <small class="form-text text-muted">Direct link to the candidate's photo.</small>
                             </div>
-
                             <!-- Brief Biography (Required) -->
                             <div class="form-group">
                                 <label for="candidateBriefBio"><i class="fas fa-file-alt"></i> <span
@@ -318,7 +318,6 @@
                                 <small class="form-text text-muted">A concise overview of the candidate (max 200 chars
                                     recommended).</small>
                             </div>
-
                             <!-- Field of Activity (Required) -->
                             <div class="form-group">
                                 <label for="candidateFieldOfActivity"><i class="fas fa-briefcase"></i> <span
@@ -327,7 +326,6 @@
                                     class="form-control" required placeholder="e.g., Arts - Law">
                                 <small class="form-text text-muted">Primary professional field (e.g., 'Med - Scientific Research').</small>
                             </div>
-
                             <!-- Weekly Activity (Required) -->
                             <div class="form-group">
                                 <label for="candidateActivity"><i class="fas fa-clock"></i> <span
@@ -336,12 +334,10 @@
                                     class="form-control" min="0" max="168" value="0" required>
                                 <small class="form-text text-muted">Estimated hours of activity per week.</small>
                             </div>
-
                             <!-- --- Optional Fields --- -->
                             <hr>
                             <h5><i class="fas fa-plus-circle"></i> <span data-i18n="optionalDetails">Optional
                                     Details</span></h5>
-
                             <!-- Full Name -->
                             <div class="form-group">
                                 <label for="candidateFullName"><i class="fas fa-user"></i> <span
@@ -349,7 +345,6 @@
                                 <input type="text" id="candidateFullName" name="candidateFullName" class="form-control"
                                     placeholder="e.g., Full Legal Name">
                             </div>
-
                             <!-- Full Biography -->
                             <div class="form-group">
                                 <label for="candidateBio"><i class="fas fa-book"></i> <span
@@ -358,7 +353,6 @@
                                     placeholder="Detailed biography of the candidate..."></textarea>
                                 <small class="form-text text-muted">A more detailed biography.</small>
                             </div>
-
                             <!-- Email -->
                             <div class="form-group">
                                 <label for="candidateEmail"><i class="fas fa-envelope"></i> <span
@@ -366,7 +360,6 @@
                                 <input type="email" id="candidateEmail" name="candidateEmail" class="form-control"
                                     placeholder="candidate@example.com">
                             </div>
-
                             <!-- Phone -->
                             <div class="form-group">
                                 <label for="candidatePhone"><i class="fas fa-phone"></i> <span
@@ -374,7 +367,6 @@
                                 <input type="tel" id="candidatePhone" name="candidatePhone" class="form-control"
                                     placeholder="+966...">
                             </div>
-
                             <!-- Place of Birth -->
                             <div class="form-group">
                                 <label for="candidatePoB"><i class="fas fa-map-marker-alt"></i> <span
@@ -382,7 +374,6 @@
                                 <input type="text" id="candidatePoB" name="candidatePoB" class="form-control"
                                     placeholder="e.g., Damascus, Syria">
                             </div>
-
                             <!-- Place of Residence -->
                             <div class="form-group">
                                 <label for="candidatePoResidence"><i class="fas fa-home"></i> <span
@@ -390,14 +381,12 @@
                                 <input type="text" id="candidatePoResidence" name="candidatePoResidence"
                                     class="form-control" placeholder="e.g., Bayren, Germany">
                             </div>
-
                             <!-- Date of Birth -->
                             <div class="form-group">
                                 <label for="candidateDoB"><i class="fas fa-birthday-cake"></i> <span
                                         data-i18n="dateOfBirth">Date of Birth</span></label>
                                 <input type="date" id="candidateDoB" name="candidateDoB" class="form-control">
                             </div>
-                            
                             <!-- Facebook URL -->
                             <div class="form-group">
                                 <label for="candidateFacebook"><i class="fab fa-facebook"></i> <span data-i18n="facebook">Facebook Profile</span></label>
@@ -405,7 +394,6 @@
                                        placeholder="https://www.facebook.com/username">
                                 <small class="form-text text-muted">Link to the candidate's Facebook profile.</small>
                             </div>
-
                             <!-- Work -->
                             <div class="form-group">
                                 <label for="candidateWork"><i class="fas fa-building"></i> <span
@@ -413,7 +401,6 @@
                                 <input type="text" id="candidateWork" name="candidateWork" class="form-control"
                                     placeholder="e.g., Teacher">
                             </div>
-
                             <!-- Level of Education -->
                             <div class="form-group">
                                 <label for="candidateEducation"><i class="fas fa-graduation-cap"></i> <span
@@ -423,7 +410,6 @@
                                     placeholder="e.g., High School - PhD in Psycology">
                             </div>
                             <!-- --- End Optional Fields --- -->
-
                             <div class="action-buttons">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fas fa-plus-circle"></i> <span data-i18n="addCandidate">Add
@@ -446,7 +432,6 @@
                     </div>
                 </div>
                 <!-- End Manage Candidates Card -->
-
             </div>
         </div>
         <!-- End Admin Tab -->
@@ -460,14 +445,12 @@
             <!-- Details populated by JS -->
         </div>
     </div>
-
     <!-- Validation Popup -->
     <div id="validationPopup" class="validation-popup hidden">
         <div class="popup-content">
             <p><i class="fas fa-exclamation-triangle"></i> <span id="validationMessage"></span></p>
         </div>
     </div>
-    
     <!-- INSTRUCTIONS POPUP MODAL -->
     <div id="instructionsPopup" class="modal hidden" role="dialog" aria-labelledby="instructionsTitle" aria-hidden="true">
         <div class="modal-content">
@@ -489,11 +472,9 @@
             </div>
         </div>
     </div>
-
     <!-- External Libraries -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <!-- Internal js -->
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
@@ -505,5 +486,7 @@
     <script src="js/i18n.js"></script>
     <script src="js/core-init.js"></script>
     <script src="js/core-main.js"></script>
+    <!-- The script for the modern header is assumed to be in your js/core-main.js or added elsewhere -->
+    <!-- <script> ... </script> (JavaScript Snippet removed as per your request) -->
 </body>
 </html>
