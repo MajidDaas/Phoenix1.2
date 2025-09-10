@@ -856,7 +856,7 @@
     "email": "demo_user_04cdb6d4@example.com",
     "name": "Demo User",
     "created_at": "2025-09-10T20:32:30.778157Z",
-    "has_voted": false,
+    "has_voted": true,
     "is_admin": true,
     "is_eligible_voter": true
   }

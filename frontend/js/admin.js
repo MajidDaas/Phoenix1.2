@@ -290,34 +290,35 @@ const AdminModule = {
         }
     },
 
-    // - Export Votes to CSV -
-    exportVotesToCSV: async function () {
-        try {
-             // Use the API method if available in api.js
-            if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotesToCSV === 'function') {
-                 // Assuming ElectionAPI.exportVotesToCSV handles the fetch and blob download
-                 await ElectionAPI.exportVotesToCSV();
-                 Utils.showMessage('Votes CSV export initiated. Check your downloads.', 'success');
-                 return;
-            }
+// - Export Votes to CSV -
+exportVotesToCSV: async function () {
+    try {
+        // Use the API method if available in api.js
+        if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotesToCSV === 'function') {
+            const response = await ElectionAPI.exportVotesToCSV();
+            // --- START: Handle the response based on its Content-Type ---
+            const contentType = response.headers.get('content-type');
+            let blob;
 
-            // Fallback direct fetch if API method is missing
-            console.warn("ElectionAPI.exportVotesToCSV not found, using direct fetch.");
-            const response = await fetch('/api/admin/votes/export/csv', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'text/csv',
-                    'credentials': 'include',
+            if (contentType && contentType.includes('application/json')) {
+                // Server returned JSON. We expect the CSV data to be in a 'csv_data' field.
+                const jsonData = await response.json();
+                if (jsonData.csv_data) {
+                    // Create a Blob from the CSV string
+                    blob = new Blob([jsonData.csv_data], { type: 'text/csv;charset=utf-8;' });
+                } else {
+                    throw new Error('CSV data not found in server response.');
                 }
-            });
-
-            if (!response.ok) {
-                 const errorData = await response.json().catch(() => ({}));
-                 const errorMessage = errorData.message || response.statusText;
-                 throw new Error(`CSV Export failed: ${errorMessage}`);
+            } else if (contentType && contentType.includes('text/csv')) {
+                // Server returned the CSV file directly
+                blob = await response.blob();
+            } else {
+                // Unknown content type
+                throw new Error(`Unexpected content type: ${contentType}`);
             }
+            // --- END: Handle the response based on its Content-Type ---
 
-            const blob = await response.blob();
+            // Proceed with download
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -335,13 +336,65 @@ const AdminModule = {
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
-
             Utils.showMessage('Votes exported to CSV successfully', 'success');
-        } catch (error) {
-            console.error("Error exporting votes to CSV:", error);
-            Utils.showMessage(`Failed to export votes to CSV: ${error.message}`, 'error');
+            return; // Important: return here to skip the fallback code
         }
-    },
+
+        // --- Fallback direct fetch if API method is missing ---
+        console.warn("ElectionAPI.exportVotesToCSV not found, using direct fetch.");
+        const response = await fetch('/api/admin/votes/export/csv', {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.message || response.statusText;
+            throw new Error(`CSV Export failed: ${errorMessage}`);
+        }
+
+        // --- START: Handle the fallback response based on its Content-Type ---
+        const contentType = response.headers.get('content-type');
+        let blob;
+
+        if (contentType && contentType.includes('application/json')) {
+            const jsonData = await response.json();
+            if (jsonData.csv_data) {
+                blob = new Blob([jsonData.csv_data], { type: 'text/csv;charset=utf-8;' });
+            } else {
+                throw new Error('CSV data not found in server response.');
+            }
+        } else if (contentType && contentType.includes('text/csv')) {
+            blob = await response.blob();
+        } else {
+            throw new Error(`Unexpected content type: ${contentType}`);
+        }
+        // --- END: Handle the fallback response ---
+
+        // Proceed with download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        let filename = 'votes.csv';
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1].replace(/['"]/g, '');
+            }
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        Utils.showMessage('Votes exported to CSV successfully', 'success');
+
+    } catch (error) {
+        console.error("Error exporting votes to CSV:", error);
+        Utils.showMessage(`Failed to export votes to CSV: ${error.message}`, 'error');
+    }
+},
 
     // - Placeholder Functions -
     refreshData: async function () {

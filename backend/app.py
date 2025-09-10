@@ -529,17 +529,19 @@ def create_app(config_name='default'):
             candidates = get_candidates(include_private=False)
             # Create a lookup dictionary for candidate ID to name
             candidate_lookup = {c.id: c.name for c in candidates}
+            voter_name_lookup = {vote.voter_id: vote.voter_name for vote in votes_data.votes}
             # Create a StringIO object to hold CSV data
             output = io.StringIO()
             writer = csv.writer(output)
             # Write header row
-            header = ['Voter ID']
+            header = ['Voter Name']
             header.extend([f'Executive {i+1}' for i in range(7)])
             header.extend([f'Council {i+1}' for i in range(8)]) # 15 total - 7 exec = 8 council only
             writer.writerow(header)
             # Write vote data
             for vote in votes_data.votes:
-                row = [vote.voter_id] # Start with Voter ID
+                voter_name = voter_name_lookup.get(vote.voter_id, f"Unknown Voter ({vote.voter_id})")
+                row = [voter_name] # Start with Voter ID
                 # Add Executive Officers (up to 7) - Lookup names
                 executive_names_list = [candidate_lookup.get(cid, f"Unknown ID: {cid}") for cid in vote.executive_candidates[:7]]
                 executive_names_list.extend([''] * (7 - len(executive_names_list)))

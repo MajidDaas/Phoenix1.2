@@ -23,7 +23,8 @@
         "6152e12b-10a9-4269-9a09-337b9ebaf875",
         "0b9b30df-29a0-43cb-bd58-62903a6df90c",
         "dbfba9e6-54c1-4d2d-973d-5ed9348cab20",
-        "d505f65a-ee84-45f3-b594-22c90326e367"
+        "d505f65a-ee84-45f3-b594-22c90326e367",
+        "04cdb6d4-be6e-4d24-b295-cc6f17c19c38"
     ],
     "votes": [
         {
@@ -55,7 +56,9 @@
                 10,
                 9
             ],
-            "timestamp": "2025-08-31T15:36:39.348619Z"
+            "timestamp": "2025-08-31T15:36:39.348619Z",
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "0a15b15e-d98d-41f8-84cc-03ad7ece3327",
@@ -86,7 +89,9 @@
                 9,
                 13
             ],
-            "timestamp": "2025-08-31T15:58:11.874279Z"
+            "timestamp": "2025-08-31T15:58:11.874279Z",
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "c6d6c2d4-a9de-440c-bedb-9e6e53510be2",
@@ -117,7 +122,9 @@
                 10,
                 11
             ],
-            "timestamp": "2025-08-31T16:03:39.574304Z"
+            "timestamp": "2025-08-31T16:03:39.574304Z",
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "d0a9ffd0-322c-46ec-a4a7-80f78d644ced",
@@ -148,7 +155,9 @@
                 19,
                 13
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "da412d67-b7c6-46d4-a856-bd4e4093628d",
@@ -179,7 +188,9 @@
                 41,
                 22
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "58629178-4038-4589-bb70-f20989471d50",
@@ -210,7 +221,9 @@
                 13,
                 27
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "675c6721-d3aa-4590-8b6d-a3609b78dd22",
@@ -241,7 +254,9 @@
                 13,
                 25
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "71bb1627-b7b3-40ab-a792-c299fa44e5f3",
@@ -272,7 +287,9 @@
                 38,
                 25
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "c08dae56-29a9-444d-ba57-894b05312142",
@@ -303,7 +320,9 @@
                 41,
                 22
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "3113542d-fa3a-4848-8414-5d5c0124b300",
@@ -334,7 +353,9 @@
                 6,
                 17
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "09a3111d-a9d1-4a77-912d-c8161ff191b9",
@@ -365,7 +386,9 @@
                 38,
                 4
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "7a2d4cbc-570b-4ed0-90fd-382ee93f8d1e",
@@ -396,7 +419,9 @@
                 16,
                 27
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "98c6d7e4-8e4f-4413-b94f-102edd12f887",
@@ -427,7 +452,9 @@
                 13,
                 6
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "d7420bb5-ae6d-42cd-bbc7-62ef36fe3854",
@@ -458,7 +485,9 @@
                 30,
                 18
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "006fe76f-23db-430a-9260-688beaceb172",
@@ -489,7 +518,9 @@
                 14,
                 18
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "b544b8c8-b614-41ab-ac7a-f935086e2cbd",
@@ -520,7 +551,9 @@
                 40,
                 25
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "bdc55010-d716-44ba-be8e-65e243f41f99",
@@ -551,7 +584,9 @@
                 36,
                 16
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "6e090c7e-27d2-4483-a056-b6e159c7a9d4",
@@ -582,7 +617,9 @@
                 2,
                 15
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "6bcff61b-ef5e-4315-8fb4-5cff88c7cccc",
@@ -613,7 +650,9 @@
                 27,
                 2
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "e29b419b-0beb-4df5-9b85-2f4486571b96",
@@ -644,7 +683,9 @@
                 4,
                 7
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "0b465a1c-7910-44e6-b6b7-2cdc933fb965",
@@ -675,7 +716,9 @@
                 37,
                 16
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "1c62dd15-89f3-419f-9688-54f2871d3fca",
@@ -706,7 +749,9 @@
                 19,
                 15
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "f0bc4263-77db-4c30-86e1-08bc5cd2e4f2",
@@ -737,7 +782,9 @@
                 4,
                 38
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         },
         {
             "id": "8d0556c7-571f-406d-b5fe-aac8e4f4fe44",
@@ -768,7 +815,42 @@
                 14,
                 5
             ],
-            "timestamp": null
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
+        },
+        {
+            "id": "ef6183a3-fac1-46bb-aeda-ab2e3253686f",
+            "voter_id": "04cdb6d4-be6e-4d24-b295-cc6f17c19c38",
+            "selected_candidates": [
+                1,
+                5,
+                12,
+                14,
+                13,
+                2,
+                11,
+                10,
+                9,
+                18,
+                15,
+                8,
+                3,
+                17,
+                20
+            ],
+            "executive_candidates": [
+                5,
+                8,
+                14,
+                3,
+                2,
+                17,
+                10
+            ],
+            "timestamp": null,
+            "voter_name": "",
+            "voter_email": ""
         }
     ]
 }

@@ -42,17 +42,42 @@ class Candidate:
                 
         return data
 
+# --- MODIFIED: Vote dataclass ---
 @dataclass
 class Vote:
     id: str
-    voter_id: str
+    voter_id: str                  # Google User ID (sub)
     selected_candidates: List[int]
     executive_candidates: List[int]
-    timestamp: str # Assuming stored as ISO string
+    timestamp: str                 # Assuming stored as ISO string
+    # --- NEW: Add voter details ---
+    voter_name: str = ""          # Voter's full name
+    voter_email: str = ""         # Voter's email address
+    # --- END NEW ---
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts the Vote object to a dictionary."""
+        # --- MODIFIED: Include new fields in the dictionary ---
+        # Using asdict is simpler and includes all fields automatically
         return asdict(self)
+        # --- END MODIFIED ---
+
+    # Optional: If you want a more explicit method or need custom logic later:
+    # def to_dict(self) -> Dict[str, Any]:
+    #     """Converts the Vote object to a dictionary."""
+    #     return {
+    #         "id": self.id,
+    #         "voter_id": self.voter_id,
+    #         "selected_candidates": self.selected_candidates,
+    #         "executive_candidates": self.executive_candidates,
+    #         "timestamp": self.timestamp,
+    #         # --- NEW: Include voter details ---
+    #         "voter_name": self.voter_name,
+    #         "voter_email": self.voter_email
+    #         # --- END NEW ---
+    #     }
+
+# --- END MODIFIED: Vote dataclass ---
 
 @dataclass
 class VotesData:
