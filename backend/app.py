@@ -255,9 +255,29 @@ def create_app(config_name='default'):
                 app.logger.error(f"Error fetching candidates: {e}")
                 return jsonify({"message": "Error loading candidates. Please try again later."}), 500
                 
+
     @app.route('/api/results')
     def get_results():
         try:
+            # --- CRITICAL: Check if user is authenticated and eligible to view results ---
+            voter_session_id = session.get('voter_session_id')
+            if not voter_session_id:
+                return jsonify({'message': 'Authentication required to view results'}), 401
+
+            voter_info = voter_session.get_session(voter_session_id)
+            if not voter_info:
+                return jsonify({'message': 'Invalid session'}), 401
+    
+            # Check if user is an eligible voter or an admin
+            is_eligible_voter = voter_info.get('is_eligible_voter', False)
+            is_admin = voter_info.get('is_admin', False)
+
+            if not (is_eligible_voter or is_admin):
+                user_email = voter_info.get('email', 'Unknown')
+                app.logger.warning(f"User {user_email} attempted to view results but is not eligible.")
+                return jsonify({'message': 'You are not authorized to view election results.'}), 403
+            # --- END CRITICAL CHECK ---
+
             # --- NEW: Check election status FIRST based on schedule---
             status = get_election_status()
             current_time = datetime.now(timezone.utc)
@@ -265,45 +285,26 @@ def create_app(config_name='default'):
             # Calculate if election is currently open based on scheduled times
             if status.start_time and status.end_time:
                 try:
-                    # --- FIX: Correct datetime usage (matching import) ---
                     start_dt = datetime.fromisoformat(status.start_time.replace('Z', '+00:00')) if isinstance(status.start_time, str) else status.start_time
                     end_dt = datetime.fromisoformat(status.end_time.replace('Z', '+00:00')) if isinstance(status.end_time, str) else status.end_time
                     is_election_open = start_dt <= current_time < end_dt
                 except ValueError as e:
                     app.logger.error(f"Error parsing election start/end times for results: {e}")
-                    # If parsing fails, it's safer to assume not open or handle error appropriately
-                    # Defaulting to False prevents accidental result leakage.
-            # --- END NEW CHECK ---
 
             # --- MODIFIED: Return placeholder or restricted data if election is open (scheduled) ---
             if is_election_open:
-                # Option 1: Return a message indicating results are not available yet
                 return jsonify({
-                    'isOpen': True, # Reflects the dynamic state based on schedule
+                    'isOpen': True,
                     'message': 'Election is currently open. Results will be available after the election closes.',
                     'totalVotes': 0,
                     'results': []
                 }), 200
 
-                # Option 2 (Alternative): Return candidate names only, without vote counts
-                # candidates = get_candidates(include_private=False)
-                # results_placeholder = [{'id': c.id, 'name': c.name, 'councilVotes': 0, 'executiveVotes': 0} for c in candidates]
-                # return jsonify({
-                #     'isOpen': True,
-                #     'message': 'Election is currently open. Vote counts are hidden.',
-                #     'totalVotes': 0,
-                #     'results': results_placeholder
-                # }), 200
-            # --- END MODIFIED ---
-
             # If election is NOT open (scheduled), proceed to calculate and show results
-            # Get votes data
             votes_data = get_votes()
-            # --- FIX: Handle potential None votes_data ---
             if not votes_data:
-                 # Return empty results if no votes data is found
-                 return jsonify({
-                    'isOpen': False, # Consistent with the check above (election not open, no data)
+                return jsonify({
+                    'isOpen': False,
                     'totalVotes': 0,
                     'results': []
                 }), 200
@@ -313,42 +314,38 @@ def create_app(config_name='default'):
 
             # Calculate results
             candidate_votes = {}
-            executive_votes = {}
             total_votes = len(votes_data.voter_ids)
             # Initialize vote counts for all candidates
             for candidate in candidates:
                 candidate_votes[candidate.id] = {'name': candidate.name, 'councilVotes': 0, 'executiveVotes': 0}
             # Count votes
             for vote in votes_data.votes:
-                # Count council votes
                 for candidate_id in vote.selected_candidates:
                     if candidate_id in candidate_votes:
                         candidate_votes[candidate_id]['councilVotes'] += 1
-                # Count executive votes
                 for candidate_id in vote.executive_candidates:
                     if candidate_id in candidate_votes:
                         candidate_votes[candidate_id]['executiveVotes'] += 1
-                        # Note: executive_votes dict seems less used now, candidate_votes tracks both.
-                        # if candidate_id not in executive_votes:
-                        #     executive_votes[candidate_id] = 0
-                        # executive_votes[candidate_id] += 1
+
             # Prepare results list
-            results = []
-            for candidate_id, vote_data in candidate_votes.items():
-                results.append({
+            results = [
+                {
                     'id': candidate_id,
                     'name': vote_data['name'],
                     'councilVotes': vote_data['councilVotes'],
                     'executiveVotes': vote_data['executiveVotes']
-                })
-            # Sort results by council votes (descending), then by executive votes (descending)
+                }
+                for candidate_id, vote_data in candidate_votes.items()
+            ]
+            # Sort results
             results.sort(key=lambda x: (-x['councilVotes'], -x['executiveVotes']))
-            # Return results with dynamic isOpen status (should be False here)
+
             return jsonify({
-                'isOpen': False, # Consistent with the check above (we are in the 'else' block where is_election_open is False)
+                'isOpen': False,
                 'totalVotes': total_votes,
                 'results': results
             }), 200
+
         except Exception as e:
             app.logger.error(f"Error calculating results: {e}")
             return jsonify({"message": "Error calculating results. Please try again later."}), 500
