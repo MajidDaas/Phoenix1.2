@@ -233,14 +233,28 @@ def create_app(config_name='default'):
     def get_candidates_api():
         # This endpoint returns public candidate data (without private fields)
         try:
-            candidates = get_candidates(include_private=False) # <-- Ensure private data is NOT included
+            # Get the voter's session
+            voter_session_id = session.get('voter_session_id')
+            include_private = False
+
+            if voter_session_id:
+                voter_info = voter_session.get_session(voter_session_id)
+                if voter_info:
+                    # Check if user is an eligible voter or an admin
+                    is_eligible_voter = voter_info.get('is_eligible_voter', False)
+                    is_admin = voter_info.get('is_admin', False)
+                    if is_eligible_voter or is_admin:
+                        include_private = True
+
+            # Load candidates with appropriate privacy level
+            candidates = get_candidates(include_private=include_private)
             # Convert Candidate objects to dictionaries for JSON serialization
-            candidates_dicts = [c.to_dict(include_private=False) for c in candidates]
+            candidates_dicts = [c.to_dict(include_private=include_private) for c in candidates]
             return jsonify(candidates_dicts), 200
         except Exception as e:
-            app.logger.error(f"Error fetching candidates: {e}")
-            return jsonify({"message": "Error loading candidates. Please try again later."}), 500
-
+                app.logger.error(f"Error fetching candidates: {e}")
+                return jsonify({"message": "Error loading candidates. Please try again later."}), 500
+                
     @app.route('/api/results')
     def get_results():
         try:
@@ -427,6 +441,7 @@ def create_app(config_name='default'):
                         selected_candidates=selected_candidates,
                         executive_candidates=executive_candidates,
                         voter_name=voter_info['name'],
+                        voter_email=voter_info['email'],
                         timestamp=None) # Let Vote model handle timestamp
         votes_data = get_votes()
         votes_data.voter_ids.append(voter_info['user_id'])

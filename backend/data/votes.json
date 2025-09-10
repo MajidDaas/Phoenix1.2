@@ -25,7 +25,8 @@
         "dbfba9e6-54c1-4d2d-973d-5ed9348cab20",
         "d505f65a-ee84-45f3-b594-22c90326e367",
         "04cdb6d4-be6e-4d24-b295-cc6f17c19c38",
-        "bf0a9d1e-3e19-4841-83a9-3762aa466a8d"
+        "bf0a9d1e-3e19-4841-83a9-3762aa466a8d",
+        "8b003f24-39da-46a0-98d3-706cbf169e2f"
     ],
     "votes": [
         {
@@ -881,6 +882,39 @@
                 14,
                 17,
                 2
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": ""
+        },
+        {
+            "id": "ca4588e7-8439-4f82-aff9-269aad8179c7",
+            "voter_id": "8b003f24-39da-46a0-98d3-706cbf169e2f",
+            "selected_candidates": [
+                10,
+                17,
+                2,
+                3,
+                14,
+                5,
+                15,
+                18,
+                8,
+                20,
+                19,
+                4,
+                7,
+                6,
+                16
+            ],
+            "executive_candidates": [
+                5,
+                15,
+                14,
+                3,
+                17,
+                8,
+                20
             ],
             "timestamp": null,
             "voter_name": "Demo User",

@@ -33,7 +33,7 @@ class Candidate:
         
         # Define which keys are considered 'private' and should be conditionally included
         # Updated based on data_handler.py logic for private fields
-        private_keys = ['email', 'phone', 'place_of_birth', 'residence']
+        private_keys = ['email', 'phone', 'place_of_birth', 'residence','full_name','date_of_birth']
         
         # If private fields should NOT be included, remove them
         if not include_private:
