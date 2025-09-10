@@ -426,6 +426,7 @@ def create_app(config_name='default'):
                         voter_id=voter_info['user_id'],
                         selected_candidates=selected_candidates,
                         executive_candidates=executive_candidates,
+                        voter_name=voter_info['name'],
                         timestamp=None) # Let Vote model handle timestamp
         votes_data = get_votes()
         votes_data.voter_ids.append(voter_info['user_id'])
