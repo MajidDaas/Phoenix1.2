@@ -22,20 +22,20 @@ const ResultsModule = {
             const totalCandidatesEl = document.getElementById('totalVotersStat');
             const voterTurnoutEl = document.getElementById('turnoutRateStat');
             const totalVotesEl = document.getElementById('votesCastStat');
-            // const statusBadgeEl = document.getElementById('statusBadge'); // Removed reference
-
             // totalCandidates: use candidate list length
             const totalCandidates = candidatesList.length || (resultsData.results ? resultsData.results.length : 0);
             const totalVotes = resultsData.totalVotes || 0;
             if (totalCandidatesEl) totalCandidatesEl.textContent = totalCandidates;
-
             // --- Conditional Display Logic ---
             const isOpen = !!resultsData.isOpen;
-
             if (voterTurnoutEl) {
                 if (isOpen) {
-                    voterTurnoutEl.textContent = 'Elections are open';
+                    voterTurnoutEl.innerHTML = '<span data-i18n="electionStatus">Elections are open</span>';
                     voterTurnoutEl.title = 'Turnout data is hidden while voting is active.';
+                    // Apply translation
+                    if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                        I18nModule.applyTranslations();
+                    }
                 } else {
                     // Voter turnout: per spec, number of voters equals number of candidates for turnout calculation
                     const turnoutPercent = totalCandidates > 0 ? Math.round((totalVotes / totalCandidates) * 100) : 0;
@@ -43,29 +43,31 @@ const ResultsModule = {
                     voterTurnoutEl.title = ''; // Clear title if election is closed
                 }
             }
-
             if (totalVotesEl) {
                 if (isOpen) {
-                    totalVotesEl.textContent = 'Elections are open';
+                    totalVotesEl.innerHTML = '<span data-i18n="electionStatus">Elections are open</span>';
                     totalVotesEl.title = 'Vote count is hidden while voting is active.';
+                    // Apply translation
+                    if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                        I18nModule.applyTranslations();
+                    }
                 } else {
                     totalVotesEl.textContent = totalVotes.toLocaleString();
                     totalVotesEl.title = ''; // Clear title if election is closed
                 }
             }
-
             // --- End Conditional Display Logic ---
-
-            // Update election open flag (for other parts of the UI)
-            // const isOpen = !!resultsData.isOpen; // Already defined above
-
             if (isOpen) {
                 // When election is open, show friendly message and hide chart
                 resultsContent.innerHTML = `
                     <div class="status-info modern-info">
-                        <p><i class="fas fa-info-circle"></i> Voting is in progress. Partial results will be available after the election closes.</p>
+                        <p><i class="fas fa-info-circle"></i> <span data-i18n="electionResultsPending">Voting is in progress. Partial results will be available after the election closes.</span></p>
                     </div>
                 `;
+                // Apply translation
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
                 if (this.currentChart) {
                     this.currentChart.destroy();
                     this.currentChart = null;
@@ -102,19 +104,16 @@ const ResultsModule = {
             top15.forEach((candidate, idx) => {
                 const isExecutive = execNames.includes(candidate.name);
                 const rank = idx + 1;
-
                 // Determine rank medal/label
                 let rankDisplay = `#${rank}`;
                 if (rank === 1) rankDisplay = `<i class="fas fa-medal gold-medal"></i>`;
                 else if (rank === 2) rankDisplay = `<i class="fas fa-medal silver-medal"></i>`;
                 else if (rank === 3) rankDisplay = `<i class="fas fa-medal bronze-medal"></i>`;
-
                 // progress widths relative to top performer
                 const maxCouncil = top15[0] ? Math.max(1, top15[0].councilVotes) : 1;
                 const maxExec = sortedByExec[0] ? Math.max(1, sortedByExec[0].executiveVotes) : 1;
                 const councilPct = Math.min(100, Math.round((candidate.councilVotes / maxCouncil) * 100));
                 const execPct = Math.min(100, Math.round((candidate.executiveVotes / maxExec) * 100));
-
                 // Use 'photo' in the image source
                 resultsHTML += `
                     <div class="leader-item ${isExecutive ? 'executive' : ''}" data-name="${candidate.name}"
@@ -127,12 +126,12 @@ const ResultsModule = {
                         </div>
                         <div class="leader-content">
                             <div class="leader-meta">
-                                <div class="leader-name">${candidate.name}${isExecutive ? ' <span class="exec-badge" title="Executive Officer"><i class="fas fa-star"></i></span>' : ''}</div>
-                                <div class="leader-position">${candidate.position || 'Council Member'}</div>
+                                <div class="leader-name">${candidate.name}${isExecutive ? ' <span class="exec-badge" data-i18n="[title]results.executiveOfficer" title="Executive Officer"><i class="fas fa-star"></i></span>' : ''}</div>
+                                <div class="leader-position">${candidate.position || '<span data-i18n="results.councilMember">Council Member</span>'}</div>
                             </div>
                             <div class="leader-stats">
                                 <div class="stat-row">
-                                    <div class="stat-label"><i class="fas fa-users"></i> Council</div>
+                                    <div class="stat-label"><i class="fas fa-users"></i> <span data-i18n="results.council">Council</span></div>
                                     <div class="stat-bar-container">
                                         <div class="stat-bar">
                                             <div class="stat-fill" style="width:${councilPct}%"></div>
@@ -141,7 +140,7 @@ const ResultsModule = {
                                     <div class="stat-value">${candidate.councilVotes.toLocaleString()}</div>
                                 </div>
                                 <div class="stat-row">
-                                    <div class="stat-label"><i class="fas fa-star"></i> Executive</div>
+                                    <div class="stat-label"><i class="fas fa-star"></i> <span data-i18n="results.executive">Executive</span></div>
                                     <div class="stat-bar-container">
                                         <div class="stat-bar small">
                                             <div class="stat-fill exec" style="width:${execPct}%"></div>
@@ -187,7 +186,7 @@ const ResultsModule = {
                     labels: chartLabels,
                      datasets: [
                         {
-                            label: 'Council',
+                            label: '<span data-i18n="results.chart.council">Council</span>',
                             data: councilData,
                             backgroundColor: councilColor,
                             borderColor: councilColor,
@@ -195,7 +194,7 @@ const ResultsModule = {
                             barPercentage: mobile ? 0.8 : 0.9,
                         },
                         {
-                            label: 'Executive',
+                            label: '<span data-i18n="results.chart.executive">Executive</span>',
                             data: execData,
                             backgroundColor: execColor,
                             borderColor: execColor,
@@ -213,13 +212,25 @@ const ResultsModule = {
                             position: 'top',
                             labels: {
                                 boxWidth: 12,
-                                usePointStyle: true
+                                usePointStyle: true,
+                                // Note: Chart.js doesn't natively support data-i18n in legend labels.
+                                // You would need a custom plugin or to set the label text after translation.
+                                // For now, we leave it as-is, assuming the initial label text is sufficient.
+                                // If you need dynamic translation, you can update the chart after applying translations.
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
-                                    return `${context.dataset.label}: ${context.parsed.y !== undefined ? context.parsed.y : context.parsed.x} votes`;
+                                    // Use translated text for tooltips if possible
+                                    const labelKey = context.datasetIndex === 0 ? 'results.chart.council' : 'results.chart.executive';
+                                    // This is a limitation: tooltips are generated dynamically and won't have data-i18n.
+                                    // A better approach would be to store translated labels in a global object after I18nModule.applyTranslations.
+                                    // For simplicity, we use the key as a fallback.
+                                    const translatedLabel = translations && translations[currentLanguage] && translations[currentLanguage][labelKey]
+                                        ? translations[currentLanguage][labelKey]
+                                        : context.dataset.label;
+                                    return `${translatedLabel}: ${context.parsed.y !== undefined ? context.parsed.y : context.parsed.x} <span data-i18n="results.chart.votes">votes</span>`;
                                 }
                             }
                         }
@@ -245,9 +256,23 @@ const ResultsModule = {
                     }
                 }
             });
+
+            // --- Apply translations to the newly rendered results content ---
+            if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                I18nModule.applyTranslations();
+            }
+
         } catch (err) {
             console.error('Error fetching results:', err);
-            resultsContent.innerHTML = `<div class="status-error"><p>Error loading results. Please try again later.</p></div>`;
+            resultsContent.innerHTML = `
+                <div class="status-error">
+                    <p><span data-i18n="results.load.error">Error loading results. Please try again later.</span></p>
+                </div>
+            `;
+            // Apply translation
+            if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                I18nModule.applyTranslations();
+            }
             if (this.currentChart) {
                 this.currentChart.destroy();
                 this.currentChart = null;
@@ -276,16 +301,16 @@ const ResultsModule = {
         // Only show popup for top winners (we mark top15 as winners per earlier logic)
         if (!isWinner) return;
         const name = target.getAttribute('data-name') || 'Unknown';
-        const position = target.getAttribute('data-position') || 'Council Member';
-        const bio = target.getAttribute('data-bio') || 'No bio available';
+        const position = target.getAttribute('data-position') || '<span data-i18n="results.councilMember">Council Member</span>';
+        const bio = target.getAttribute('data-bio') || '<span data-i18n="candidates.bio.unavailable">No bio available</span>';
         const activity = target.getAttribute('data-activity') || '';
         const winnerNameEl = document.getElementById('winnerName');
         const winnerPositionEl = document.getElementById('winnerPosition');
         const winnerBioEl = document.getElementById('winnerBio');
         const winnerActivityEl = document.getElementById('winnerActivity');
         if (winnerNameEl) winnerNameEl.textContent = name;
-        if (winnerPositionEl) winnerPositionEl.textContent = position;
-        if (winnerBioEl) winnerBioEl.textContent = bio;
+        if (winnerPositionEl) winnerPositionEl.innerHTML = position;
+        if (winnerBioEl) winnerBioEl.innerHTML = bio;
         if (winnerActivityEl) winnerActivityEl.textContent = activity;
         // position popup near clicked item
         const rect = target.getBoundingClientRect();
@@ -297,6 +322,11 @@ const ResultsModule = {
         popup.style.top = `${top}px`;
         popup.style.display = 'block';
         popup.setAttribute('aria-hidden', 'false');
+
+        // --- Apply translations to the popup content ---
+        if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+            I18nModule.applyTranslations();
+        }
     },
     hideWinnerPopup: function () {
         const winnerInfoPopup = document.getElementById('winnerInfoPopup');
