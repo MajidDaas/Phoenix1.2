@@ -124,7 +124,7 @@
     "core.scheduleFailed": "Failed to set schedule",
     "core.scheduleGeneralError": "An error occurred while setting the schedule.",
     "core.instructionsUnavailable": "Voting instructions are temporarily unavailable.",
-    "candidateSearch|placeholder": "Search candidates..."
+    "candidateSearch": "Search candidates..."
   },
   "ar": {
     "pageTitle": "التجمع الديمقراطي المدني",
@@ -251,6 +251,6 @@
     "core.scheduleFailed": "فشل في تعيين الجدول",
     "core.scheduleGeneralError": "حدث خطأ أثناء تعيين الجدول.",
     "core.instructionsUnavailable": "تعليمات التصويت غير متوفرة مؤقتًا.",
-    "candidateSearch|placeholder": "ابحث عن المرشحين..."
+    "candidateSearch": "ابحث عن المرشحين..."
   }
 }

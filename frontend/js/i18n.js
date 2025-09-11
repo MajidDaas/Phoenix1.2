@@ -46,7 +46,11 @@ switchLanguage: function(lang) {
         }
         const elementsToTranslate = document.querySelectorAll('[data-i18n]');
         elementsToTranslate.forEach(element => {
-            const key = element.getAttribute('data-i18n');
+            const fullKey = element.getAttribute('data-i18n');
+            const parts = fullKey.split('|');
+            const key = parts[0];
+            const attr = parts[1] || 'textContent'; // ✅ Default to textContent if no attribute specified
+
             const translation = translations[currentLanguage][key];
             if (translation !== undefined && translation !== null) {
                 if (element.dataset.i18nParams) {
@@ -56,13 +60,28 @@ switchLanguage: function(lang) {
                          for (const [paramKey, paramValue] of Object.entries(params)) {
                              translatedText = translatedText.replace(new RegExp(`{${paramKey}}`, 'g'), paramValue);
                          }
-                         element.innerHTML = translatedText;
+                         // ✅ Apply to correct target
+                         if (attr === 'textContent') {
+                             element.textContent = translatedText;
+                         } else {
+                             element.setAttribute(attr, translatedText);
+                         }
                      } catch (e) {
                          console.error("Error parsing i18n params for key:", key, e);
-                         element.textContent = translation;
+                         // ✅ Fallback: apply to correct target
+                         if (attr === 'textContent') {
+                             element.textContent = translation;
+                         } else {
+                             element.setAttribute(attr, translation);
+                         }
                      }
                 } else {
-                    element.textContent = translation;
+                    // ✅ Apply to correct target — THIS IS THE ONLY CHANGE
+                    if (attr === 'textContent') {
+                        element.textContent = translation;
+                    } else {
+                        element.setAttribute(attr, translation);
+                    }
                 }
             } else {
                 if (key) {
