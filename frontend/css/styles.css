@@ -1,5 +1,4 @@
 /* --- styles.css --- */
-
 /* --- ROOT VARIABLES --- */
 :root {
   --primary: #009657;
@@ -21,8 +20,17 @@
   --spacing-md: 24px;
   --spacing-lg: 32px;
   --spacing-xl: 48px;
-}
 
+  /* --- Modern Header Variables --- */
+  --header-bg: #ffffff;
+  --header-shadow: 0 2px 15px rgba(0, 0, 0, 0.08); /* Slightly softer shadow */
+  --brand-primary: #2c3e50;
+  --accent-color: #3498db;
+  --text-light: #7f8c8d;
+  --border-color: #ecf0f1;
+  --mobile-menu-bg: #f8f9fa;
+  --header-hover-bg: #f1f3f4; /* New: Hover background for tabs */
+}
 /* --- BASE & LAYOUT --- */
 * {
   box-sizing: border-box;
@@ -30,8 +38,7 @@
 body {
   font-family: 'Roboto', Arial, sans-serif;
   background: linear-gradient(135deg, var(--primary) 40%, var(--secondary) 100%);
- 
- color: var(--dark);
+  color: var(--dark);
   line-height: 1.6;
   min-height: 100vh;
   padding: var(--spacing-xs);
@@ -40,7 +47,6 @@ body {
 .hidden {
   display: none ;
 }
-
 .hidden-by-status {
   display: none !important;
 }
@@ -290,130 +296,288 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- HEADER --- */
-.header {
-  position: relative;
-  background: linear-gradient(120deg, var(--primary), var(--secondary));
-  color: white;
-  text-align: center;
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.11);
-  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-.header-controls {
-  position: absolute;
-  top: 16px;
-  left: 18px;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  z-index: 10;
-}
-.lang-switcher {
-    background-color: transparent; /* Make background transparent like other tabs */
-    color: var(--text-primary); /* Use primary text color */
-    border: none; /* Remove default button border */
-    padding: 12px 15px; /* Adjust padding to match other tabs */
-    text-align: left; /* Align text to the left */
-    width: 100%; /* Make it full width within the li */
-    cursor: pointer;
-    font-size: 1rem; /* Match font size */
+/* --- MODERN HEADER --- */
+.modern-header {
+    background-color: var(--header-bg);
+    box-shadow: var(--header-shadow);
+    padding: 15px 5%; /* Use percentage for responsive horizontal padding */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
-    align-items: center;
-    gap: 8px; /* Space between icon and text */
-    border-radius: 0; /* Remove border radius if tabs don't have it */
-    transition: background-color 0.2s ease; /* Add hover effect if desired */
+    flex-direction: column;
+    gap: 12px; /* Increased gap for spacing */
+    /* Add subtle transition for background/color changes if needed */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* --- Top Row: Branding, Language, Menu Toggle --- */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px; /* Use gap for spacing */
+}
+.header-branding {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between logo and text */
+    min-width: 0; /* Allows title to truncate if needed */
+}
+.logo-icon {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    /* Add subtle animation on hover */
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+.logo-icon:hover {
+    transform: scale(1.1);
+    color: var(--primary);
+}
+.header-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem; /* Slightly larger title */
+    margin: 0;
+    color: var(--brand-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.3s ease;
+}
+.header-title:hover {
+    color: var(--accent-color); /* Subtle hover effect */
+}
+.header-subtitle {
+    font-size: 0.9rem; /* Slightly larger subtitle */
+    color: var(--text-light);
+    margin: 0;
+    display: none; /* Hidden by default, shown on larger screens */
+}
+
+/* Language Switcher Button */
+.lang-switcher {
+    background-color: var(--mobile-menu-bg);
+    border: 1px solid var(--border-color);
+    color: var(--brand-primary);
+    padding: 8px 15px; /* Slightly increased padding */
+    border-radius: 25px; /* Slightly more pill-shaped */
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease; /* Smooth transition for all changes */
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Space between icon and text */
+    white-space: nowrap;
+    /* Add a subtle box-shadow on hover */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 .lang-switcher:hover {
-background-color: var(--hover-bg);
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    transform: translateY(-2px); /* Lift slightly on hover */
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2); /* Add shadow */
 }
-.lang-switcher .lang-text {
-     color: inherit;
+.lang-switcher:focus {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
 }
-.admin-btn {
-  padding: 8px 20px;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: var(--pill-radius);
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 1rem;
-  font-family: inherit;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
-  transition: var(--transition);
-  outline: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+    /* Add transition for smooth icon animation */
+    transition: transform 0.3s ease;
 }
-.admin-btn:hover {
-  background: var(--secondary);
-  color: var(--dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.hamburger-icon {
+    width: 100%;
+    height: 3px;
+    background-color: var(--brand-primary);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+    transform-origin: center; /* Ensure rotation happens from center */
 }
-.admin-btn.hidden {
-  display: none;
-}
-.header h1 {
-  font-size: 1.8rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  margin-bottom: var(--spacing-xs);
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  flex-wrap: wrap;
-}
-.header p {
-  font-size: 1rem;
-  opacity: 0.95;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-}
+
+/* --- Election Status --- */
 .election-status {
-  display: inline-block;
-  background: #fff;
-  color: var(--primary);
-  border-radius: var(--pill-radius);
-  padding: 8px 20px;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-top: var(--spacing-sm);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  letter-spacing: 0.5px;
-  transition: var(--transition);
-  border: 2px solid var(--primary);
+    font-size: 0.95rem; /* Slightly larger */
+    padding: 7px 15px; /* Slightly increased padding */
+    border-radius: 25px; /* More pill-shaped */
+    display: inline-flex;
+    align-items: center;
+    gap: 7px; /* Space between icon and text */
+    font-weight: 500;
+    margin: 0;
+    /* Add subtle animation */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.election-status:hover {
+    transform: translateY(-1px); /* Lift slightly on hover */
 }
 .election-status.open {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border-color: #2e7d32;
-}
-.election-status.warning {
-  background: #fff8e1;
-  color: #f57f17;
-  border-color: #f57f17;
-  animation: pulseYellow 2s infinite;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    box-shadow: 0 2px 5px rgba(46, 125, 50, 0.1);
 }
 .election-status.closed {
-  background: #ffebee;
-  color: #c62828;
-  border-color: #c62828;
+    background-color: #ffebee;
+    color: #c62828;
+    box-shadow: 0 2px 5px rgba(198, 40, 40, 0.1);
 }
-@keyframes pulseYellow {
-  0% { box-shadow: 0 0 0 0 rgba(245, 127, 23, 0.4); }
-  70% { box-shadow: 0 0 0 8px rgba(245, 127, 23, 0); }
+.election-status.warning {
+    background-color: #fff8e1;
+    color: #f57f17;
+    box-shadow: 0 2px 5px rgba(245, 127, 23, 0.1);
+    animation: pulseYellowHeader 1.5s infinite; /* Faster pulse */
+}
+@keyframes pulseYellowHeader {
+  0% { box-shadow: 0 0 0 0 rgba(245, 127, 23, 0.3); }
+  70% { box-shadow: 0 0 0 6px rgba(245, 127, 23, 0); }
   100% { box-shadow: 0 0 0 0 rgba(245, 127, 23, 0); }
 }
 
-/* --- TABS --- */
+
+/* --- Navigation Menu --- */
+.header-nav {
+    display: block;
+}
+.nav-tabs {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    /* Add gap for spacing between tabs */
+    gap: 6px;
+    /* Add smooth scrolling behavior */
+    scroll-behavior: smooth;
+}
+.nav-tabs::-webkit-scrollbar {
+    display: none;
+}
+.nav-tabs li {
+    /* Removed margin-right, using gap instead */
+}
+.tab {
+    background-color: transparent;
+    border: none;
+    padding: 10px 18px; /* Slightly increased padding */
+    border-radius: 25px; /* More pill-shaped */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--brand-primary);
+    white-space: nowrap;
+    transition: all 0.25s ease; /* Slightly faster transition */
+    position: relative; /* For potential badge or indicator positioning */
+}
+.tab:hover {
+    background-color: var(--header-hover-bg); /* Use new hover variable */
+    color: var(--accent-color); /* Change text color on hover */
+    transform: translateY(-1px); /* Lift slightly on hover */
+}
+.tab.active {
+    background-color: var(--accent-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2); /* Add shadow */
+    font-weight: 600; /* Slightly bolder */
+    /* Add subtle scale effect for emphasis */
+    transform: translateY(-1px) scale(1.02);
+}
+.tab.hidden-by-status {
+    display: none;
+}
+.tab:focus {
+    outline: 2px solid var(--secondary);
+    outline-offset: 2px;
+    z-index: 1; /* Ensure focus ring is visible */
+}
+
+/* --- Responsive Styles for Modern Header --- */
+@media (max-width: 768px) {
+    .modern-header {
+        padding: 12px 4%;
+    }
+    .header-title {
+        font-size: 1.3rem;
+    }
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    .header-subtitle {
+        display: none;
+    }
+    .header-nav {
+        display: none;
+        background-color: var(--mobile-menu-bg);
+        border-top: 1px solid var(--border-color);
+        padding: 10px 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+    .header-nav.active {
+        display: block;
+    }
+    .nav-tabs {
+        flex-direction: column;
+        overflow-x: visible;
+        gap: 0; /* Remove gap for vertical layout */
+    }
+    .nav-tabs li {
+        margin-bottom: 5px;
+    }
+    .tab {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 20px;
+        border-radius: 0;
+        /* Add hover effect for mobile */
+        transition: background-color 0.2s ease;
+    }
+    .tab:last-child {
+        margin-bottom: 0;
+    }
+    /* Hamburger animation */
+    .mobile-menu-toggle.active {
+        transform: rotate(90deg); /* Rotate icon for open state */
+    }
+    .mobile-menu-toggle.active .hamburger-icon:nth-child(1) {
+         transform: translateY(9px) rotate(45deg);
+     }
+     .mobile-menu-toggle.active .hamburger-icon:nth-child(2) {
+         opacity: 0;
+     }
+     .mobile-menu-toggle.active .hamburger-icon:nth-child(3) {
+         transform: translateY(-9px) rotate(-45deg);
+     }
+}
+@media (min-width: 769px) {
+    .header-subtitle {
+        display: block;
+    }
+    .header-nav {
+        display: block !important;
+    }
+}
+/* --- END MODERN HEADER --- */
+
+
+/* --- TABS (Legacy, consider removing if fully using .modern-header) --- */
 .tabs {
   display: flex;
   gap: 8px;
@@ -469,7 +633,6 @@ background-color: var(--hover-bg);
   outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
-
 /* --- TAB CONTENT --- */
 .tab-content {
   display: none;
@@ -486,7 +649,6 @@ background-color: var(--hover-bg);
 .tab-content.active {
   display: block;
 }
-
 /* --- CONTENT SECTION --- */
 .content-section {
   background: white;
@@ -504,7 +666,6 @@ background-color: var(--hover-bg);
   gap: 12px;
   font-family: 'Poppins', sans-serif;
 }
-
 /* --- INSTRUCTIONS CARD --- */
 .instructions-card {
   background: #e8f4f8;
@@ -531,7 +692,6 @@ background-color: var(--hover-bg);
   font-size: 0.95rem;
   line-height: 1.5;
 }
-
 /* --- SORTING CONTROLS --- */
 .sorting-controls {
   display: flex;
@@ -563,7 +723,6 @@ background-color: var(--hover-bg);
 .sorting-controls select:hover {
   border-color: var(--primary);
 }
-
 /* --- CANDIDATE SEARCH BAR --- */
 .search-container {
     margin-bottom: var(--spacing-md);
@@ -584,7 +743,6 @@ background-color: var(--hover-bg);
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
 }
-
 /* --- COMBINED VOTE CONTROLS (SORT & SEARCH) --- */
 .vote-controls-container {
     display: flex;
@@ -592,26 +750,23 @@ background-color: var(--hover-bg);
     gap: var(--spacing-sm);
     margin: var(--spacing-md) 0;
     align-items: flex-start;
-    background: #f8f9fa; /* Shared background */
-    padding: var(--spacing-sm); /* Padding around the controls */
-    border-radius: 12px; /* Rounded corners for the container */
+    background: #f8f9fa;
+    padding: var(--spacing-sm);
+    border-radius: 12px;
     width: 100%;
 }
-/* Adjust existing sorting controls for the new layout */
 .vote-controls-container .sorting-controls {
     flex: 1;
     margin: 0;
     min-width: 200px;
-    background: transparent; /* Remove individual background */
-    padding: 0; /* Remove individual padding */
+    background: transparent;
+    padding: 0;
 }
-/* Style the search container within the combined area */
 .vote-controls-container .search-container {
     flex: 1;
     margin: 0;
     min-width: 150px;
 }
-/* Style the search input */
 .vote-controls-container .search-container input {
     width: 100%;
     padding: 10px 14px;
@@ -628,8 +783,6 @@ background-color: var(--hover-bg);
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
 }
-
-
 /* --- SELECTION HEADER --- */
 .selection-header {
   display: flex;
@@ -669,26 +822,20 @@ background-color: var(--hover-bg);
   text-align: center;
 }
 /* --- VOTE COUNTERS (Enhanced) --- */
-/* Make the Executive Officer counter background gold */
 .counter-group:nth-child(2) .counter {
   background-color: var(--warning);
   color: #fff;
 }
-/* Make the Executive Officer label text gold */
 .counter-group:nth-child(2) h3 {
   color: var(--warning);
 }
-/* Optional: If you also want the icon in the Executive Officer label to be gold */
 .counter-group:nth-child(2) h3 i.fas.fa-star {
   color: var(--warning);
 }
-/* Keep the Council Members counter text color as primary */
 .counter-group:nth-child(1) .counter {
   color: white;
   background-color: var(--primary);
 }
-
-
 /* --- CANDIDATE CARDS --- */
 .candidate-grid {
   display: grid;
@@ -823,7 +970,7 @@ background-color: var(--hover-bg);
   background: #007d4a;
 }
 .close-details {
-    position: fixed; /* Keep close button visible when scrolling */
+    position: fixed;
     top: 12px;
     right: 12px;
     background: #eee;
@@ -838,7 +985,7 @@ background-color: var(--hover-bg);
     color: var(--gray);
     font-size: 1rem;
     transition: var(--transition);
-    z-index: 15; /* Ensure it's above the scrolling content */
+    z-index: 15;
 }
 .close-details:hover {
   background: var(--danger);
@@ -858,9 +1005,8 @@ background-color: var(--hover-bg);
     display: none;
     flex-direction: column;
     animation: slideUp 0.25s ease forwards;
-    /* --- NEW: Constrain content and allow scrolling --- */
-    overflow-y: auto; /* Enable vertical scrollbar if content overflows */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .candidate-details.show {
   display: flex;
@@ -869,7 +1015,6 @@ background-color: var(--hover-bg);
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 /* --- BUTTONS --- */
 .btn {
   background: var(--primary);
@@ -1033,7 +1178,6 @@ background-color: var(--hover-bg);
   justify-content: center;
   margin-top: var(--spacing-lg);
 }
-
 /* --- VALIDATION POPUP --- */
 .validation-popup {
   position: fixed;
@@ -1069,7 +1213,6 @@ background-color: var(--hover-bg);
   margin: 0;
   padding: 0;
 }
-
 /* --- OTHER STYLES --- */
 .stats-card, .results-card, .info-card, .admin-card {
   background: white;
@@ -1110,11 +1253,9 @@ background-color: var(--hover-bg);
   font-weight: 700;
   color: var(--primary);
 }
-
 /* --- LEADERBOARD (Improved Results Tab) --- */
 .leaderboard {
   display: grid;
-  /* Responsive grid: 1 column on small screens, 2 on medium, 3 on large */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-md);
   padding: var(--spacing-md) 0;
@@ -1132,7 +1273,7 @@ background-color: var(--hover-bg);
   cursor: pointer;
   position: relative;
   border: 1px solid var(--light-gray);
-  overflow: hidden; /* Contain the pseudo-element */
+  overflow: hidden;
 }
 .leader-item:hover {
   transform: translateY(-3px);
@@ -1141,13 +1282,12 @@ background-color: var(--hover-bg);
 }
 .leader-item.executive {
   border: 1px solid var(--warning);
-  background-color: #fffaf0; /* Very light orange background */
+  background-color: #fffaf0;
   box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15);
 }
 .leader-item.executive:hover {
   box-shadow: 0 8px 20px rgba(243, 156, 18, 0.25);
 }
-/* Rank styling with medals */
 .leader-rank {
   font-size: 1.8rem;
   font-weight: bold;
@@ -1160,16 +1300,15 @@ background-color: var(--hover-bg);
 .leader-rank .fa-medal.gold-medal { color: #FFD700; font-size: 2rem; }
 .leader-rank .fa-medal.silver-medal { color: #C0C0C0; font-size: 2rem; }
 .leader-rank .fa-medal.bronze-medal { color: #CD7F32; font-size: 2rem; }
-/* Avatar/Photo styling */
 .leader-avatar {
-  flex-shrink: 0; /* Prevent avatar from shrinking */
+  flex-shrink: 0;
 }
 .leader-avatar img,
 .avatar-placeholder {
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  object-fit: cover; /* Ensures photo covers the area */
+  object-fit: cover;
   border: 2px solid #eee;
   display: flex;
   align-items: center;
@@ -1183,12 +1322,11 @@ background-color: var(--hover-bg);
     border-color: var(--warning);
     box-shadow: 0 2px 6px rgba(243, 156, 18, 0.1);
 }
-/* Content area (name, position, stats) */
 .leader-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Allows content to shrink if needed */
+  min-width: 0;
 }
 .leader-meta {
   margin-bottom: var(--spacing-sm);
@@ -1201,7 +1339,7 @@ background-color: var(--hover-bg);
   display: flex;
   align-items: center;
   gap: 6px;
-  word-break: break-word; /* Break long names */
+  word-break: break-word;
 }
 .exec-badge {
   color: var(--warning);
@@ -1213,7 +1351,6 @@ background-color: var(--hover-bg);
   font-style: italic;
   word-break: break-word;
 }
-/* Stats styling */
 .leader-stats {
   display: flex;
   flex-direction: column;
@@ -1228,14 +1365,14 @@ background-color: var(--hover-bg);
 .stat-label {
   color: var(--dark);
   font-weight: 500;
-  min-width: 90px; /* Consistent label width */
+  min-width: 90px;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 .stat-bar-container {
   flex: 1;
-  min-width: 80px; /* Minimum width for the bar container */
+  min-width: 80px;
 }
 .stat-bar {
   background: #e9ecef;
@@ -1253,7 +1390,7 @@ background-color: var(--hover-bg);
   background: var(--primary);
   border-radius: 10px;
   transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-  width: 0; /* Start at 0 for animation */
+  width: 0;
 }
 .stat-fill.exec {
   background: var(--warning);
@@ -1267,25 +1404,22 @@ background-color: var(--hover-bg);
   white-space: nowrap;
 }
 /* --- STATS CARD (Ensuring it appears below leaderboard) --- */
-/* Target the content section within the results tab */
 #results .content-section {
   display: flex;
   flex-direction: column;
 }
-/* Style the results card (leaderboard container) */
 .results-card.modern-results {
-  order: 1; /* This will make it appear first */
-  flex: 1; /* Allow it to grow */
-  margin-bottom: var(--spacing-md); /* Add some space below the leaderboard */
-  padding: 0; /* Remove padding as leaderboard items have their own */
-  background: transparent; /* Make transparent so grid items show their own background */
-  border: none; /* Remove border */
-  box-shadow: none; /* Remove box-shadow */
+  order: 1;
+  flex: 1;
+  margin-bottom: var(--spacing-md);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
-/* Style the stats card */
 .stats-card.modern-stats {
-  order: 2; /* This will make it appear second (below the leaderboard) */
-  flex: 0 0 auto; /* Don't let it grow, keep its natural size */
+  order: 2;
+  flex: 0 0 auto;
   width: 100%;
   background: white;
   border-radius: var(--border-radius);
@@ -1294,13 +1428,10 @@ background-color: var(--hover-bg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid var(--light-gray);
 }
-/* Ensure the chart container comes after */
 .chart-container.responsive-chart {
-  order: 3; /* This will make it appear last */
-  flex: 1; /* Allow it to grow */
+  order: 3;
+  flex: 1;
 }
-
-
 /* --- WINNER POPUP --- */
 #winnerInfoPopup {
   position: absolute;
@@ -1354,7 +1485,6 @@ background-color: var(--hover-bg);
 .winner-details strong {
   color: var(--primary);
 }
-
 /* --- STATUS MESSAGES --- */
 .message {
   position: fixed;
@@ -1386,8 +1516,6 @@ background-color: var(--hover-bg);
 .message.error { background: var(--danger); }
 .message.info { background: var(--info); }
 .message.warning { background: var(--warning); color: #212529; }
-
-
 /* --- LOADER --- */
 .loader {
   border: 4px solid #f3f3f3;
@@ -1402,7 +1530,6 @@ background-color: var(--hover-bg);
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 /* --- FOOTER --- */
 .footer {
   text-align: center;
@@ -1414,7 +1541,6 @@ background-color: var(--hover-bg);
   background: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 /* --- THANK YOU CARD --- */
 .thank-you-card {
     background: linear-gradient(135deg, #28a745 0%, #218838 100%);
@@ -1449,7 +1575,6 @@ background-color: var(--hover-bg);
     margin-top: 30px;
     flex-wrap: wrap;
 }
-
 /* --- ELECTION CLOSED CARD --- */
 .election-closed-card {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
@@ -1484,7 +1609,6 @@ background-color: var(--hover-bg);
     margin-top: 30px;
     flex-wrap: wrap;
 }
-
 /* --- BUTTON STYLES FOR CARDS --- */
 .thank-you-card .btn,
 .election-closed-card .btn {
@@ -1517,12 +1641,10 @@ background-color: var(--hover-bg);
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
 }
-
 /* --- SKELETON SCREEN --- */
 .skeleton {
   animation: skeleton-loading 1s linear infinite alternate;
 }
-
 @keyframes skeleton-loading {
   0% {
     background-color: hsl(200, 20%, 80%);
@@ -1531,29 +1653,24 @@ background-color: var(--hover-bg);
     background-color: hsl(200, 20%, 95%);
   }
 }
-
 .skeleton-text {
   width: 100%;
   height: 1rem;
   margin-bottom: 0.5rem;
   border-radius: 0.25rem;
 }
-
 .skeleton-text__body {
   width: 75%;
 }
-
 .skeleton-footer {
   width: 50%;
 }
-
 .skeleton-avatar {
   width: 90px;
   height: 90px;
   border-radius: 50%;
   margin: 0 auto var(--spacing-md);
 }
-
 .skeleton-card {
   background: white;
   border: 2px solid #e9ecef;
@@ -1567,7 +1684,6 @@ background-color: var(--hover-bg);
   align-items: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-
 /* --- RESPONSIVE DESIGN --- */
 @media (max-width: 900px) {
   .main-app { padding: var(--spacing-md); }
@@ -1591,7 +1707,6 @@ background-color: var(--hover-bg);
     align-items: flex-start;
   }
   .leader-content {
-    /* Adjust content layout if needed on small screens */
   }
   .stat-row {
     flex-wrap: wrap;
@@ -1612,7 +1727,6 @@ background-color: var(--hover-bg);
         width: 100%;
     }
 }
-
 @media (max-width: 480px) {
   .header h1 { font-size: 1.5rem; }
   .auth-logo h1 { font-size: 1.8rem; }
@@ -1668,14 +1782,12 @@ background-color: var(--hover-bg);
   .sorting-controls select { min-width: 140px; }
   .tab-content { padding: var(--spacing-md) 0; }
 }
-
 /* --- ACCESSIBILITY --- */
 button:focus, input:focus, textarea:focus, select:focus,
 .tab:focus, .lang-switcher:focus, .admin-btn:focus {
   outline: 1px solid var(--secondary);
   outline-offset: 0px;
 }
-
 /* --- RTL SUPPORT --- */
 body.rtl {
   direction: rtl;
@@ -1707,13 +1819,11 @@ body.rtl .message {
   from { transform: translateX(-100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
-
 /* --- HOVER EFFECTS FOR LEADERBOARD --- */
 .leader-item:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 12px 40px rgba(253,184,19,0.18);
 }
-
 /* --- ADMIN FORM STYLES --- */
 .form-group {
     margin-bottom: 16px;
@@ -1737,40 +1847,35 @@ body.rtl .message {
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 150, 87, 0.2);
 }
-
 /* --- Candidate Info Popup Styles --- */
 .candidate-popup-overlay {
-    /* These styles are mostly handled inline in JS for dynamic creation,
-       but you can define base styles here if preferred */
-    /* display: none; (Handled by JS) */
-    /* position: fixed; (Handled by JS) */
-    /* ... other positioning ... */
-    /* background-color: rgba(0, 0, 0, 0.7); (Handled by JS) */
-    /* z-index: 10000; (Handled by JS) */
-    /* justify-content: center; (Handled by JS) */
-    /* align-items: center; (Handled by JS) */
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
 }
-
 .candidate-popup-content {
-    /* Base styles are inline, but you can add overrides or animations here */
-    /* background-color: white; (Handled by JS) */
-    /* padding: 25px; (Handled by JS) */
-    /* border-radius: 15px; (Handled by JS) */
-    /* max-width: 90%; (Handled by JS) */
-    /* width: 500px; (Handled by JS) */
-    /* max-height: 90vh; (Handled by JS) */
-    /* overflow-y: auto; (Handled by JS) */
-    /* box-shadow: 0 5px 15px rgba(0,0,0,0.3); (Handled by JS) */
-    /* position: relative; (Handled by JS) */
-    animation: fadeInScale 0.3s ease-out; /* Example animation */
+    background-color: white;
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 90%;
+    width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeInScale 0.3s ease-out;
 }
-
 @keyframes fadeInScale {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
-
-
 .candidate-popup-close {
     position: absolute;
     top: 15px;
@@ -1786,147 +1891,72 @@ body.rtl .message {
 .candidate-popup-close:hover {
     color: #333;
 }
-
-/* Ensure popup content elements inherit styles or define specific ones */
-.candidate-popup-header h2,
-.candidate-popup-header p {
-    /* Inherit or set specific fonts/colors if needed */
-}
-.candidate-popup-details h3 {
-    /* Inherit or set specific fonts/colors if needed */
-    /* border-bottom: 1px solid #eee; (Handled by JS) */
-    /* padding-bottom: 5px; (Handled by JS) */
-}
-.candidate-popup-details p {
-    /* Inherit or set specific fonts/colors/margins if needed */
-    /* white-space: pre-wrap; (Handled by JS for bio) */
-}
-/* --- End Candidate Info Popup Styles --- */
-/* In your index.html <style> tag or styles.css */
-.candidate-popup-overlay {
-    display: none; /* Or use a class like .hidden { display: none; } */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-    /* aria-hidden should be managed by JS, not CSS */
-}
-
-.candidate-popup-content {
-    background-color: white;
-    padding: 25px;
-    border-radius: 15px;
-    max-width: 90%;
-    width: 600px; /* Adjust as needed */
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.candidate-popup-close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #333;
-}
-
 .popup-header {
     text-align: center;
     margin-bottom: 20px;
 }
-
 .candidate-popup-image {
-    width: 100px; /* Or use rem/em */
+    width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 10px; /* Or use rem/em */
+    margin-bottom: 10px;
 }
-
 .popup-details {
     display: grid;
-    grid-template-columns: 1fr; /* Default to one column */
-    gap: 15px; /* Space between sections */
+    grid-template-columns: 1fr;
+    gap: 15px;
 }
-
 @media (min-width: 768px) {
     .popup-details {
-        /* On larger screens, potentially use two columns for the main grid */
-        /* grid-template-columns: 1fr 1fr; */
-         /* Or keep 1fr and let inner grids handle 2 columns */
     }
 }
-
 .detail-section {
-    /* Basic styling for each section */
 }
-
 .detail-section h3 {
-    color: var(--primary); /* Use your defined CSS variables */
+    color: var(--primary);
     border-bottom: 1px solid #eee;
     padding-bottom: 5px;
     margin-top: 0;
 }
-
 .detail-section h4 {
      color: var(--dark);
      margin-top: 0;
-     margin-bottom: 0.25em; /* Smaller margin below heading */
+     margin-bottom: 0.25em;
 }
-
 .detail-section p {
-    margin-top: 0.25em; /* Smaller margin above paragraph */
-    margin-bottom: 0.5em; /* Standard margin below */
-    /* white-space: pre-wrap; might be needed for biography if preserving line breaks */
+    margin-top: 0.25em;
+    margin-bottom: 0.5em;
 }
-
-/* Grid for Personal Info and Contact/Work sections */
 .two-column-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px; /* Space between grid items */
+    gap: 10px;
 }
-
 .activity-indicator {
     display: inline-block;
     margin-top: 10px;
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: bold;
-    /* Styles for activity-high, activity-medium, activity-low would be defined here too */
 }
-
 .activity-high {
-    background-color: #d4edda; /* Example color */
+    background-color: #d4edda;
     color: #155724;
 }
-
 .activity-medium {
     background-color: #fff3cd;
     color: #856404;
 }
-
 .activity-low {
     background-color: #f8d7da;
     color: #721c24;
 }
-
 .executive-badge {
-     /* Specific styles for the executive badge if different */
 }
-/* Basic Modal Styles (Add to your CSS) */
+/* Basic Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     z-index: 10000;
     left: 0;
@@ -1934,16 +1964,14 @@ body.rtl .message {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+    background-color: rgba(0,0,0,0.7);
 }
-
 .modal.hidden {
-    display: none !important; /* Ensure it's hidden when class is present */
+    display: none !important;
 }
-
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* 15% from the top and centered */
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
     border-radius: 10px;
@@ -1952,7 +1980,6 @@ body.rtl .message {
     position: relative;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
-
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1961,7 +1988,6 @@ body.rtl .message {
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
-
 .modal-close {
     color: #aaa;
     font-size: 28px;
@@ -1970,265 +1996,18 @@ body.rtl .message {
     background: none;
     border: none;
 }
-
 .modal-close:hover,
 .modal-close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
 }
-
 .modal-body {
     margin-bottom: 20px;
 }
-
 .modal-footer {
     text-align: right;
 }
-
-/* --- Modern Header Styles --- */
-
-:root {
-    --header-bg: #ffffff; /* Background color for the header */
-    --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --brand-primary: #2c3e50; /* Dark blue for text/icons */
-    --accent-color: #3498db; /* Blue for highlights */
-    --text-light: #7f8c8d; /* Lighter text color */
-    --border-color: #ecf0f1; /* Subtle border color */
-    --mobile-menu-bg: #f8f9fa; /* Background for mobile menu */
-}
-
-.modern-header {
-    background-color: var(--header-bg);
-    box-shadow: var(--header-shadow);
-    padding: 15px 5%;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Space between elements */
-}
-
-/* --- Top Row: Branding, Language, Menu Toggle --- */
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap; /* Allow wrapping on very small screens */
-    gap: 10px;
-}
-
-.header-branding {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* Space between logo and text */
-    min-width: 0; /* Allows title to truncate if needed */
-}
-
-.logo-icon {
-    font-size: 1.8rem;
-    color: var(--accent-color);
-}
-
-.header-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.4rem;
-    margin: 0;
-    color: var(--brand-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Truncate long titles */
-}
-
-.header-subtitle {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin: 0;
-    display: none; /* Hidden by default, shown on larger screens */
-}
-
-/* Language Switcher Button */
-.lang-switcher {
-    background-color: var(--mobile-menu-bg);
-    border: 1px solid var(--border-color);
-    color: var(--brand-primary);
-    padding: 8px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap;
-}
-.lang-switcher:hover {
-    background-color: var(--accent-color);
-    color: white;
-    border-color: var(--accent-color);
-}
-
-/* Mobile Menu Toggle Button */
-.mobile-menu-toggle {
-    display: none; /* Hidden by default */
-    flex-direction: column;
-    justify-content: space-around;
-    width: 30px;
-    height: 30px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 10;
-}
-.hamburger-icon {
-    width: 100%;
-    height: 3px;
-    background-color: var(--brand-primary);
-    transition: all 0.3s ease;
-    border-radius: 2px;
-}
-
-/* --- Election Status --- */
-.election-status {
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    border-radius: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
-    margin: 0; /* Remove default margin */
-}
-.election-status.open {
-    background-color: #e8f5e9; /* Light green */
-    color: #2e7d32; /* Dark green */
-}
-.election-status.closed {
-    background-color: #ffebee; /* Light red */
-    color: #c62828; /* Dark red */
-}
-
-/* --- Navigation Menu --- */
-.header-nav {
-    display: block; /* Shown by default */
-}
-.nav-tabs {
-    list-style: none;
-    display: flex;
-    padding: 0;
-    margin: 0;
-    overflow-x: auto; /* Horizontal scroll if tabs overflow */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
-.nav-tabs::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera*/
-}
-.nav-tabs li {
-    margin-right: 5px; /* Space between tabs */
-}
-.tab {
-    background-color: transparent;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 25px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    color: var(--brand-primary);
-    white-space: nowrap;
-    transition: all 0.3s ease;
-}
-.tab:hover {
-    background-color: var(--mobile-menu-bg);
-}
-.tab.active {
-    background-color: var(--accent-color);
-    color: white;
-}
-.tab.hidden-by-status {
-    display: none; /* Controlled by JS based on user role/status */
-}
-
-
-/* --- Responsive Styles --- */
-
-@media (max-width: 768px) {
-    .modern-header {
-        padding: 12px 4%;
-    }
-
-    .header-title {
-        font-size: 1.2rem;
-    }
-
-    /* Show the mobile menu toggle */
-    .mobile-menu-toggle {
-        display: flex;
-    }
-
-    /* Hide the subtitle on small screens */
-    .header-subtitle {
-        display: none;
-    }
-
-    /* Style the collapsible navigation */
-    .header-nav {
-        display: none; /* Hidden by default on mobile */
-        background-color: var(--mobile-menu-bg);
-        border-top: 1px solid var(--border-color);
-        padding: 10px 0;
-        margin-top: 5px;
-        width: 100%;
-    }
-    .header-nav.active {
-        display: block; /* Shown when toggled */
-    }
-
-    .nav-tabs {
-        flex-direction: column; /* Stack tabs vertically */
-        overflow-x: visible; /* Remove horizontal scroll */
-    }
-    .nav-tabs li {
-        margin-right: 0; /* Remove horizontal margin */
-        margin-bottom: 5px; /* Add vertical space between tabs */
-    }
-    .tab {
-        width: 100%;
-        justify-content: flex-start;
-        padding: 12px 20px;
-        border-radius: 0;
-    }
-    .tab:last-child {
-        margin-bottom: 0; /* Remove margin on last item */
-    }
-
-    /* Hamburger animation (Optional) */
-    .mobile-menu-toggle.active .hamburger-icon:nth-child(1) {
-         transform: translateY(9px) rotate(45deg);
-     }
-     .mobile-menu-toggle.active .hamburger-icon:nth-child(2) {
-         opacity: 0;
-     }
-     .mobile-menu-toggle.active .hamburger-icon:nth-child(3) {
-         transform: translateY(-9px) rotate(-45deg);
-     }
-}
-
-@media (min-width: 769px) {
-    .header-subtitle {
-        display: block; /* Show subtitle on larger screens */
-    }
-    .header-nav {
-        display: block !important; /* Ensure nav is always visible on desktop */
-    }
-}
-
 /* Global Notification Popup (Utils.showMessage) */
 .notification-popup {
     position: fixed;
@@ -2249,26 +2028,21 @@ body.rtl .message {
     opacity: 0;
     transition: opacity 0.3s, transform 0.3s;
 }
-
 .notification-popup.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
-
 .notification-popup.notification-success {
-    background-color: #28a745; /* Green */
+    background-color: #28a745;
 }
-
 .notification-popup.notification-error {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
 }
-
 .notification-popup.notification-warning {
-    background-color: #ffc107; /* Yellow */
+    background-color: #ffc107;
     color: #212529;
 }
-
 .notification-popup.notification-info {
-    background-color: #17a2b8; /* Info blue */
+    background-color: #17a2b8;
 }
-/* --- End Modern Header Styles --- */
+

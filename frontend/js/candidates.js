@@ -72,10 +72,10 @@ const CandidatesModule = {
         }
         sortedCandidates.forEach(candidate => {
             const activityClass = candidate.activity >= 5 ? 'activity-high' :
-                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+                candidate.activity >= 3 ? 'activity-medium' : 'activity-low';
             // Define activity text keys.
             const activityTextKey = candidate.activity >= 5 ? 'candidates.activity.high' :
-                candidate.activity >= 2 ? 'candidates.activity.medium' : 'candidates.activity.low';
+                candidate.activity >= 3 ? 'candidates.activity.medium' : 'candidates.activity.low';
 
             const card = document.createElement('div');
             card.className = 'candidate-item';
@@ -188,10 +188,10 @@ const CandidatesModule = {
             infoCard.className = 'candidate-item info-candidate-item'; // Keep existing classes
             infoCard.dataset.id = candidate.id; // Store candidate ID on the card
             const activityClass = candidate.activity >= 5 ? 'activity-high' :
-                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+                candidate.activity >= 3 ? 'activity-medium' : 'activity-low';
             // Define activity text keys for info tab
             const activityTextKey = candidate.activity >= 5 ? 'candidates.activity.high' :
-                candidate.activity >= 2 ? 'candidates.activity.medium' : 'candidates.activity.low';
+                candidate.activity >= 3 ? 'candidates.activity.medium' : 'candidates.activity.low';
 
             // --- Updated Card Content ---
             infoCard.innerHTML = `
@@ -289,9 +289,9 @@ const CandidatesModule = {
         const popupBody = popup.querySelector('.candidate-popup-body');
         if (popupBody) {
             const activityClass = candidate.activity >= 5 ? 'activity-high' :
-                candidate.activity >= 2 ? 'activity-medium' : 'activity-low';
+                candidate.activity >= 3 ? 'activity-medium' : 'activity-low';
             const activityTextKey = candidate.activity >= 5 ? 'candidates.activity.highly_active' :
-                candidate.activity >= 2 ? 'candidates.activity.moderately_active' : 'candidates.activity.less_active';
+                candidate.activity >= 3 ? 'candidates.activity.moderately_active' : 'candidates.activity.less_active';
 
             popupBody.innerHTML = `
             <div class="popup-header" style="text-align: center; margin-bottom: 20px;">
