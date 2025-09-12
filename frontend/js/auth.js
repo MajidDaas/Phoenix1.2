@@ -3,73 +3,51 @@ const AuthModule = {
     // --- Demo Authentication (Revised) ---
     demoAuth: async function () {
         const demoAuthBtn = document.getElementById('demoAuthBtn');
-        // const authLoading = document.getElementById('authLoading'); // ❌ Element not found in HTML
         const authSkeletonScreen = document.getElementById('authSkeletonScreen');
         let originalBtnContent = '';
-
         if (demoAuthBtn) {
+            // Preserve original content for restoration
             originalBtnContent = demoAuthBtn.innerHTML;
-            demoAuthBtn.innerHTML = '<div class="loader" style="width: 20px; height: 20px; border-width: 2px;"></div> Entering Demo...'; // Provide visual feedback
+            // Use translation key for loading text
+            demoAuthBtn.innerHTML = '<div class="loader" style="width: 20px; height: 20px; border-width: 2px;"></div> <span data-i18n="auth.enteringDemo">Entering Demo...</span>';
             demoAuthBtn.disabled = true;
-        }
 
+            // Apply translations for button text
+            if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                I18nModule.applyTranslations();
+            }
+        }
         // Show skeleton if it exists
         if (authSkeletonScreen) {
             authSkeletonScreen.style.display = 'flex';
         }
-
         try {
             const response = await fetch('/api/auth/demo', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                    // credentials: 'include' // Usually included by default for same-origin, but good to be explicit if needed
                 }
             });
-
             if (response.ok) {
                 const data = await response.json();
                 if (data.authenticated) {
                     console.log('Demo authentication successful');
                     // --- CRITICAL: Update State ---
                     window.State.currentUser = data.user;
-                    // window.State.electionOpen = true; // Assume open or fetch status?
-                    // window.State.userHasVoted = data.user.hasVoted || false;
-                    // --- CRITICAL: Trigger UI Transition ---
-                    // Option 1: If core-main.js polls or reacts to State changes:
-                    // It should detect the change in window.State.currentUser and transition.
-                    // Option 2: Explicitly call core functions (requires them to be accessible)
-                    // You might have functions like these in core-main.js or a UI controller:
-                    // hideAuthScreen(); // Function to hide #authScreen
-                    // showMainApp();    // Function to show #mainApp and initialize it
-                    // StateModule.initialize(); // Re-initialize state if needed
-                    // Option 3: Dispatch a custom event (clean way to communicate)
-                    // window.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { user: data.user } }));
-                    // For this example, let's assume core-main handles it or we call a global init
-                    // If you have a global init function in core-main.js, call it:
-                    // if (typeof initializeApp === 'function') {
-                    //     initializeApp(); // This would re-check state and show main app
-                    // }
 
                     // Simple approach: Hide auth elements directly here
                     const authScreen = document.getElementById('authScreen');
                     const mainApp = document.getElementById('mainApp');
-                    if (authScreen) authScreen.style.display = 'none'; // or add 'hidden' class
+                    if (authScreen) authScreen.style.display = 'none';
                     if (mainApp) {
                         mainApp.classList.remove('hidden');
-                        mainApp.style.display = 'block'; // Ensure it's displayed
-                        // Re-initialize the main app state/modules if necessary
-                        // This depends on how your core-main.js is structured
-                        // StateModule.initialize(); // Example call
-                        // CandidatesModule.loadCandidates();
-                        // ResultsModule.renderResults();
-                        // VotingModule.updateUI();
+                        mainApp.style.display = 'block';
                     }
 
-
-                    Utils.showMessage('Demo mode: Authentication successful. You may now vote.', 'success');
+                    // Show success message via Utils (now supports i18n keys)
+                    Utils.showMessage('auth.demoSuccess', 'success');
                 } else {
-                     throw new Error(data.message || 'Demo authentication failed (server)');
+                    throw new Error(data.message || 'Demo authentication failed (server)');
                 }
             } else {
                 const errorData = await response.json().catch(() => ({}));
@@ -77,7 +55,9 @@ const AuthModule = {
             }
         } catch (err) {
             console.error('Demo auth error:', err);
-            Utils.showMessage(`Demo authentication failed: ${err.message}`, 'error');
+            // Show error via Utils
+            Utils.showMessage(`auth.demoFailed: ${err.message}`, 'error');
+
             // Hide skeleton on error
             if (authSkeletonScreen) {
                 authSkeletonScreen.style.display = 'none';
@@ -87,6 +67,11 @@ const AuthModule = {
             if (demoAuthBtn) {
                 demoAuthBtn.innerHTML = originalBtnContent;
                 demoAuthBtn.disabled = false;
+
+                // Re-apply translations in case original content had i18n attributes
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
             }
             // Hide skeleton in finally block to ensure it's always hidden
             if (authSkeletonScreen) {
@@ -94,13 +79,20 @@ const AuthModule = {
             }
         }
     },
-
-    // --- Google OAuth2 Authentication (Comments apply here too) ---
+    // --- Google OAuth2 Authentication ---
     signInWithGoogle: async function () {
         try {
             const googleSigninBtn = document.getElementById('googleSigninBtn');
             const authSkeletonScreen = document.getElementById('authSkeletonScreen');
-            if (googleSigninBtn) googleSigninBtn.disabled = true;
+            if (googleSigninBtn) {
+                googleSigninBtn.disabled = true;
+                // Optional: Change button text to "Redirecting..."
+                const originalText = googleSigninBtn.innerHTML;
+                googleSigninBtn.innerHTML = '<span data-i18n="auth.redirecting">Redirecting...</span>';
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
+            }
             if (authSkeletonScreen) {
                 authSkeletonScreen.style.display = 'flex';
             }
@@ -110,16 +102,22 @@ const AuthModule = {
             const authSkeletonScreen = document.getElementById('authSkeletonScreen');
             if (authSkeletonScreen) authSkeletonScreen.style.display = 'none';
             const googleSigninBtn = document.getElementById('googleSigninBtn');
-            if (googleSigninBtn) googleSigninBtn.disabled = false;
-            Utils.showMessage('An error occurred while redirecting to Google. Please try again or use Demo Mode.', 'error');
+            if (googleSigninBtn) {
+                googleSigninBtn.disabled = false;
+                // Restore original text if needed
+                googleSigninBtn.innerHTML = '<span data-i18n="signInWithGoogle">Sign in with Google</span>';
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
+            }
+            // Show error via Utils
+            Utils.showMessage('auth.googleError', 'error');
         }
-        // Finally block is not used here as the page redirects
     },
-
-    // --- Check Auth Status (This is often called on page load or periodically) ---
+    // --- Check Auth Status ---
     checkAuthStatus: async function () {
         try {
-            const response = await fetch('/api/auth/session', { credentials: 'include' }); // Ensure credentials are sent
+            const response = await fetch('/api/auth/session', { credentials: 'include' });
             if (response.ok) {
                 const data = await response.json();
                 if (data.authenticated) {
@@ -132,61 +130,49 @@ const AuthModule = {
                     return false;
                 }
             } else {
-                // Handle non-2xx responses (e.g., 401, 500)
                 console.log(`Failed to fetch auth session. Status: ${response.status}`);
-                // Optionally, check response.status for specific actions (e.g., 401 might mean session expired)
                 window.State.currentUser = null;
                 return false;
             }
         } catch (err) {
             console.log('Error checking auth status:', err);
             window.State.currentUser = null;
-            // Could potentially show a network error message here
             return false;
         }
-        // The showing/hiding of screens based on window.State should be handled by core-main.js
-        // after this function resolves (e.g., in the caller of checkAuthStatus).
     },
-
     // --- Logout (Revised) ---
     logout: async function () {
         try {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
-                credentials: 'include' // Ensure session cookie is sent
+                credentials: 'include'
             });
             // Reset local state regardless of server response (best effort)
             window.State.currentUser = null;
             window.State.userHasVoted = false;
-            window.State.electionOpen = true; // Default assumption
+            window.State.electionOpen = true;
 
-            // Option 1: Reload for a clean slate (simplest)
-            // window.location.reload();
+            // Manual UI transition
+            const authScreen = document.getElementById('authScreen');
+            const mainApp = document.getElementById('mainApp');
+            if (authScreen) {
+                authScreen.style.display = 'flex';
+                authScreen.classList.remove('hidden');
+            }
+            if (mainApp) {
+                mainApp.classList.add('hidden');
+                mainApp.style.display = 'none';
+            }
 
-            // Option 2: Manual UI transition (smoother, requires careful state management)
-             const authScreen = document.getElementById('authScreen');
-             const mainApp = document.getElementById('mainApp');
-             if (authScreen) {
-                 authScreen.style.display = 'flex'; // or remove 'hidden' class
-                 authScreen.classList.remove('hidden'); // Ensure it's visible
-             }
-             if (mainApp) {
-                 mainApp.classList.add('hidden');
-                 mainApp.style.display = 'none'; // Ensure it's hidden
-             }
-             // Reset any UI elements if needed (e.g., candidate lists, votes)
-             // VotingModule.reset(); // Hypothetical reset function
-             // CandidatesModule.clear(); // Hypothetical clear function
-
-             Utils.showMessage('Logged out successfully', 'success');
-
-             // If using a state management pattern that relies on checking auth status:
-             // StateModule.initialize(); // This might call checkAuthStatus again
+            // Show success message
+            Utils.showMessage('auth.logoutSuccess', 'success');
 
         } catch (err) {
             console.error('Error logging out:', err);
-            Utils.showMessage('Error occurred during logout. Please close and reopen the browser.', 'error');
-            // Even if server logout fails, clear local state/UI for security/usability
+            // Show error via Utils
+            Utils.showMessage('auth.logoutError', 'error');
+
+            // Even if server logout fails, clear local state/UI
             window.State.currentUser = null;
             const authScreen = document.getElementById('authScreen');
             const mainApp = document.getElementById('mainApp');
@@ -195,4 +181,3 @@ const AuthModule = {
         }
     }
 };
-// ✅ Ensure this closing brace is present

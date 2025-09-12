@@ -851,12 +851,12 @@
     "is_admin": true,
     "is_eligible_voter": true
   },
-  "675e5ef7-87a3-496e-97e1-0e065b3fa6ad": {
-    "user_id": "56e3e029-ea69-463c-8d54-232643a73cf6",
-    "email": "demo_user_56e3e029@example.com",
+  "60f980e2-5fb7-4da1-ba88-b8fbb3370052": {
+    "user_id": "51b17887-f428-40d7-966f-a2f536aa2e4f",
+    "email": "demo_user_51b17887@example.com",
     "name": "Demo User",
-    "created_at": "2025-09-11T14:37:42.942653Z",
-    "has_voted": false,
+    "created_at": "2025-09-12T10:07:24.719052Z",
+    "has_voted": true,
     "is_admin": true,
     "is_eligible_voter": true
   }

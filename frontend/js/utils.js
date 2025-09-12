@@ -1,52 +1,72 @@
-// utils.js - Small, reusable utility functions
+// utils.js - Small, reusable utility functions (i18n-ready + popup notifications)
 
 const Utils = {
-    // --- Show Status Message (persistent in tab) ---
-    showMessage: function(message, type) {
-        const div = document.createElement('div');
-        div.className = `status-message status-${type}`;
-        div.innerHTML = `<p>${message}</p>`;
-        const container = document.querySelector('.tab-content.active');
-        if (container) {
-            container.insertBefore(div, container.firstChild);
-            setTimeout(() => {
-                if (div && div.parentNode) {
-                    div.remove();
-                }
-            }, 5000);
+    // --- Show Message in Popup Notification ---
+    showMessage: function(messageKey, type = 'info') {
+        // Accept translation key OR raw HTML string
+        let messageContent = messageKey;
+
+        // If it looks like a translation key (no HTML tags), try to translate it
+        if (typeof messageKey === 'string' && !messageKey.includes('<') && translations && translations[currentLanguage]) {
+            const translated = translations[currentLanguage][messageKey];
+            if (translated !== undefined) {
+                messageContent = translated;
+            }
         }
+
+        // Create or get notification popup
+        let popup = document.getElementById('globalNotificationPopup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'globalNotificationPopup';
+            popup.className = 'notification-popup';
+            document.body.appendChild(popup);
+        }
+
+        // Set content
+        popup.innerHTML = messageContent;
+
+        // Set style based on type
+        popup.className = 'notification-popup notification-' + type;
+
+        // Show popup with animation
+        popup.classList.add('show');
+
+        // Auto-hide after 3 seconds
+        clearTimeout(popup._hideTimer);
+        popup._hideTimer = setTimeout(() => {
+            popup.classList.remove('show');
+        }, 3000);
     },
 
     // --- Show Validation Popup (centered, auto-hiding) ---
-    showValidationPopup: function(message) {
+    showValidationPopup: function(messageKey) {
+        // Accept translation key OR raw string
+        let messageContent = messageKey;
+
+        if (typeof messageKey === 'string' && !messageKey.includes('<') && translations && translations[currentLanguage]) {
+            const translated = translations[currentLanguage][messageKey];
+            if (translated !== undefined) {
+                messageContent = translated;
+            }
+        }
+
         const popup = document.getElementById('validationPopup');
         const messageEl = document.getElementById('validationMessage');
-        
         if (popup && messageEl) {
-            // Set message
-            messageEl.textContent = message;
-            
-            // Show popup
+            messageEl.innerHTML = messageContent;
             popup.classList.remove('hidden');
-            
-            // Auto-hide after 2 seconds
+
             setTimeout(() => {
                 popup.classList.add('hidden');
             }, 2000);
         } else {
-            console.warn('Validation popup elements not found. Ensure #validationPopup and #validationMessage exist in HTML.');
-            // Fallback: show as regular message
-            this.showMessage(message, 'error');
+            console.warn('Validation popup elements not found. Fallback to global notification.');
+            this.showMessage(messageKey, 'error');
         }
     },
 
     // --- Sort Candidates Utility ---
-    /**
-     * Sorts an array of candidate objects based on the given criteria.
-     * @param {Array} candidatesArray - The array of candidate objects to sort.
-     * @param {string} criteria - The sorting criteria ('name-asc', 'name-desc', 'activity-asc', 'activity-desc').
-     * @returns {Array} - The sorted array.
-     */
     sortCandidates: function(candidatesArray, criteria) {
         return candidatesArray.sort((a, b) => {
             switch (criteria) {

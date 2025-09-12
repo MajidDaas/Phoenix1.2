@@ -143,34 +143,41 @@ class ElectionAPI {
     }
     // --- END NEW ---
 
-    // --- NEW: Admin API to Export Votes (as JSON) ---
-    static async exportVotes() {
-        const response = await fetch(`${API_BASE_URL}/admin/votes/export`, {
-            method: 'GET',
-             credentials: 'include' // Ensure session cookie is sent
-        });
+// --- NEW: Admin API to Export Votes (as JSON) ---
+/**
+ * Fetches the votes export file from the backend.
+ * This function returns the raw fetch Response object to allow the caller
+ * to handle the file download (e.g., by calling response.blob()).
+ * @returns {Promise<Response>} The fetch Response object.
+ * @throws {Error} Throws an error if the network request fails or the response is not OK.
+ */
+static async exportVotes() {
+    const response = await fetch(`${API_BASE_URL}/admin/votes/export`, {
+        method: 'GET',
+        credentials: 'include' // Ensure session cookie is sent
+    });
 
-         if (!response.ok) {
-            throw new Error(`Export failed: ${response.statusText}`);
+    if (!response.ok) {
+        // Try to get a more specific error message from the server if it sent JSON
+        let errorMessage = `Export failed: ${response.statusText} (${response.status})`;
+        try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+                errorMessage = errorData.error;
+            } else if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+            }
+        } catch (e) {
+            // Ignore errors in parsing error response, use default message
         }
-
-        // Parse the JSON response body (contains vote data)
-        const data = await response.json();
-        console.log('Exported votes (JSON):', data);
-        // In a real app, you might create a downloadable JSON file here
-        // const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        // const url = URL.createObjectURL(blob);
-        // const a = document.createElement('a');
-        // a.href = url;
-        // a.download = 'votes_export.json';
-        // document.body.appendChild(a);
-        // a.click();
-        // a.remove();
-        // URL.revokeObjectURL(url);
-
-        return data; // Return the data for potential further processing
+        throw new Error(errorMessage);
     }
-    // --- END NEW ---
+
+    // Return the raw Response object. Do NOT call response.json() or response.blob() here.
+    // The caller (e.g., admin.js) will handle the blob and trigger the download.
+    return response;
+}
+// --- END NEW ---
 }
 
 // Make it globally available for use in other scripts like admin.js

@@ -2229,4 +2229,46 @@ body.rtl .message {
     }
 }
 
+/* Global Notification Popup (Utils.showMessage) */
+.notification-popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    z-index: 10000;
+    padding: 16px 24px;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-width: 90%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.notification-popup.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification-popup.notification-success {
+    background-color: #28a745; /* Green */
+}
+
+.notification-popup.notification-error {
+    background-color: #dc3545; /* Red */
+}
+
+.notification-popup.notification-warning {
+    background-color: #ffc107; /* Yellow */
+    color: #212529;
+}
+
+.notification-popup.notification-info {
+    background-color: #17a2b8; /* Info blue */
+}
 /* --- End Modern Header Styles --- */

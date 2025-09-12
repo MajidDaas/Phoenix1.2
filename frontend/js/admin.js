@@ -12,7 +12,7 @@ const AdminModule = {
             window.location.href = '/auth/google/login';
         } catch (err) {
             console.error('Error initiating Google admin sign-in redirect:', err);
-            Utils.showMessage('An error occurred while redirecting to Google. Please try again.', 'error');
+            Utils.showMessage('auth.googleError', 'error');
         } finally {
             const googleAdminBtn = document.getElementById('googleAdminSigninBtn');
             const adminAuthLoading = document.getElementById('adminAuthLoading');
@@ -22,19 +22,16 @@ const AdminModule = {
             }
         }
     },
-
     // --- NEW: Add Candidate Functionality (Updated for Enter Navigation & Confirmation) ---
     addCandidate: async function (event) {
         event.preventDefault(); // Prevent default form submission
         const addCandidateForm = event.target; // Get the form element from the event
         if (!addCandidateForm) {
             console.error("Add Candidate form not found in event.");
-            Utils.showMessage('UI Error: Form not found.', 'error');
+            Utils.showMessage('admin.uiErrorFormNotFound', 'error');
             return;
         }
-
         // --- Collect form data using the actual IDs from index.html ---
-        // Map HTML form field IDs to temporary JS variable names
         const formDataTemp = {
             name: document.getElementById('candidateName')?.value.trim() || '',
             photo: document.getElementById('candidatePhoto')?.value.trim() || '',
@@ -49,13 +46,11 @@ const AdminModule = {
             activity: parseInt(document.getElementById('candidateActivity')?.value.trim(), 10) || 0,
             date_of_birth: document.getElementById('candidateDoB')?.value.trim() || '',
             work: document.getElementById('candidateWork')?.value.trim() || '',
-            education: document.getElementById('candidateEducation')?.value.trim() || '', // Corrected ID
+            education: document.getElementById('candidateEducation')?.value.trim() || '',
             facebook_url: document.getElementById('candidateFacebook')?.value.trim() || '',
         };
-
-        console.log("Collected Candidate Data (raw):", formDataTemp); // For debugging
-
-        // --- Transform keys to match backend expectations (data_handler.py add_candidate) ---
+        console.log("Collected Candidate Data (raw):", formDataTemp);
+        // --- Transform keys to match backend expectations ---
         const formDataObject = {
             name: formDataTemp.name,
             photo: formDataTemp.photo,
@@ -73,73 +68,71 @@ const AdminModule = {
             education: formDataTemp.education,
             facebook_url: formDataTemp.facebook_url,
         };
-
-        console.log("Candidate Data (to be sent):", formDataObject); // For debugging
-
-        // --- Validate required fields based on actual form and backend needs ---
-        // Backend requires 'name' and 'bio'. 'bio' comes from candidateBriefBio.
+        console.log("Candidate Data (to be sent):", formDataObject);
+        // --- Validate required fields ---
         if (!formDataObject.name || !formDataObject.bio) {
-            Utils.showMessage('Please fill in the required fields: Name and Brief Biography.', 'error');
-            return; // Stop submission if validation fails
+            Utils.showMessage('admin.requiredFields', 'error');
+            return;
         }
-
         // --- NEW: Confirmation Dialog ---
-        const confirmationMessage = `Are you sure you want to add the candidate "${formDataObject.name}"?\n\nPlease verify the details before proceeding.`;
+        const confirmationMessage = translations[currentLanguage]?.admin.confirmAddCandidate
+            ? translations[currentLanguage].admin.confirmAddCandidate.replace('{name}', formDataObject.name)
+            : `Are you sure you want to add the candidate "${formDataObject.name}"? Please verify the details before proceeding.`;
         const isConfirmed = window.confirm(confirmationMessage);
         if (!isConfirmed) {
             console.log("Candidate addition cancelled by user.");
             return;
         }
         // --- END NEW ---
-
         // Disable submit button and show loading indicator
         const submitBtn = addCandidateForm.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
-        const resetBtn = addCandidateForm.querySelector('button[type="reset"]'); // Also disable reset button
+        const resetBtn = addCandidateForm.querySelector('button[type="reset"]');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span data-i18n="admin.addingCandidate">Adding...</span>';
+            // Apply translations
+            if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                I18nModule.applyTranslations();
+            }
         }
         if (resetBtn) {
             resetBtn.disabled = true;
         }
-
         try {
-            // --- Call the API function from api.js ---
             const result = await ElectionAPI.addCandidate(formDataObject);
-            console.log("API Response:", result); // For debugging
+            console.log("API Response:", result);
             if (result && result.message) {
-                // Check if the message indicates success
                 if (result.message.toLowerCase().includes('success') || result.message.includes('added') || result.message.includes('created')) {
-                    Utils.showMessage(`Success: ${result.message}`, 'success');
-                    addCandidateForm.reset(); // Clear the form on success
-                    // Refresh candidate lists if needed
+                    Utils.showMessage('admin.addCandidateSuccess', 'success');
+                    addCandidateForm.reset();
                     if (typeof CandidatesModule !== 'undefined' && typeof CandidatesModule.loadCandidates === 'function') {
                          CandidatesModule.loadCandidates();
                     } else {
                          console.warn("CandidatesModule.loadCandidates not found. Candidate list might not update automatically.");
                     }
                 } else {
-                    // Assume it's an error message from the backend
-                    Utils.showMessage(`Notice: ${result.message}`, 'warning'); // Use warning/info for backend messages that aren't strictly errors
+                    Utils.showMessage(`admin.backendNotice: ${result.message}`, 'warning');
                 }
             } else {
-                Utils.showMessage('Unexpected response from server.', 'error');
+                Utils.showMessage('admin.unexpectedResponse', 'error');
             }
         } catch (error) {
             console.error('Error adding candidate:', error);
-            // Check if error is a network issue or if we got a response with an error status
             if (error instanceof TypeError && error.message.includes('fetch')) {
-                Utils.showMessage('Network error. Please check your connection.', 'error');
+                Utils.showMessage('admin.networkError', 'error');
             } else {
-                // This handles errors thrown by our API function (e.g., non-2xx status)
-                Utils.showMessage(`Failed to add candidate: ${error.message || 'Unknown error'}`, 'error');
+                Utils.showMessage('admin.addCandidateFailed', 'error');
             }
         } finally {
             // Re-enable submit and reset buttons and restore original text
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText || '<i class="fas fa-plus-circle"></i> Add Candidate'; // Restore original text or default
+                submitBtn.innerHTML = originalBtnText || '<i class="fas fa-plus-circle"></i> <span data-i18n="addCandidate">Add Candidate</span>';
+                // Apply translations
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
             }
             if (resetBtn) {
                 resetBtn.disabled = false;
@@ -147,184 +140,256 @@ const AdminModule = {
         }
     },
     // --- END NEW ---
-    // - Toggle Election Status with Animations (unchanged) -
+    // - Toggle Election Status with Animations -
     toggleElection: async function () {
         const toggleBtn = document.getElementById('electionToggle');
         if (!toggleBtn) {
             console.error("Election toggle button not found.");
-            Utils.showMessage('UI Error: Toggle button not found.', 'error');
+            Utils.showMessage('admin.uiErrorToggleNotFound', 'error');
             return;
         }
-
-        // Disable button immediately to prevent spam
         toggleBtn.disabled = true;
-
         try {
-            // 1. Fetch current status
             const statusResponse = await ElectionAPI.getElectionStatus();
             const isOpen = statusResponse.is_open;
-
-            // 2. Determine new status
             const newStatus = !isOpen;
             console.log(`Toggling election status from ${isOpen} to ${newStatus}`);
-
-            // 3. Call API to update status
             const updateResponse = await fetch('/api/admin/election/toggle', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Include credentials if your auth mechanism requires it (e.g., session cookies)
-                    'credentials': 'include', // Ensure session cookie is sent
+                    'credentials': 'include',
                 },
                 body: JSON.stringify({ is_open: newStatus })
             });
-
             if (!updateResponse.ok) {
                 const errorData = await updateResponse.json().catch(() => ({}));
                 const errorMessage = errorData.message || updateResponse.statusText;
                 throw new Error(`Failed to update election status: ${errorMessage}`);
             }
-
             const data = await updateResponse.json();
             console.log("Election status update response:", data);
-
-            // 4. Update frontend state
             window.State.electionOpen = data.is_open;
             console.log("Frontend electionOpen state updated to:", window.State.electionOpen);
-
-            // 5. Update UI elements
             const electionStatusElement = document.getElementById('electionStatus');
             if (electionStatusElement) {
                 if (data.is_open) {
-                    electionStatusElement.innerHTML = '<i class="fas fa-lock-open"></i> Election is open';
-                    electionStatusElement.classList.remove('closed');
-                    electionStatusElement.classList.add('open');
+                    electionStatusElement.innerHTML = '<i class="fas fa-lock-open"></i> <span data-i18n="electionIsClosed">Election is open</span>';
                 } else {
-                    electionStatusElement.innerHTML = '<i class="fas fa-lock"></i> Election is closed';
-                    electionStatusElement.classList.remove('open');
-                    electionStatusElement.classList.add('closed');
+                    electionStatusElement.innerHTML = '<i class="fas fa-lock"></i> <span data-i18n="electionIsClosed">Election is closed</span>';
+                }
+                // Apply translations
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
                 }
             }
-
-            // 6. Update button text and style with animation
+            // Update button text and style with animation
             const icon = toggleBtn.querySelector('i');
             if (icon) {
-                // Remove any existing animation class
                 toggleBtn.classList.remove('scale-animation');
-
                 if (data.is_open) {
-                    // Election is now open
-                    toggleBtn.innerHTML = '<i class="fas fa-lock"></i> Close Election';
+                    toggleBtn.innerHTML = '<i class="fas fa-lock"></i> <span data-i18n="admin.closeElection">Close Election</span>';
                     toggleBtn.classList.remove('btn-success');
                     toggleBtn.classList.add('btn-warning');
                 } else {
-                    // Election is now closed
-                    toggleBtn.innerHTML = '<i class="fas fa-lock-open"></i> Open Election';
+                    toggleBtn.innerHTML = '<i class="fas fa-lock-open"></i> <span data-i18n="admin.openElection">Open Election</span>';
                     toggleBtn.classList.remove('btn-warning');
                     toggleBtn.classList.add('btn-success');
                 }
                 // Trigger reflow to restart animation
-                // eslint-disable-next-line no-unused-vars
                 const _ = toggleBtn.offsetWidth;
                 toggleBtn.classList.add('scale-animation');
+                // Apply translations
+                if (typeof I18nModule !== 'undefined' && typeof I18nModule.applyTranslations === 'function') {
+                    I18nModule.applyTranslations();
+                }
             }
-
-            // 7. Show success message
-            Utils.showMessage(`Election ${data.is_open ? 'opened' : 'closed'} successfully`, 'success');
-
-            // 8. Update voting tab content if needed
+            Utils.showMessage(data.is_open ? 'admin.electionOpened' : 'admin.electionClosed', 'success');
             if (typeof updateVotingTabContent === 'function') {
                  updateVotingTabContent();
             }
-
         } catch (error) {
             console.error("Error toggling election status:", error);
-            Utils.showMessage(`Failed to toggle election status: ${error.message}`, 'error');
+            Utils.showMessage('admin.toggleElectionFailed', 'error');
         } finally {
-            // Re-enable button
             toggleBtn.disabled = false;
         }
     },
+// - Export Votes -
+exportVotes: async function () {
+    try {
+        // Use the API method if available in api.js
+        if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotes === 'function') {
+            // --- CORRECTED: Handle the Response object returned by ElectionAPI.exportVotes ---
+            console.log("AdminModule.exportVotes: Calling ElectionAPI.exportVotes");
+            const response = await ElectionAPI.exportVotes(); // Get the Response object
 
-    // - Export Votes -
-    exportVotes: async function () {
-        try {
-            // Use the API method if available in api.js
-            if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotes === 'function') {
-                 // Assuming ElectionAPI.exportVotes handles the fetch and blob download
-                 await ElectionAPI.exportVotes();
-                 Utils.showMessage('Votes export initiated. Check your downloads.', 'success');
-                 return;
+            // --- CORRECTED: Perform the download logic here ---
+            console.log("AdminModule.exportVotes: ElectionAPI response received, processing for download.");
+
+            // --- Get the filename from the Content-Disposition header if possible ---
+            let filename = 'votes_export.json'; // Default filename
+            const contentDisposition = response.headers.get('Content-Disposition');
+            console.log("AdminModule.exportVotes: Response Content-Disposition:", contentDisposition);
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                    console.log("AdminModule.exportVotes: Parsed filename:", filename);
+                }
             }
 
-            // Fallback direct fetch if API method is missing
-            console.warn("ElectionAPI.exportVotes not found, using direct fetch.");
-            const response = await fetch('/api/admin/votes/export', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'credentials': 'include',
-                }
-            });
+            // --- Get the Blob from the response ---
+            const blob = await response.blob();
+            console.log("AdminModule.exportVotes: Blob received, size:", blob.size, "type:", blob.type);
 
+            // --- Create a temporary URL for the blob ---
+            const url = window.URL.createObjectURL(blob);
+            console.log("AdminModule.exportVotes: Created Object URL:", url);
+
+            // --- Create a temporary anchor element ---
+            const a = document.createElement('a');
+            a.style.display = 'none'; // Hide the anchor element
+            a.href = url;
+            a.download = filename; // Use the filename from the header or the default
+
+            // --- Trigger the download by simulating a click ---
+            console.log("AdminModule.exportVotes: Triggering download for", filename);
+            document.body.appendChild(a);
+            a.click();
+
+            // --- Clean up: remove the anchor and revoke the Object URL ---
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            console.log("AdminModule.exportVotes: Download triggered and resources cleaned up.");
+
+            Utils.showMessage('admin.votesExported', 'success'); // Use translation key
+            return; // Important: Exit after handling the API call
+            // --- END CORRECTED ---
+        }
+
+        // --- Fallback direct fetch if API method is missing (shouldn't happen now) ---
+        console.warn("ElectionAPI.exportVotes not found, using direct fetch.");
+        const response = await fetch('/api/admin/votes/export', {
+            method: 'GET',
+            // --- FIX 1: Move credentials outside headers ---
+            credentials: 'include', // Correct placement for including cookies
+            headers: {
+                // --- FIX 2: Remove Content-Type for GET request ---
+                // 'Content-Type': 'application/json', // Not needed for GET and can interfere
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.message || response.statusText;
+            throw new Error(`Export failed: ${errorMessage}`);
+        }
+
+        // --- Get the filename from the Content-Disposition header if possible (Fallback) ---
+        let filename = 'votes_export.json'; // Default filename
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1].replace(/['"]/g, '');
+            }
+        }
+
+        // --- Get the Blob from the response (Fallback) ---
+        const blob = await response.blob();
+
+        // --- Create a temporary URL for the blob (Fallback) ---
+        const url = window.URL.createObjectURL(blob);
+
+        // --- Create a temporary anchor element (Fallback) ---
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+
+        // --- Trigger the download (Fallback) ---
+        document.body.appendChild(a);
+        a.click();
+
+        // --- Clean up (Fallback) ---
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        Utils.showMessage('admin.votesExported', 'success'); // Use translation key
+    } catch (error) {
+        console.error("Error in AdminModule.exportVotes:", error);
+        // Use translation key for error message
+        Utils.showMessage('admin.exportVotesFailed', 'error');
+    }
+},
+    // - Export Votes to CSV -
+    exportVotesToCSV: async function () {
+        try {
+            if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotesToCSV === 'function') {
+                const response = await ElectionAPI.exportVotesToCSV();
+                const contentType = response.headers.get('content-type');
+                let blob;
+                if (contentType && contentType.includes('application/json')) {
+                    const jsonData = await response.json();
+                    if (jsonData.csv_data) {
+                        blob = new Blob([jsonData.csv_data], { type: 'text/csv;charset=utf-8;' });
+                    } else {
+                        throw new Error('CSV data not found in server response.');
+                    }
+                } else if (contentType && contentType.includes('text/csv')) {
+                    blob = await response.blob();
+                } else {
+                    throw new Error(`Unexpected content type: ${contentType}`);
+                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                let filename = 'votes.csv';
+                const contentDisposition = response.headers.get('Content-Disposition');
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1].replace(/['"]/g, '');
+                    }
+                }
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                Utils.showMessage('admin.votesExportedCSV', 'success');
+                return;
+            }
+            console.warn("ElectionAPI.exportVotesToCSV not found, using direct fetch.");
+            const response = await fetch('/api/admin/votes/export/csv', {
+                method: 'GET',
+                credentials: 'include',
+            });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const errorMessage = errorData.message || response.statusText;
-                throw new Error(`Export failed: ${errorMessage}`);
+                throw new Error(`CSV Export failed: ${errorMessage}`);
             }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'votes.json';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-
-            Utils.showMessage('Votes exported successfully', 'success');
-        } catch (error) {
-            console.error("Error exporting votes:", error);
-            Utils.showMessage(`Failed to export votes: ${error.message}`, 'error');
-        }
-    },
-
-// - Export Votes to CSV -
-exportVotesToCSV: async function () {
-    try {
-        // Use the API method if available in api.js
-        if (typeof ElectionAPI !== 'undefined' && typeof ElectionAPI.exportVotesToCSV === 'function') {
-            const response = await ElectionAPI.exportVotesToCSV();
-            // --- START: Handle the response based on its Content-Type ---
             const contentType = response.headers.get('content-type');
             let blob;
-
             if (contentType && contentType.includes('application/json')) {
-                // Server returned JSON. We expect the CSV data to be in a 'csv_data' field.
                 const jsonData = await response.json();
                 if (jsonData.csv_data) {
-                    // Create a Blob from the CSV string
                     blob = new Blob([jsonData.csv_data], { type: 'text/csv;charset=utf-8;' });
                 } else {
                     throw new Error('CSV data not found in server response.');
                 }
             } else if (contentType && contentType.includes('text/csv')) {
-                // Server returned the CSV file directly
                 blob = await response.blob();
             } else {
-                // Unknown content type
                 throw new Error(`Unexpected content type: ${contentType}`);
             }
-            // --- END: Handle the response based on its Content-Type ---
-
-            // Proceed with download
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            // Try to get filename from Content-Disposition header
-            const contentDisposition = response.headers.get('Content-Disposition');
             let filename = 'votes.csv';
+            const contentDisposition = response.headers.get('Content-Disposition');
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
                 if (filenameMatch && filenameMatch[1]) {
@@ -336,87 +401,27 @@ exportVotesToCSV: async function () {
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
-            Utils.showMessage('Votes exported to CSV successfully', 'success');
-            return; // Important: return here to skip the fallback code
+            Utils.showMessage('admin.votesExportedCSV', 'success');
+        } catch (error) {
+            console.error("Error exporting votes to CSV:", error);
+            Utils.showMessage('admin.exportVotesCSVFailed', 'error');
         }
-
-        // --- Fallback direct fetch if API method is missing ---
-        console.warn("ElectionAPI.exportVotesToCSV not found, using direct fetch.");
-        const response = await fetch('/api/admin/votes/export/csv', {
-            method: 'GET',
-            credentials: 'include',
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.message || response.statusText;
-            throw new Error(`CSV Export failed: ${errorMessage}`);
-        }
-
-        // --- START: Handle the fallback response based on its Content-Type ---
-        const contentType = response.headers.get('content-type');
-        let blob;
-
-        if (contentType && contentType.includes('application/json')) {
-            const jsonData = await response.json();
-            if (jsonData.csv_data) {
-                blob = new Blob([jsonData.csv_data], { type: 'text/csv;charset=utf-8;' });
-            } else {
-                throw new Error('CSV data not found in server response.');
-            }
-        } else if (contentType && contentType.includes('text/csv')) {
-            blob = await response.blob();
-        } else {
-            throw new Error(`Unexpected content type: ${contentType}`);
-        }
-        // --- END: Handle the fallback response ---
-
-        // Proceed with download
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        let filename = 'votes.csv';
-        const contentDisposition = response.headers.get('Content-Disposition');
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-            if (filenameMatch && filenameMatch[1]) {
-                filename = filenameMatch[1].replace(/['"]/g, '');
-            }
-        }
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        Utils.showMessage('Votes exported to CSV successfully', 'success');
-
-    } catch (error) {
-        console.error("Error exporting votes to CSV:", error);
-        Utils.showMessage(`Failed to export votes to CSV: ${error.message}`, 'error');
-    }
-},
-
+    },
     // - Placeholder Functions -
     refreshData: async function () {
-        Utils.showMessage('Data refreshed successfully', 'success');
-        // trigger a refresh in other modules
+        Utils.showMessage('admin.dataRefreshed', 'success');
         if (window.ResultsModule && typeof window.ResultsModule.renderResults === 'function') {
             window.ResultsModule.renderResults();
         }
     },
     backupToCloud: async function () {
-        Utils.showMessage('Data backed up to cloud successfully', 'success');
+        Utils.showMessage('admin.dataBackedUp', 'success');
     },
-
     // - Admin UI Management -
     updateAdminUIForLoggedInUser: function (user) {
         console.log("Updating Admin UI for logged-in user:", user);
-        // Assumes the user object from the backend has an 'isAdmin' boolean property
-        // e.g., { ..., "isAdmin": true, ... }
         const isAdmin = user && user.isAdmin === true;
-
-        // --- Manage visibility of the Admin Tab Button ---
-        const adminTabBtn = document.getElementById('adminTabBtn'); // The button in the main .tabs list
+        const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn) {
             if (isAdmin) {
                 adminTabBtn.classList.remove('hidden-by-status');
@@ -428,92 +433,69 @@ exportVotesToCSV: async function () {
         } else {
              console.warn("Admin tab button (#adminTabBtn) not found in the DOM.");
         }
-        // --- END ---
-
-        // Manage visibility of admin controls within the admin tab content
-        const adminControls = document.getElementById('adminControls'); // Content inside #admin tab
-        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check structure
+        const adminControls = document.getElementById('adminControls');
+        const adminPasswordSection = document.querySelector('#admin .admin-password-section');
         if (isAdmin) {
             console.log("User is an admin. Revealing admin controls in tab.");
             if (adminControls) {
                 adminControls.classList.remove('hidden');
             }
             if (adminPasswordSection) {
-                adminPasswordSection.classList.add('hidden'); // Hide password prompt if user is admin
+                adminPasswordSection.classList.add('hidden');
             }
         } else {
             console.log("User is authenticated but NOT an admin. Hiding admin controls in tab.");
             if (adminControls) {
                 adminControls.classList.add('hidden');
             }
-            // Optionally, show a "not authorized" message or the password section
-            // if (adminPasswordSection) { adminPasswordSection.classList.remove('hidden'); }
         }
-
-        // Manage visibility of the top-right admin quick-access button
-        const topRightAdminBtn = document.getElementById('adminBtn'); // Check if this ID exists in your HTML
+        const topRightAdminBtn = document.getElementById('adminBtn');
         if (isAdmin) {
             console.log("User is an admin. Revealing top-right admin button.");
             if (topRightAdminBtn) {
-                topRightAdminBtn.style.display = 'flex'; // Or remove 'hidden' class if styled that way
+                topRightAdminBtn.style.display = 'flex';
             }
         } else {
             console.log("User is authenticated but NOT an admin. Hiding top-right admin button.");
             if (topRightAdminBtn) {
-                topRightAdminBtn.style.display = 'none'; // Or add 'hidden' class
+                topRightAdminBtn.style.display = 'none';
             }
         }
     },
-
     hideAdminUIForLoggedOutUser: function () {
         console.log("Hiding all admin UI for logged-out user.");
-        // Hide content inside the admin tab
-        const adminControls = document.getElementById('adminControls'); // Check if this ID exists in your HTML
-        const adminPasswordSection = document.querySelector('#admin .admin-password-section'); // Check structure
+        const adminControls = document.getElementById('adminControls');
+        const adminPasswordSection = document.querySelector('#admin .admin-password-section');
         if (adminControls) adminControls.classList.add('hidden');
-        // Optionally show password section or a "logged out" message
-        // if (adminPasswordSection) adminPasswordSection.classList.remove('hidden');
-
-        // Hide the top-right admin button
-        const topRightAdminBtn = document.getElementById('adminBtn'); // Check if this ID exists in your HTML
+        const topRightAdminBtn = document.getElementById('adminBtn');
         if (topRightAdminBtn) {
             topRightAdminBtn.style.display = 'none';
         }
-
-        // --- Ensure the main tab button is also hidden for logged out users ---
         const adminTabBtn = document.getElementById('adminTabBtn');
         if (adminTabBtn) {
             adminTabBtn.classList.add('hidden-by-status');
             console.log("User logged out, ensuring admin tab button (#adminTabBtn) is hidden.");
         }
-        // --- END ---
     }
 };
 
 // --- ATTACH EVENT LISTENER after DOM is Loaded ---
-// This is crucial to make the form submission logic work.
 document.addEventListener('DOMContentLoaded', function () {
-    // --- Attach the Add Candidate Form Handler ---
     const addCandidateForm = document.getElementById('addCandidateForm');
     if (addCandidateForm) {
-        // --- NEW: Add Enter Key Navigation ---
         addCandidateForm.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent form submission on Enter in an input
-
+                event.preventDefault();
                 const formElements = Array.from(addCandidateForm.elements);
                 const currentIndex = formElements.indexOf(document.activeElement);
-
-                // Find the next focusable element (input, select, textarea, button)
                 let nextIndex = currentIndex + 1;
                 let nextElement = null;
                 while (nextIndex < formElements.length) {
                     const element = formElements[nextIndex];
-                    // Check if the element is focusable
                     if (
                         element &&
                         !element.disabled &&
-                        element.tabIndex !== -1 && // Not explicitly removed from tab order
+                        element.tabIndex !== -1 &&
                         ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(element.tagName)
                     ) {
                         nextElement = element;
@@ -521,33 +503,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     nextIndex++;
                 }
-
                 if (nextElement) {
                     nextElement.focus();
                 } else {
-                    // If no next element, optionally submit the form
                     addCandidateForm.dispatchEvent(new Event('submit'));
                     console.log("Reached the end of focusable elements in the form.");
                 }
             }
         });
-        // --- END NEW ---
-
-        // Bind the 'addCandidate' method of AdminModule to the form's submit event
         addCandidateForm.addEventListener('submit', AdminModule.addCandidate.bind(AdminModule));
         console.log("Add Candidate form listeners attached (Enter navigation, Submit).");
     } else {
         console.warn("Add Candidate form (#addCandidateForm) not found on this page when attaching listener.");
     }
-
-    // --- You can attach other admin-related event listeners here if needed ---
-    // Example for toggle button:
     const toggleBtn = document.getElementById('electionToggle');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', AdminModule.toggleElection);
     }
-
-    // Example for export buttons:
     const exportVotesBtn = document.getElementById('exportVotesBtn');
     if (exportVotesBtn) {
         exportVotesBtn.addEventListener('click', AdminModule.exportVotes);
@@ -556,5 +528,4 @@ document.addEventListener('DOMContentLoaded', function () {
     if (exportVotesToCSVBtn) {
         exportVotesToCSVBtn.addEventListener('click', AdminModule.exportVotesToCSV);
     }
-    // --- End other listeners ---
 });

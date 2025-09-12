@@ -1,5 +1,5 @@
 # backend/app.py - Main Flask application
-from flask import Flask, jsonify, request, send_from_directory, session, redirect, url_for, Response
+from flask import Flask, jsonify, request, send_from_directory, session, redirect, url_for, Response, send_file
 from flask_cors import CORS
 from functools import wraps
 from datetime import datetime, timezone, timedelta
@@ -527,8 +527,36 @@ def create_app(config_name='default'):
     @app.route('/api/admin/votes/export', methods=['GET'])
     @require_admin
     def export_votes():
-        # Placeholder for exporting raw vote data
-        return jsonify({'message': 'Votes export functionality (raw data) is a placeholder'}), 200
+        """
+        Exports the raw votes.json file by sending it as a downloadable attachment.
+        """
+        try:
+            # 1. Define the path to the votes.json file
+            # Make sure this path correctly points to your 'backend/data/votes.json'
+            # os.path.dirname(__file__) gets the directory of the current app.py file.
+            VOTES_FILE_PATH = os.path.join(os.path.dirname(__file__), 'data', 'votes.json')
+
+            # 2. Check if the file actually exists to prevent errors
+            if not os.path.exists(VOTES_FILE_PATH):
+                app.logger.error(f"Votes file not found at expected path: {VOTES_FILE_PATH}")
+                return jsonify({"error": "Votes file not found on server."}), 404
+
+            # 3. Send the file
+            # send_file automatically handles setting the mimetype.
+            # as_attachment=True is the key part: it sets the Content-Disposition header
+            # to 'attachment', which tells the browser to download the file.
+            # download_name specifies the filename the browser should use for the download.
+            return send_file(
+                VOTES_FILE_PATH,
+                as_attachment=True,        # This forces the download
+                download_name='votes.json' # This suggests the filename
+            )
+
+        except Exception as e:
+            # 4. Handle any unexpected errors
+            app.logger.error(f"Error exporting votes file: {e}", exc_info=True) # Log the full traceback
+            # Return a JSON error message to the frontend
+            return jsonify({"error": "An internal error occurred while exporting votes."}), 500
 
     # --- NEW ROUTE: Export Votes to CSV with Candidate Names ---
     @app.route('/api/admin/votes/export/csv', methods=['GET'])
