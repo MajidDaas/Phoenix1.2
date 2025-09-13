@@ -1,6 +1,14 @@
 {
     "voter_ids": [
-        "51b17887-f428-40d7-966f-a2f536aa2e4f"
+        "51b17887-f428-40d7-966f-a2f536aa2e4f",
+        "45bbe539-6aab-43ea-9dc1-39774f25b5ba",
+        "b443f01b-12f0-4b7a-b165-8336d5d92930",
+        "8b43a769-7cd7-4666-984a-855adf2e8e9d",
+        "f81dbfe7-1d8a-4754-b0a6-65bffd99c6aa",
+        "4cf1bcff-7077-407d-8b5b-93127cec931a",
+        "f5196c7c-dd5a-49f6-b020-c0efe5c57840",
+        "326ad9c2-aefb-4946-be99-c411db679c60",
+        "69564000-a0f5-40df-838a-06fb25d29a71"
     ],
     "votes": [
         {
@@ -35,6 +43,270 @@
             "timestamp": null,
             "voter_name": "Demo User",
             "voter_email": "demo_user_51b17887@example.com"
+        },
+        {
+            "id": "3bcc521c-937b-499a-8b5b-d36971b48882",
+            "voter_id": "45bbe539-6aab-43ea-9dc1-39774f25b5ba",
+            "selected_candidates": [
+                1,
+                12,
+                18,
+                8,
+                5,
+                3,
+                14,
+                17,
+                2,
+                20,
+                10,
+                7,
+                4,
+                19,
+                6
+            ],
+            "executive_candidates": [
+                17,
+                20,
+                10,
+                2,
+                19,
+                4,
+                7
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_45bbe539@example.com"
+        },
+        {
+            "id": "675d7b2d-a5b7-4522-9209-f179323f7b94",
+            "voter_id": "b443f01b-12f0-4b7a-b165-8336d5d92930",
+            "selected_candidates": [
+                12,
+                1,
+                11,
+                2,
+                14,
+                5,
+                18,
+                15,
+                8,
+                3,
+                17,
+                10,
+                19,
+                20,
+                4
+            ],
+            "executive_candidates": [
+                3,
+                8,
+                15,
+                17,
+                20,
+                4,
+                19
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_b443f01b@example.com"
+        },
+        {
+            "id": "db9d904f-3736-479f-a243-66e5a7bb41eb",
+            "voter_id": "8b43a769-7cd7-4666-984a-855adf2e8e9d",
+            "selected_candidates": [
+                19,
+                20,
+                4,
+                17,
+                7,
+                3,
+                6,
+                8,
+                16,
+                15,
+                14,
+                2,
+                12,
+                1,
+                18
+            ],
+            "executive_candidates": [
+                19,
+                14,
+                2,
+                12,
+                1,
+                18,
+                17
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_8b43a769@example.com"
+        },
+        {
+            "id": "9f375796-4125-4db7-9ee8-2a23555f44dc",
+            "voter_id": "f81dbfe7-1d8a-4754-b0a6-65bffd99c6aa",
+            "selected_candidates": [
+                11,
+                2,
+                14,
+                5,
+                12,
+                18,
+                1,
+                3,
+                8,
+                17,
+                20,
+                15,
+                10,
+                19,
+                4
+            ],
+            "executive_candidates": [
+                2,
+                14,
+                5,
+                12,
+                1,
+                18,
+                8
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_f81dbfe7@example.com"
+        },
+        {
+            "id": "fcd3f69b-5a32-4911-8526-f46391efc8de",
+            "voter_id": "4cf1bcff-7077-407d-8b5b-93127cec931a",
+            "selected_candidates": [
+                19,
+                4,
+                17,
+                7,
+                3,
+                6,
+                16,
+                8,
+                14,
+                2,
+                10,
+                15,
+                18,
+                5,
+                1
+            ],
+            "executive_candidates": [
+                19,
+                10,
+                2,
+                17,
+                3,
+                14,
+                8
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_4cf1bcff@example.com"
+        },
+        {
+            "id": "1ade3d72-8494-4b7f-b0d3-1e651602e4c5",
+            "voter_id": "f5196c7c-dd5a-49f6-b020-c0efe5c57840",
+            "selected_candidates": [
+                10,
+                3,
+                9,
+                14,
+                11,
+                2,
+                5,
+                8,
+                15,
+                18,
+                19,
+                4,
+                20,
+                17,
+                7
+            ],
+            "executive_candidates": [
+                8,
+                15,
+                14,
+                3,
+                2,
+                10,
+                19
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_f5196c7c@example.com"
+        },
+        {
+            "id": "c86f2afc-6ef4-4d4c-9a5f-8d61df721eb1",
+            "voter_id": "326ad9c2-aefb-4946-be99-c411db679c60",
+            "selected_candidates": [
+                9,
+                2,
+                11,
+                14,
+                5,
+                18,
+                1,
+                10,
+                19,
+                4,
+                7,
+                6,
+                3,
+                8,
+                16
+            ],
+            "executive_candidates": [
+                16,
+                6,
+                8,
+                7,
+                4,
+                19,
+                11
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_326ad9c2@example.com"
+        },
+        {
+            "id": "86842d1a-b33e-4c65-8455-f737e0be66ea",
+            "voter_id": "69564000-a0f5-40df-838a-06fb25d29a71",
+            "selected_candidates": [
+                9,
+                2,
+                11,
+                14,
+                5,
+                12,
+                1,
+                18,
+                8,
+                15,
+                3,
+                7,
+                6,
+                19,
+                20
+            ],
+            "executive_candidates": [
+                14,
+                15,
+                18,
+                7,
+                6,
+                19,
+                20
+            ],
+            "timestamp": null,
+            "voter_name": "Demo User",
+            "voter_email": "demo_user_69564000@example.com"
         }
     ]
 }

@@ -120,7 +120,6 @@ const ResultsModule = {
                          data-position="${candidate.position || ''}" data-bio="${candidate.bio || ''}"
                          data-activity="${candidate.activity || ''}" data-is-winner="${rank <= 15 ? 'true' : 'false'}"
                          onclick="ResultsModule.showWinnerPopup(event)">
-                        <div class="leader-rank">${rankDisplay}</div>
                         <div class="leader-avatar">
                             ${candidate.photo ? `<img src="${candidate.photo}" alt="${candidate.name}">` : `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`}
                         </div>

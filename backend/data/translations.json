@@ -1,6 +1,6 @@
 {
   "en": {
-    "pageTitle": "Civic Democratic Union",
+    "pageTitle": "Civil Democratic Union",
     "pageSubtitle": "Third CDU Council Election",
     "authenticationRequired": "Sign In",
     "pleaseSignInToVote": "Welcome! Please sign in to participate in the elections.",
@@ -38,7 +38,7 @@
     "thankYouForVoting": "Thank You for Voting!",
     "voteSubmittedMessage": "Your vote has been successfully recorded.",
     "electionIsClosed": "Election Closed",
-    "electionClosedViewResults": "The voting period for this election has ended.",
+    "electionClosedViewResults": "Voting in this election is currently closed",
     "viewFinalResults": "View Final Results",
     "notAuthorizedToVote": "Not Registered",
     "notRegisteredContactAdmin": "Your account is not registered to vote in this election.",
@@ -166,7 +166,8 @@
     "admin.votesExportedCSV": "Votes exported to CSV successfully",
     "admin.exportVotesCSVFailed": "Failed to export votes to CSV",
     "admin.dataRefreshed": "Data refreshed successfully",
-    "admin.dataBackedUp": "Data backed up to cloud successfully"
+    "admin.dataBackedUp": "Data backed up to cloud successfully",
+    "results.executiveOfficer": "Executive Officer"
   },
   "ar": {
     "pageTitle": "التجمع الديمقراطي المدني",
@@ -207,7 +208,7 @@
     "thankYouForVoting": "شكرًا لك على التصويت!",
     "voteSubmittedMessage": "تم تسجيل صوتك بنجاح.",
     "electionIsClosed": "الانتخابات مغلقة",
-    "electionClosedViewResults": "انتهت فترة التصويت في هذه الانتخابات.",
+    "electionClosedViewResults": "التصويت في هذه الانتخابات مغلق حالياً.",
     "viewFinalResults": "عرض النتائج النهائية",
     "notAuthorizedToVote": "غير مسجل",
     "notRegisteredContactAdmin": "حسابك غير مسجل للتصويت في هذه الانتخابات.",
@@ -335,7 +336,8 @@
     "admin.votesExportedCSV": "تم تصدير الأصوات إلى CSV بنجاح",
     "admin.exportVotesCSVFailed": "فشل في تصدير الأصوات إلى CSV",
     "admin.dataRefreshed": "تم تحديث البيانات بنجاح",
-    "admin.dataBackedUp": "تم عمل نسخة احتياطية للبيانات إلى السحابة بنجاح"
+    "admin.dataBackedUp": "تم عمل نسخة احتياطية للبيانات إلى السحابة بنجاح",
+    "results.executiveOfficer": "عضو تنفيذي"
 
     
   }
